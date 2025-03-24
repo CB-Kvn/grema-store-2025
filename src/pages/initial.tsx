@@ -15,6 +15,8 @@ import { useNavigate } from "react-router-dom";
 import { Info_Bussiness } from "@/components/initial-page/bussiness";
 import { Product } from "@/interfaces/products";
 import ContactPage from "@/components/initial-page/contact";
+import Aos from "aos";
+import "aos/dist/aos.css"; 
 
 const categories = [
   { id: "all", name: "Todas las Joyas" },
@@ -22,6 +24,7 @@ const categories = [
   { id: "necklaces", name: "Collares" },
   { id: "earrings", name: "Aretes" },
   { id: "bracelets", name: "Pulseras" },
+  { id: "sets", name: "Sets" },
 ];
 
 export const products: Product[] = [
@@ -1601,14 +1604,15 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       <LogoInitial></LogoInitial>
 
       {/* Categories */}
-      <div className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 py-6 sm:py-8 -mt-4" data-aos="fade-up"
+              data-aos-duration="1000">
         <div className="flex justify-center">
           <div className="inline-flex space-x-2 sm:space-x-4">
             {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors ${
+                className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-xl font-medium transition-colors ${
                   selectedCategory === category.id
                     ? "bg-primary-600 text-white"
                     : "bg-white text-primary-800 hover:bg-primary-50"
@@ -1622,7 +1626,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       </div>
 
       {/* Featured Products */}
-      <div className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8 -m-10 py-6" data-aos="fade-up"
+              data-aos-duration="1000">
         <div className="flex items-center justify-center mb-6 sm:mb-8">
           <div className="flex items-center">
             <div className="hidden sm:block w-32 h-px bg-primary-300 mr-4" />
@@ -1635,7 +1640,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
           </div>
         </div>
         <Swiper
-          modules={[Navigation, Pagination]}
+          modules={[Navigation]}
           spaceBetween={20}
           slidesPerView={1}
           navigation
@@ -1676,8 +1681,9 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       </div>
 
       {/* Featured Collections Tabs */}
-      <div className=" py-16 sm:py-24 bg-primary-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" py-16 sm:py-24 bg-primary-50 " data-aos="fade-up" data-aos-duration="1000">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" data-aos="fade-up"
+              data-aos-duration="1000">
           {/* Tab Navigation */}
           <div className="flex justify-center mb-12">
             <div className="inline-flex bg-primary-100 rounded-full p-1">
@@ -1718,7 +1724,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               </p>
             </div>
             <Swiper
-            modules={[Navigation, Pagination]}
+            modules={[Navigation]}
             spaceBetween={20}
             slidesPerView={1}
             navigation
@@ -1759,7 +1765,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               </p>
             </div>
             <Swiper
-            modules={[Navigation, Pagination]}
+            modules={[Navigation]}
             spaceBetween={20}
             slidesPerView={1}
             navigation

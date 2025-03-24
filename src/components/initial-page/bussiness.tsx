@@ -1,6 +1,6 @@
 import { features } from "@/utils/about-us";
 import Aos from "aos";
-import "aos/dist/aos.css"; // Importar CSS de AOS
+import "aos/dist/aos.css"; 
 import { useEffect } from "react";
 
 export const Info_Bussiness = () => {

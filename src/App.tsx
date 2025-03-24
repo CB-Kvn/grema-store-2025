@@ -18,6 +18,7 @@ import { useAppSelector } from "./hooks/useAppSelector";
 import { HistoryUs } from "./pages/history";
 import { ValuesPage } from "./pages/values";
 import { Menu_Bar } from "./components/navigation/nav-store";
+import { Networking } from "./components/socials/networking";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -66,6 +67,7 @@ function App() {
         <Route path="/sobre-nosotros" element={<HistoryUs />} />
         <Route path="/nuestros-valores" element={<ValuesPage />} />
       </Routes>
+      <Networking></Networking>
     </Router>
   );
 }

@@ -21,7 +21,8 @@ const TikTokIcon = () => (
 
 const ContactPage = () => {
   return (
-    <div className="min-h-screen bg-primary-50  mt-10">
+    <div className="min-h-screen bg-primary-50  mt-10" data-aos="fade-up"
+    data-aos-duration="1000">
       {/* Hero Section */}
       <div className=" py-16 sm:py-24 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
