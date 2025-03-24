@@ -2,10 +2,7 @@
 import React, { useState } from "react";
 import { Flame, Sparkles } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import {
-  Navigation,
-  Pagination,
-} from "swiper/modules";
+import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -16,7 +13,7 @@ import { Info_Bussiness } from "@/components/initial-page/bussiness";
 import { Product } from "@/interfaces/products";
 import ContactPage from "@/components/initial-page/contact";
 import Aos from "aos";
-import "aos/dist/aos.css"; 
+import "aos/dist/aos.css";
 
 const categories = [
   { id: "all", name: "Todas las Joyas" },
@@ -1604,8 +1601,11 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       <LogoInitial></LogoInitial>
 
       {/* Categories */}
-      <div className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 py-6 sm:py-8 -mt-4" data-aos="fade-up"
-              data-aos-duration="1000">
+      <div
+        className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 py-6 sm:py-8 -mt-4"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+      >
         <div className="flex justify-center">
           <div className="inline-flex space-x-2 sm:space-x-4">
             {categories.map((category) => (
@@ -1626,8 +1626,11 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       </div>
 
       {/* Featured Products */}
-      <div className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8 -m-10 py-6" data-aos="fade-up"
-              data-aos-duration="1000">
+      <div
+        className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8 -m-10 py-6"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+      >
         <div className="flex items-center justify-center mb-6 sm:mb-8">
           <div className="flex items-center">
             <div className="hidden sm:block w-32 h-px bg-primary-300 mr-4" />
@@ -1681,9 +1684,16 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       </div>
 
       {/* Featured Collections Tabs */}
-      <div className=" py-16 sm:py-24 bg-primary-50 " data-aos="fade-up" data-aos-duration="1000">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" data-aos="fade-up"
-              data-aos-duration="1000">
+      <div
+        className=" py-16 sm:py-24 bg-primary-50 "
+        data-aos="fade-up"
+        data-aos-duration="1000"
+      >
+        <div
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+          data-aos="fade-up"
+          data-aos-duration="1000"
+        >
           {/* Tab Navigation */}
           <div className="flex justify-center mb-12">
             <div className="inline-flex bg-primary-100 rounded-full p-1">
@@ -1724,33 +1734,33 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               </p>
             </div>
             <Swiper
-            modules={[Navigation]}
-            spaceBetween={20}
-            slidesPerView={1}
-            navigation
-            pagination={{ clickable: true }}
-            breakpoints={{
-              640: {
-                slidesPerView: 2,
-                spaceBetween: 30,
-              },
-              1024: {
-                slidesPerView: 4,
-                spaceBetween: 30,
-              },
-            }}
-            className="pb-12"
-          >
-            {bestSellers.map((product) => (
-              <SwiperSlide key={product.id}>
-                <ProductCard
-                  product={product}
-                  onAddToCart={() => addToCart(product)}
-                  onClick={() => navigate(`/producto/${product.id}`)}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+              modules={[Navigation]}
+              spaceBetween={20}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true }}
+              breakpoints={{
+                640: {
+                  slidesPerView: 2,
+                  spaceBetween: 30,
+                },
+                1024: {
+                  slidesPerView: 4,
+                  spaceBetween: 30,
+                },
+              }}
+              className="pb-12"
+            >
+              {bestSellers.map((product) => (
+                <SwiperSlide key={product.id}>
+                  <ProductCard
+                    product={product}
+                    onAddToCart={() => addToCart(product)}
+                    onClick={() => navigate(`/producto/${product.id}`)}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
 
           {/* New Arrivals Content */}
@@ -1765,33 +1775,33 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               </p>
             </div>
             <Swiper
-            modules={[Navigation]}
-            spaceBetween={20}
-            slidesPerView={1}
-            navigation
-            pagination={{ clickable: true }}
-            breakpoints={{
-              640: {
-                slidesPerView: 2,
-                spaceBetween: 30,
-              },
-              1024: {
-                slidesPerView: 4,
-                spaceBetween: 30,
-              },
-            }}
-            className="pb-12"
-          >
-            {newArrivals.map((product) => (
-              <SwiperSlide key={product.id}>
-                <ProductCard
-                  product={product}
-                  onAddToCart={() => addToCart(product)}
-                  onClick={() => navigate(`/producto/${product.id}`)}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+              modules={[Navigation]}
+              spaceBetween={20}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true }}
+              breakpoints={{
+                640: {
+                  slidesPerView: 2,
+                  spaceBetween: 30,
+                },
+                1024: {
+                  slidesPerView: 4,
+                  spaceBetween: 30,
+                },
+              }}
+              className="pb-12"
+            >
+              {newArrivals.map((product) => (
+                <SwiperSlide key={product.id}>
+                  <ProductCard
+                    product={product}
+                    onAddToCart={() => addToCart(product)}
+                    onClick={() => navigate(`/producto/${product.id}`)}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         </div>
       </div>

@@ -164,3 +164,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #95566f;
 }
+
+.related-products-slider .swiper-slide {
+  visibility: hidden;
+}
+
+.related-products-slider .swiper-slide-visible {
+  visibility: visible;
+}

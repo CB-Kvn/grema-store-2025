@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Thumbs } from "swiper/modules";
+import { Autoplay, Navigation, Pagination, Thumbs } from "swiper/modules";
 import {
   Heart,
   Share2,
@@ -16,9 +16,12 @@ import {
   Link as LinkIcon,
   Barcode,
   Check,
+  Flame,
+  Sparkles,
 } from "lucide-react";
 import { products } from "@/pages/initial";
 import { useAppSelector } from "@/hooks/useAppSelector";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 interface ProductDetailProps {
   addToCart: (product: (typeof products)[0] & { quantity: number }) => void;
@@ -111,6 +114,57 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
     .filter((p) => p.id !== product.id && p.category === product.category)
     .slice(0, 8);
 
+    const ProductSlider = ({ products }: { products: typeof relatedProducts }) => (
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay]}
+        spaceBetween={24}
+        slidesPerView={1}
+        navigation
+        pagination={{ clickable: true }}
+        autoplay={{
+          delay: 3000,
+          disableOnInteraction: false,
+        }}
+        breakpoints={{
+          640: {
+            slidesPerView: 2,
+          },
+          1024: {
+            slidesPerView: 4,
+          },
+        }}
+        className="pb-12"
+      >
+        {products.map(product => (
+          <SwiperSlide key={product.id}>
+            <Link 
+              to={`/producto/${product.id}`}
+              className="block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
+            >
+              <div className="relative pb-[100%]">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="text-primary-900 font-medium line-clamp-2">{product.name}</h3>
+                <div className="mt-2 flex items-baseline">
+                  <span className="text-lg font-bold text-primary-900">
+                    ${(product.price * 0.85).toLocaleString()}
+                  </span>
+                  <span className="ml-2 text-sm line-through text-primary-400">
+                    ${product.price.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    );
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
@@ -131,13 +185,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
-          <div className="space-y-4 max-w-full mx-auto">
+          <div className="space-y-4">
             <Swiper
               modules={[Navigation, Pagination, Thumbs]}
               thumbs={{ swiper: thumbsSwiper }}
               navigation
               pagination={{ clickable: true }}
-              className="h-[500px] sm:h-[600px] lg:h-[700px] rounded-lg overflow-hidden"
+              className="h-[350px] xs:h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-lg overflow-hidden"
             >
               {product.images.map((image, index) => (
                 <SwiperSlide key={index}>
@@ -152,7 +206,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                     <img
                       src={image}
                       alt={`${product.name} - Vista ${index + 1}`}
-                      className="zoom-image object-contain w-full h-auto"
+                      className="zoom-image w-full h-full object-contain"
                     />
                     <div
                       className="zoom-overlay"
@@ -167,16 +221,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
 
             {/* Thumbnails */}
             <Swiper
-              // @ts-ignore
+              //@ts-ignore
               onSwiper={setThumbsSwiper}
               spaceBetween={10}
               slidesPerView={4}
               modules={[Navigation, Thumbs]}
-              className="h-24"
+              className="h-20 sm:h-24"
             >
               {product.images.map((image, index) => (
                 <SwiperSlide key={index}>
-                  <div className="h-24 w-full cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors">
+                  <div className="h-20 sm:h-24 w-full cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors">
                     <img
                       src={image}
                       alt={`${product.name} - Miniatura ${index + 1}`}
@@ -462,87 +516,43 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
         </div>
 
         {/* Related Products */}
-     {/* <div className="mt-12 border-t border-primary-100 pt-8">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-primary-900 mb-6">
-            Productos Relacionados
-          </h2>
-          <div className="px-4 -mx-4">
-            <Swiper
-              modules={[Navigation, Pagination]}
-              spaceBetween={24}
-              slidesPerView={1}
-              navigation
-              pagination={{ clickable: true }}
-              breakpoints={{
-
-                480: {
-                  slidesPerView: 2,
-                },
-                640: {
-                  slidesPerView: 2,
-                },
-                768: {
-                  slidesPerView: 3,
-                },
-                1024: {
-                  slidesPerView: 4,
-                },
-                1280: {
-                  slidesPerView: 5,
-                },
-                1536: {
-                  slidesPerView: 6,
-                },
-              }}
-              className="related-products-slider pb-12"
-            >
-              {relatedProducts.map((relatedProduct) => (
-                <SwiperSlide key={relatedProduct.id}>
-                  <Link
-                    to={`/producto/${relatedProduct.id}`}
-                    className="block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <div className="relative pb-[100%]">
-                      <img
-                        src={relatedProduct.image}
-                        alt={relatedProduct.name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-base sm:text-lg lg:text-xl font-medium text-primary-900 line-clamp-2">
-                        {relatedProduct.name}
-                      </h3>
-                      <div className="mt-2 flex items-baseline">
-                        <span className="text-base sm:text-lg lg:text-xl font-bold text-primary-900">
-                        {new Intl.NumberFormat("es-CR", {
-                                style: "currency",
-                                currency: "CRC",
-                                maximumFractionDigits: 2,
-                                minimumFractionDigits: 2,
-                              }).format(
-                                relatedProduct.price * 0.85
-                              )}
-                         
-                        </span>
-                        <span className="ml-2 text-sm sm:text-base lg:text-lg line-through text-primary-400">
-                        {new Intl.NumberFormat("es-CR", {
-                                style: "currency",
-                                currency: "CRC",
-                                maximumFractionDigits: 2,
-                                minimumFractionDigits: 2,
-                              }).format(
-                                relatedProduct.price
-                              )}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </div>  */}
+        <div className="mt-16 border-t border-primary-100 pt-12">
+          <Tabs defaultValue="related" className="w-full">
+            <TabsList className="grid w-full max-w-[400px] grid-cols-2 mx-auto mb-8">
+              <TabsTrigger value="related" className="flex items-center">
+                <Flame className="h-4 w-4 mr-2" />
+                Productos Relacionados
+              </TabsTrigger>
+              <TabsTrigger value="suggestions" className="flex items-center">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Sugerencias
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="related">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-serif font-bold text-primary-900 mb-4">
+                  Productos Relacionados
+                </h2>
+                <p className="text-primary-600 max-w-2xl mx-auto">
+                  Explora más piezas de nuestra colección {product.category}
+                </p>
+              </div>
+              <ProductSlider products={relatedProducts} />
+            </TabsContent>
+            <TabsContent value="suggestions">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-serif font-bold text-primary-900 mb-4">
+                  También te puede interesar
+                </h2>
+                <p className="text-primary-600 max-w-2xl mx-auto">
+                  Basado en tus preferencias y el rango de precio
+                </p>
+              </div>
+              {/* <ProductSlider products={suggestedProducts} /> */}
+            </TabsContent>
+          </Tabs>
+        </div>
+     
       </div>
     </div>
   );
