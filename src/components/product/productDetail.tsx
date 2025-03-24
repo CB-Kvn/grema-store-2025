@@ -203,7 +203,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-baseline">
-                  <span className="text-4xl font-bold text-primary-900">
+                  <span className="text-xl md:text-3xl font-bold text-primary-900">
                   {new Intl.NumberFormat("es-CR", {
                                 style: "currency",
                                 currency: "CRC",
@@ -462,7 +462,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
         </div>
 
         {/* Related Products */}
-       {/* <div className="mt-12 border-t border-primary-100 pt-8">
+     {/* <div className="mt-12 border-t border-primary-100 pt-8">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-primary-900 mb-6">
             Productos Relacionados
           </h2>
@@ -474,6 +474,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               navigation
               pagination={{ clickable: true }}
               breakpoints={{
+
+                480: {
+                  slidesPerView: 2,
+                },
                 640: {
                   slidesPerView: 2,
                 },
@@ -482,6 +486,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 },
                 1024: {
                   slidesPerView: 4,
+                },
+                1280: {
+                  slidesPerView: 5,
+                },
+                1536: {
+                  slidesPerView: 6,
                 },
               }}
               className="related-products-slider pb-12"
