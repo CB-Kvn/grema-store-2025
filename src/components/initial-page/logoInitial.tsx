@@ -11,7 +11,7 @@ export const LogoInitial = () => {
             <img
               src="../../../public/Logo en negro.png" // Ruta de la imagen en la carpeta public
               alt="Descripción de la imagen" // Texto alternativo para accesibilidad
-              className="mx-auto" // Clases de estilo
+              className="w-full h-full object-contain" // Clases de estilo
             />
           </div>
           <button onClick={()=>navigation("/tienda")} className="bg-primary-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors shadow-md animate-pulse-custom">
