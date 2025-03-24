@@ -19,6 +19,7 @@ import { HistoryUs } from "./pages/history";
 import { ValuesPage } from "./pages/values";
 import { Menu_Bar } from "./components/navigation/nav-store";
 import { Networking } from "./components/socials/networking";
+import { Footer } from "./components/initial-page/footer";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -68,6 +69,7 @@ function App() {
         <Route path="/nuestros-valores" element={<ValuesPage />} />
       </Routes>
       <Networking></Networking>
+      <Footer></Footer>
     </Router>
   );
 }

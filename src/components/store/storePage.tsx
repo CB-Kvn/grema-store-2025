@@ -418,7 +418,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   };
 
   return (
-    <div className="min-h-screen bg-primary-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
 
       {/* Navigation Bar */}
