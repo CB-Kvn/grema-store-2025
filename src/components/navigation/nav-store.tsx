@@ -16,10 +16,6 @@ import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { useAppSelector } from "@/hooks/useAppSelector";
 
-// Si prefieres importar la imagen desde src/assets:
-// import logoMobile from "@/assets/Logo en negro.png";
-// import logoDesktop from "@/assets/Logo en negro.png";
-
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a">
@@ -55,9 +51,9 @@ const ListItem = React.forwardRef<
 
 ListItem.displayName = "ListItem";
 
-export const Menu_Bar = ({isOpen}:{isOpen: () => void;}) => {
+export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const cartItems = useAppSelector(state => state.cart.items)
+  const cartItems = useAppSelector((state) => state.cart.items);
   return (
     <>
       <nav
@@ -68,7 +64,7 @@ export const Menu_Bar = ({isOpen}:{isOpen: () => void;}) => {
           <div className="relative flex h-16 items-center justify-between z-30">
             {/* Botón para menú móvil */}
             <button
-              className="sm:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md"
+              className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
@@ -82,8 +78,8 @@ export const Menu_Bar = ({isOpen}:{isOpen: () => void;}) => {
             <Link to={"/"}>
               <div className="flex flex-shrink-0 items-center">
                 {/* Logo para móviles */}
-                <div className="navbar-center block sm:block md:hidden">
-                  <div className="w-16 h-16 bg-cover bg-center bg-no-repeat">
+                <div className="navbar-center block sm:hidden">
+                  <div className="w-52 h-16 bg-cover bg-center bg-no-repeat">
                     <img
                       src="/Logo en negro.png" // Ruta desde la carpeta public
                       alt="Logo de la empresa"
@@ -93,7 +89,7 @@ export const Menu_Bar = ({isOpen}:{isOpen: () => void;}) => {
                 </div>
 
                 {/* Logo para escritorio */}
-                <div className="navbar-center hidden sm:hidden md:block">
+                <div className="navbar-center hidden md:block">
                   <div className="w-64 h-24 my-2 bg-cover bg-center bg-no-repeat">
                     <img
                       src="/Logo en negro.png" // Ruta desde la carpeta public
@@ -106,7 +102,7 @@ export const Menu_Bar = ({isOpen}:{isOpen: () => void;}) => {
             </Link>
 
             {/* Botones Navegación (Desktop) */}
-            <div className="hidden sm:flex">
+            <div className="hidden lg:flex">
               <NavigationMenu className="bg-transparent">
                 <NavigationMenuList>
                   <NavigationMenuItem className="bg-transparent">
@@ -169,39 +165,38 @@ export const Menu_Bar = ({isOpen}:{isOpen: () => void;}) => {
               </NavigationMenu>
             </div>
 
-            {/* Barra de búsqueda */}
-            <div className="hidden sm:flex items-center z-30">
+            {/* Barra de búsqueda y carrito (600px a 1024px) */}
+            <div className="hidden sm:flex lg:flex items-center z-30">
               <SearchBar />
+              <div className="hidden sm:flex lg:hidden items-center z-30">
+                <button
+                  className="p-2 hover:bg-primary-50 rounded-full relative"
+                  onClick={() => {
+                    isOpen();
+                  }}
+                >
+                  <ShoppingCart className="h-6 w-6 text-primary-600" />
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartItems.reduce(
+                        (total, item) => total + item.quantity,
+                        0
+                      )}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
-
-            <div className="hidden sm:flex items-center z-30">
-            <button 
-                className="p-2 hover:bg-primary-50 rounded-full relative"
-                onClick={() => {isOpen()}}
-              >
-                <ShoppingCart className="h-6 w-6 text-primary-600" />
-                {cartItems.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartItems.reduce((total, item) => total + item.quantity, 0)}
-                  </span>
-                )}
-              </button>
-            </div>
-
-          
-
-            {/* Botón Login y Shopping (comentado por ahora) */}
-            {/* <div className="hidden sm:flex items-center z-30">
-            {profile ? <ButtonProfile /> : <LoginIndex />}
-            <BtnShopping />
-          </div> */}
           </div>
 
           {/* Menú móvil */}
           {isMobileMenuOpen && (
-            <div className="sm:hidden bg-white shadow-lg">
+            <div className="md:hidden bg-white shadow-lg">
               <ul className="space-y-1 px-2 pb-3 pt-2">
                 {/* Enlace a una nueva página */}
+                <li>
+                <SearchBar />
+                </li>
                 <li>
                   <Link
                     to="/sobre-nosotros"

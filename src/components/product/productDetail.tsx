@@ -131,7 +131,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
-          <div className="space-y-4 max-w-[500px] mx-auto">
+          <div className="space-y-4 max-w-full mx-auto">
             <Swiper
               modules={[Navigation, Pagination, Thumbs]}
               thumbs={{ swiper: thumbsSwiper }}
@@ -152,7 +152,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                     <img
                       src={image}
                       alt={`${product.name} - Vista ${index + 1}`}
-                      className="zoom-image object-contain"
+                      className="zoom-image object-contain w-full h-auto"
                     />
                     <div
                       className="zoom-overlay"
@@ -191,7 +191,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-4xl font-serif font-bold text-primary-900">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-primary-900">
                 {product.name}
               </h1>
               <div className="flex items-center mt-2 text-primary-600">
@@ -429,7 +429,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               <div className="flex items-center space-x-3">
                 <Truck className="h-5 w-5 text-primary-600" />
                 <div>
-                  <h4 className="font-medium text-primary-900">Envío Gratis</h4>
+                  <h4 className="font-medium text-primary-900">Envío x medio de Correos de Costa Rica</h4>
                   <p className="text-sm text-primary-600">
                     Entrega estimada: 3-5 días hábiles
                   </p>
@@ -462,8 +462,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
         </div>
 
         {/* Related Products */}
-        <div className="mt-12 border-t border-primary-100 pt-8">
-          <h2 className="text-2xl font-serif font-bold text-primary-900 mb-6">
+       {/* <div className="mt-12 border-t border-primary-100 pt-8">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-primary-900 mb-6">
             Productos Relacionados
           </h2>
           <div className="px-4 -mx-4">
@@ -500,11 +500,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="text-primary-900 font-medium line-clamp-2">
+                      <h3 className="text-base sm:text-lg lg:text-xl font-medium text-primary-900 line-clamp-2">
                         {relatedProduct.name}
                       </h3>
                       <div className="mt-2 flex items-baseline">
-                        <span className="text-lg font-bold text-primary-900">
+                        <span className="text-base sm:text-lg lg:text-xl font-bold text-primary-900">
                         {new Intl.NumberFormat("es-CR", {
                                 style: "currency",
                                 currency: "CRC",
@@ -515,7 +515,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                               )}
                          
                         </span>
-                        <span className="ml-2 text-sm line-through text-primary-400">
+                        <span className="ml-2 text-sm sm:text-base lg:text-lg line-through text-primary-400">
                         {new Intl.NumberFormat("es-CR", {
                                 style: "currency",
                                 currency: "CRC",
@@ -532,7 +532,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               ))}
             </Swiper>
           </div>
-        </div>
+        </div>  */}
       </div>
     </div>
   );
