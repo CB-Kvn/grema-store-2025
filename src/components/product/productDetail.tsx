@@ -168,7 +168,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm py-4">
+      <div className="bg-white  shadow-sm py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
             <Link
@@ -180,7 +180,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
             </Link>
           </div>
         </div>
-      </nav>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">

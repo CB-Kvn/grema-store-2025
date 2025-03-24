@@ -13,7 +13,7 @@ import SearchBar from "@/components/navigation/search-bar";
 import clsx from "clsx";
 import { products_list } from "@/utils/categoriesMsg";
 import { Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { useAppSelector } from "@/hooks/useAppSelector";
 
 const ListItem = React.forwardRef<
@@ -57,8 +57,8 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   return (
     <>
       <nav
-        className="sticky top-0 z-30 bg-opacity-45"
-        style={{ backgroundColor: "rgba(246, 218, 239, 0.45)" }}
+        className="sticky top-0 z-30 "
+        style={{ backgroundColor: "rgba(249, 242, 246)" }}
       >
         <div className="mx-auto max-w-7xl p-4 sm:px-6 lg:px-8 z-30">
           <div className="relative flex h-16 items-center justify-between z-30">
@@ -166,27 +166,32 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             </div>
 
             {/* Barra de búsqueda y carrito (600px a 1024px) */}
-            <div className="hidden sm:flex lg:flex items-center z-30">
-              <SearchBar />
-              <div className="hidden sm:flex lg:hidden items-center z-30">
-                <button
-                  className="p-2 hover:bg-primary-50 rounded-full relative"
-                  onClick={() => {
-                    isOpen();
-                  }}
-                >
-                  <ShoppingCart className="h-6 w-6 text-primary-600" />
-                  {cartItems.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItems.reduce(
-                        (total, item) => total + item.quantity,
-                        0
-                      )}
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
+            <div className="flex items-center space-x-4 z-30">
+  {/* Barra de búsqueda - visible en sm y lg */}
+  <div className="hidden sm:block">
+    <SearchBar />
+  </div>
+  
+  {/* Botón del carrito - visible en sm */}
+  <div className="">
+    <button
+      className="p-2 hover:bg-primary-50 rounded-full relative"
+      onClick={() => {
+        isOpen();
+      }}
+    >
+      <ShoppingCart className="h-6 w-6 text-primary-600" />
+      {cartItems.length > 0 && (
+        <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          {cartItems.reduce(
+            (total, item) => total + item.quantity,
+            0
+          )}
+        </span>
+      )}
+    </button>
+  </div>
+</div>
           </div>
 
           {/* Menú móvil */}
@@ -236,7 +241,9 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             </div>
           )}
         </div>
+        
       </nav>
+      
     </>
   );
 };
