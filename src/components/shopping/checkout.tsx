@@ -119,7 +119,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   };
 
   return (
-    <div className="min-h-screen bg-primary-50">
+    <div className="min-h-screen bg-white">
       
       {/* Header */}
       <header className="bg-white shadow-sm">
@@ -138,7 +138,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-primary-50 rounded-lg shadow-md p-6">
               {/* Progress Steps */}
               <div className="mb-8">
                 <div className="flex items-center justify-between">
@@ -355,7 +355,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+            <div className="bg-primary-50 rounded-lg shadow-md p-6 space-y-6">
               <h2 className="text-lg font-semibold text-primary-900">Resumen del Pedido</h2>
               
               {/* Items */}
