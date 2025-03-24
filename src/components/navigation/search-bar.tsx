@@ -1,32 +1,18 @@
 import React, { useState } from "react";
-
-interface SearchResult {
-  id: number;
-  name: string;
-  image: string;
-}
-
-const searchData: SearchResult[] = [
-  { id: 1, name: "Producto 1", image: "https://via.placeholder.com/50" },
-  { id: 2, name: "Producto 2", image: "https://via.placeholder.com/50" },
-  { id: 3, name: "Producto 3", image: "https://via.placeholder.com/50" },
-  { id: 4, name: "Producto 4", image: "https://via.placeholder.com/50" },
-  { id: 5, name: "Producto 5", image: "https://via.placeholder.com/50" },
-  { id: 6, name: "Producto 6", image: "https://via.placeholder.com/50" },
-  { id: 7, name: "Producto 7", image: "https://via.placeholder.com/50" },
-  { id: 8, name: "Producto 8", image: "https://via.placeholder.com/50" },
-];
+import { Product } from "../../interfaces/products"; // Importa la interfaz Product
+import { products } from "@/pages/initial";
+ // Importa los datos de productos
 
 const SearchBar: React.FC = () => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<Product[]>([]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
 
     if (value) {
-      const filteredResults = searchData.filter((item) =>
+      const filteredResults = products.filter((item) =>
         item.name.toLowerCase().includes(value.toLowerCase())
       );
       setResults(filteredResults);

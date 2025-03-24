@@ -63,7 +63,7 @@ function App() {
           path="/checkout"
           element={<CheckoutPage cartItems={cartItems} />}
         />
-        <Route path="/tienda" element={<ShopPage />} />
+        <Route path="/tienda" element={<ShopPage addToCart={addToCart} />} />
         <Route path="/sobre-nosotros" element={<HistoryUs />} />
         <Route path="/nuestros-valores" element={<ValuesPage />} />
       </Routes>

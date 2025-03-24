@@ -20,9 +20,15 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ProductCard from "../product/ProductCard";
+import { products } from "@/pages/initial";
 
-type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
-type ViewMode = 'grid' | 'list';
+type SortOption =
+  | "featured"
+  | "price-asc"
+  | "price-desc"
+  | "name-asc"
+  | "name-desc";
+type ViewMode = "grid" | "list";
 
 interface FilterState {
   priceRange: [number, number];
@@ -34,12 +40,16 @@ interface FilterState {
 
 const ITEMS_PER_PAGE = 9;
 
-export const ShopPage: React.FC = () => {
+interface ShopPageProps {
+  addToCart: (product: (typeof products)[0]) => void;
+}
+
+export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const navigate = useNavigate();
   const products = useAppSelector(selectAllProducts);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('featured');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("featured");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
@@ -51,34 +61,52 @@ export const ShopPage: React.FC = () => {
   });
 
   // Extract unique categories and materials from products
-  const categories = Array.from(new Set(products.map(p => p.category)));
-  const materials = Array.from(new Set(products.map(p => p.details.material)));
+  const categories = Array.from(new Set(products.map((p) => p.category)));
+  const materials = Array.from(
+    new Set(products.map((p) => p.details.material))
+  );
 
   // Filter and sort products
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = filters.categories.length === 0 || filters.categories.includes(product.category);
-    const matchesMaterial = filters.materials.length === 0 || filters.materials.includes(product.details.material);
-    const matchesPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
-    const matchesNew = !filters.isNew || product.isNew;
-    const matchesBestSeller = !filters.isBestSeller || product.isBestSeller;
+  const filteredProducts = products
+    .filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        filters.categories.length === 0 ||
+        filters.categories.includes(product.category);
+      const matchesMaterial =
+        filters.materials.length === 0 ||
+        filters.materials.includes(product.details.material);
+      const matchesPrice =
+        product.price >= filters.priceRange[0] &&
+        product.price <= filters.priceRange[1];
+      const matchesNew = !filters.isNew || product.isNew;
+      const matchesBestSeller = !filters.isBestSeller || product.isBestSeller;
 
-    return matchesSearch && matchesCategory && matchesMaterial && matchesPrice && matchesNew && matchesBestSeller;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'price-asc':
-        return a.price - b.price;
-      case 'price-desc':
-        return b.price - a.price;
-      case 'name-asc':
-        return a.name.localeCompare(b.name);
-      case 'name-desc':
-        return b.name.localeCompare(a.name);
-      default:
-        return 0;
-    }
-  });
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesMaterial &&
+        matchesPrice &&
+        matchesNew &&
+        matchesBestSeller
+      );
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "price-asc":
+          return a.price - b.price;
+        case "price-desc":
+          return b.price - a.price;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -94,7 +122,7 @@ export const ShopPage: React.FC = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const Pagination = () => {
@@ -103,7 +131,10 @@ export const ShopPage: React.FC = () => {
     const renderPageNumbers = () => {
       const pages = [];
       const maxVisiblePages = 5;
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let startPage = Math.max(
+        1,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
       const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
       if (endPage - startPage + 1 < maxVisiblePages) {
@@ -117,8 +148,8 @@ export const ShopPage: React.FC = () => {
             onClick={() => handlePageChange(i)}
             className={`px-3 py-1 rounded-full ${
               currentPage === i
-                ? 'bg-primary-600 text-white'
-                : 'text-primary-600 hover:bg-primary-50'
+                ? "bg-primary-600 text-white"
+                : "text-primary-600 hover:bg-primary-50"
             }`}
           >
             {i}
@@ -145,10 +176,8 @@ export const ShopPage: React.FC = () => {
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
-        
-        <div className="flex items-center space-x-1">
-          {renderPageNumbers()}
-        </div>
+
+        <div className="flex items-center space-x-1">{renderPageNumbers()}</div>
 
         <button
           onClick={() => handlePageChange(currentPage + 1)}
@@ -169,7 +198,7 @@ export const ShopPage: React.FC = () => {
   };
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const clearFilters = () => {
@@ -180,7 +209,7 @@ export const ShopPage: React.FC = () => {
       isNew: false,
       isBestSeller: false,
     });
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   const FilterContent = () => (
@@ -194,7 +223,12 @@ export const ShopPage: React.FC = () => {
             min="0"
             max="5000"
             value={filters.priceRange[1]}
-            onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], Number(e.target.value)])}
+            onChange={(e) =>
+              handleFilterChange("priceRange", [
+                filters.priceRange[0],
+                Number(e.target.value),
+              ])
+            }
             className="w-full"
           />
           <div className="flex justify-between text-sm text-primary-600">
@@ -208,7 +242,7 @@ export const ShopPage: React.FC = () => {
       <div>
         <h4 className="font-medium text-primary-900 mb-3">Categorías</h4>
         <div className="space-y-2">
-          {categories.map(category => (
+          {categories.map((category) => (
             <label key={category} className="flex items-center">
               <input
                 type="checkbox"
@@ -216,12 +250,14 @@ export const ShopPage: React.FC = () => {
                 onChange={(e) => {
                   const newCategories = e.target.checked
                     ? [...filters.categories, category]
-                    : filters.categories.filter(c => c !== category);
-                  handleFilterChange('categories', newCategories);
+                    : filters.categories.filter((c) => c !== category);
+                  handleFilterChange("categories", newCategories);
                 }}
                 className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="ml-2 text-primary-700 capitalize">{category.replace('-', ' ')}</span>
+              <span className="ml-2 text-primary-700 capitalize">
+                {category.replace("-", " ")}
+              </span>
             </label>
           ))}
         </div>
@@ -231,7 +267,7 @@ export const ShopPage: React.FC = () => {
       <div>
         <h4 className="font-medium text-primary-900 mb-3">Materiales</h4>
         <div className="space-y-2">
-          {materials.map(material => (
+          {materials.map((material) => (
             <label key={material} className="flex items-center">
               <input
                 type="checkbox"
@@ -239,8 +275,8 @@ export const ShopPage: React.FC = () => {
                 onChange={(e) => {
                   const newMaterials = e.target.checked
                     ? [...filters.materials, material]
-                    : filters.materials.filter(m => m !== material);
-                  handleFilterChange('materials', newMaterials);
+                    : filters.materials.filter((m) => m !== material);
+                  handleFilterChange("materials", newMaterials);
                 }}
                 className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
               />
@@ -252,13 +288,15 @@ export const ShopPage: React.FC = () => {
 
       {/* Special Filters */}
       <div>
-        <h4 className="font-medium text-primary-900 mb-3">Filtros Especiales</h4>
+        <h4 className="font-medium text-primary-900 mb-3">
+          Filtros Especiales
+        </h4>
         <div className="space-y-2">
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={filters.isNew}
-              onChange={(e) => handleFilterChange('isNew', e.target.checked)}
+              onChange={(e) => handleFilterChange("isNew", e.target.checked)}
               className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
             />
             <span className="ml-2 text-primary-700">Nuevos Productos</span>
@@ -267,7 +305,9 @@ export const ShopPage: React.FC = () => {
             <input
               type="checkbox"
               checked={filters.isBestSeller}
-              onChange={(e) => handleFilterChange('isBestSeller', e.target.checked)}
+              onChange={(e) =>
+                handleFilterChange("isBestSeller", e.target.checked)
+              }
               className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
             />
             <span className="ml-2 text-primary-700">Más Vendidos</span>
@@ -298,7 +338,7 @@ export const ShopPage: React.FC = () => {
       {/* Mobile Filter Drawer */}
       <div
         className={`fixed inset-y-0 left-0 w-80 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
-          isFilterDrawerOpen ? 'translate-x-0' : '-translate-x-full'
+          isFilterDrawerOpen ? "translate-x-0" : "-translate-x-full"
         } lg:hidden overflow-auto`}
       >
         <div className="sticky top-0 bg-white border-b border-primary-100 p-4 flex justify-between items-center">
@@ -331,7 +371,9 @@ export const ShopPage: React.FC = () => {
         </div>
         <div className="flex-1 space-y-4">
           <div>
-            <h3 className="text-xl font-medium text-primary-900">{product.name}</h3>
+            <h3 className="text-xl font-medium text-primary-900">
+              {product.name}
+            </h3>
             <p className="text-primary-600 mt-1">{product.description}</p>
           </div>
           <div className="flex items-center gap-4">
@@ -379,31 +421,21 @@ export const ShopPage: React.FC = () => {
     <div className="min-h-screen bg-primary-50">
       {/* Header */}
 
-     {/* Navigation Bar */}
-     <nav className="bg-white shadow-sm py-4">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-sm py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex items-center">
-            <Link
-              to="/"
-              className="flex items-center text-primary-600 hover:text-primary-700"
-            >
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              <span>Volver</span>
-            </Link>
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div className="flex items-center">
+              <Link
+                to="/"
+                className="flex items-center text-primary-600 hover:text-primary-700"
+              >
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                <span>Volver</span>
+              </Link>
+            </div>
             <div className="flex items-center gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar joyas..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-primary-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-primary-400" />
-              </div>
+             
               <button
                 onClick={() => setIsFilterDrawerOpen(true)}
                 className="lg:hidden p-2 hover:bg-primary-50 rounded-full"
@@ -412,18 +444,17 @@ export const ShopPage: React.FC = () => {
               </button>
             </div>
           </div>
-          
         </div>
       </nav>
-
-   
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Desktop Filters Sidebar */}
           <div className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-8">
-              <h2 className="text-lg font-semibold text-primary-900 mb-6">Filtros</h2>
+              <h2 className="text-lg font-semibold text-primary-900 mb-6">
+                Filtros
+              </h2>
               <FilterContent />
             </div>
           </div>
@@ -451,14 +482,22 @@ export const ShopPage: React.FC = () => {
                 </select>
                 <div className="flex items-center gap-2 border border-primary-200 rounded-full p-1">
                   <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-full ${viewMode === 'grid' ? 'bg-primary-100 text-primary-600' : 'text-primary-400 hover:text-primary-600'}`}
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-full ${
+                      viewMode === "grid"
+                        ? "bg-primary-100 text-primary-600"
+                        : "text-primary-400 hover:text-primary-600"
+                    }`}
                   >
                     <Grid className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-full ${viewMode === 'list' ? 'bg-primary-100 text-primary-600' : 'text-primary-400 hover:text-primary-600'}`}
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-full ${
+                      viewMode === "list"
+                        ? "bg-primary-100 text-primary-600"
+                        : "text-primary-400 hover:text-primary-600"
+                    }`}
                   >
                     <List className="h-5 w-5" />
                   </button>
@@ -467,23 +506,36 @@ export const ShopPage: React.FC = () => {
             </div>
 
             {/* Active Filters */}
-            {(filters.categories.length > 0 || filters.materials.length > 0 || filters.isNew || filters.isBestSeller) && (
+            {(filters.categories.length > 0 ||
+              filters.materials.length > 0 ||
+              filters.isNew ||
+              filters.isBestSeller) && (
               <div className="mb-6">
                 <div className="flex flex-wrap gap-2">
-                  {filters.categories.map(category => (
+                  {filters.categories.map((category) => (
                     <button
                       key={category}
-                      onClick={() => handleFilterChange('categories', filters.categories.filter(c => c !== category))}
+                      onClick={() =>
+                        handleFilterChange(
+                          "categories",
+                          filters.categories.filter((c) => c !== category)
+                        )
+                      }
                       className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
                     >
                       {category}
                       <X className="h-4 w-4 ml-1" />
                     </button>
                   ))}
-                  {filters.materials.map(material => (
+                  {filters.materials.map((material) => (
                     <button
                       key={material}
-                      onClick={() => handleFilterChange('materials', filters.materials.filter(m => m !== material))}
+                      onClick={() =>
+                        handleFilterChange(
+                          "materials",
+                          filters.materials.filter((m) => m !== material)
+                        )
+                      }
                       className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
                     >
                       {material}
@@ -492,7 +544,7 @@ export const ShopPage: React.FC = () => {
                   ))}
                   {filters.isNew && (
                     <button
-                      onClick={() => handleFilterChange('isNew', false)}
+                      onClick={() => handleFilterChange("isNew", false)}
                       className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
                     >
                       Nuevos
@@ -501,7 +553,7 @@ export const ShopPage: React.FC = () => {
                   )}
                   {filters.isBestSeller && (
                     <button
-                      onClick={() => handleFilterChange('isBestSeller', false)}
+                      onClick={() => handleFilterChange("isBestSeller", false)}
                       className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
                     >
                       Más Vendidos
@@ -516,17 +568,22 @@ export const ShopPage: React.FC = () => {
             {filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <SlidersHorizontal className="h-12 w-12 text-primary-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-primary-900 mb-2">No se encontraron productos</h3>
-                <p className="text-primary-600">Intenta ajustar los filtros de búsqueda</p>
+                <h3 className="text-lg font-medium text-primary-900 mb-2">
+                  No se encontraron productos
+                </h3>
+                <p className="text-primary-600">
+                  Intenta ajustar los filtros de búsqueda
+                </p>
               </div>
-            ) : viewMode === 'grid' ? (
+            ) : viewMode === "grid" ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {paginatedProducts.map(product => (
+                  {paginatedProducts.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
-                      onAddToCart={() => {}}
+                      onAddToCart={() => addToCart(product)}
+                      onClick={() => navigate(`/producto/${product.id}`)}
                     />
                   ))}
                 </div>
@@ -537,7 +594,7 @@ export const ShopPage: React.FC = () => {
             ) : (
               <>
                 <div className="space-y-6">
-                  {paginatedProducts.map(product => (
+                  {paginatedProducts.map((product) => (
                     <ProductListView key={product.id} product={product} />
                   ))}
                 </div>
@@ -555,4 +612,3 @@ export const ShopPage: React.FC = () => {
     </div>
   );
 };
-

@@ -70,12 +70,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         >
           <Share2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
         </button>
-        <button 
+        {/* <button 
           className="p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-primary-50 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
           <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
-        </button>
+        </button> */}
         <button 
           className="p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-primary-50 transition-colors"
           onClick={(e) => {

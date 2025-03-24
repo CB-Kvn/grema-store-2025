@@ -398,6 +398,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               )}
             </div>
 
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <label className="block text-sm font-medium text-primary-700">
+                  ¿Requiere factura timbrada?
+                </label>
+                <p className="text-primary-600">
+                  Comuníquese al <a href="https://wa.me/1234567890" className="text-primary-600 hover:text-primary-700">WhatsApp</a> o solicítela al pagar.
+                </p>
+              </div>
+            </div>
+
             {/* Add to Cart Button or Already Added Message */}
             {isProductInCart ? (
               <div className="flex items-center justify-center space-x-2 bg-green-50 p-4 rounded-lg border border-green-200">
