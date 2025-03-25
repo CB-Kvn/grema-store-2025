@@ -102,7 +102,7 @@ export const Footer = () => {
             {/* Columna 4: Imagen a la derecha */}
             <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex justify-center items-center">
               <img
-                src="../../public/Logo en blamco.png" // Ruta de la imagen
+                src="https://res.cloudinary.com/denqtcsyy/image/upload/f_auto,q_auto/v1/images/f0bqluptggwdvpa0yrru" // Ruta de la imagen
                 alt="Imagen decorativa" // Texto alternativo
                 className="w-48 h-48 sm:w-64 sm:h-64 object-cover rounded-lg" // Estilos de la imagen
               />

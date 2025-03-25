@@ -10,7 +10,7 @@ export const LogoInitial = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-4 sm:mb-6">
             <img
-              src="../../../public/Logo en negro.png" // Ruta de la imagen en la carpeta public
+              src="https://res.cloudinary.com/denqtcsyy/image/upload/f_auto,q_auto/v1/images/h13dsdlzrls0y5iktl2z" // Ruta de la imagen en la carpeta public
               alt="Descripción de la imagen" // Texto alternativo para accesibilidad
               className="mx-auto" // Clases de estilo
             />
