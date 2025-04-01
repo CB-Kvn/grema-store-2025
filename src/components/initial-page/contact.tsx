@@ -1,18 +1,14 @@
-
-import { 
-  Phone, Mail, MapPin, Clock,
-  Facebook, Instagram 
-} from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react";
 
 // TikTok icon component since it's not available in lucide-react
 const TikTokIcon = () => (
-  <svg 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     className="h-6 w-6"
   >
     <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
@@ -21,8 +17,11 @@ const TikTokIcon = () => (
 
 const ContactPage = () => {
   return (
-    <div className="min-h-screen bg-primary-50  mt-10" data-aos="fade-up"
-    data-aos-duration="1000">
+    <div
+      className="min-h-screen bg-primary-50  mt-10"
+      data-aos="fade-up"
+      data-aos-duration="1000"
+    >
       {/* Hero Section */}
       <div className=" py-16 sm:py-24 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,7 +30,8 @@ const ContactPage = () => {
               Contáctanos
             </h1>
             <p className="mt-4 text-xl text-primary-600">
-              Estamos aquí para ayudarte. Contáctanos por cualquiera de nuestros canales de comunicación.
+              Estamos aquí para ayudarte. Contáctanos por cualquiera de nuestros
+              canales de comunicación.
             </p>
           </div>
         </div>
@@ -42,28 +42,36 @@ const ContactPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Phone className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">Teléfono</h3>
+            <h3 className="text-lg font-semibold text-primary-900 mb-2">
+              Teléfono
+            </h3>
             <p className="text-primary-600">+506 2222-2222</p>
             <p className="text-primary-600">+506 8888-8888</p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Mail className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">Email</h3>
+            <h3 className="text-lg font-semibold text-primary-900 mb-2">
+              Email
+            </h3>
             <p className="text-primary-600">info@joyasdelujo.com</p>
             <p className="text-primary-600">ventas@joyasdelujo.com</p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <MapPin className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">Dirección</h3>
+            <h3 className="text-lg font-semibold text-primary-900 mb-2">
+              Dirección
+            </h3>
             <p className="text-primary-600">Avenida Central</p>
             <p className="text-primary-600">San José, Costa Rica</p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Clock className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">Horario</h3>
+            <h3 className="text-lg font-semibold text-primary-900 mb-2">
+              Horario
+            </h3>
             <p className="text-primary-600">Lun - Vie: 9:00 - 18:00</p>
             <p className="text-primary-600">Sáb: 9:00 - 13:00</p>
           </div>
@@ -75,11 +83,11 @@ const ContactPage = () => {
           {/* Map */}
           <div className="bg-white p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-serif font-bold text-primary-900 mb-6">
-              Nuestra ubicación
+              Nuestro taller se encuentra en:
             </h2>
             <div className="aspect-video w-full rounded-lg overflow-hidden">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15721.650373517218!2d-84.08499184999999!3d9.933517449999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa0e342c50d15c5%3A0xe6746a6a9f11b882!2sSan%20Jos%C3%A9%20Province%2C%20San%20Jos%C3%A9%2C%20Costa%20Rica!5e0!3m2!1sen!2s!4v1635959562000!5m2!1sen!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15721.650373517218!2d-84.935788!3d9.641916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f9f5a5c5e5e5e5d%3A0x5e5e5e5e5e5e5e5d!2sPaquera%2C%20Puntarenas%2C%20Costa%20Rica!5e0!3m2!1sen!2s!4v1635959562000&zoom=9"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -119,7 +127,9 @@ const ContactPage = () => {
               </a>
             </div>
             <div className="mt-8 text-center text-primary-600">
-              <p>Síguenos para estar al día con nuestras últimas colecciones,</p>
+              <p>
+                Síguenos para estar al día con nuestras últimas colecciones,
+              </p>
               <p>eventos especiales y promociones exclusivas.</p>
             </div>
           </div>

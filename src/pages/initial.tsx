@@ -1598,36 +1598,38 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
     <div className="min-h-screen bg-white">
       {/* Navigation */}
 
-      <LogoInitial></LogoInitial>
+      <div className="py-14">
+        <LogoInitial></LogoInitial>
 
-      {/* Categories */}
-      <div
-        className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 py-6 sm:py-8 -mt-4"
-        data-aos="fade-up"
-        data-aos-duration="1000"
-      >
-        <div className="flex justify-center">
-          <div className="inline-flex space-x-2 sm:space-x-4">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-xl font-medium transition-colors ${
-                  selectedCategory === category.id
-                    ? "bg-primary-600 text-white"
-                    : "bg-white text-primary-800 hover:bg-primary-50"
-                }`}
-              >
-                {category.name}
-              </button>
-            ))}
+        {/* Categories */}
+        <div
+          className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 "
+          data-aos="fade-up"
+          data-aos-duration="1000"
+        >
+          <div className="flex justify-center">
+            <div className="inline-flex space-x-2 sm:space-x-4">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-xl font-medium transition-colors ${
+                    selectedCategory === category.id
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-800 hover:bg-primary-50"
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Featured Products */}
       <div
-        className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8 -m-10 py-6"
+        className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8"
         data-aos="fade-up"
         data-aos-duration="1000"
       >
@@ -1810,8 +1812,6 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       <Info_Bussiness></Info_Bussiness>
 
       <ContactPage></ContactPage>
-
-      
     </div>
   );
 };

@@ -42,6 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
   };
 
   return (
+    <>
     <div 
       className="relative h-[300px] sm:h-[350px] md:h-[400px] rounded-lg shadow-md overflow-hidden group cursor-pointer"
       onMouseEnter={() => setIsHovering(true)}
@@ -149,7 +150,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
                                 product.price
                               )}</span>
         </div>
-        <button 
+        
+      </div>
+      <button 
           className="w-full bg-primary-600 text-white py-2 sm:py-3 rounded-full text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors"
           onClick={(e) => {
             e.stopPropagation();
@@ -158,8 +161,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         >
           Agregar al Carrito
         </button>
-      </div>
     </div>
+    <button 
+          className="w-full bg-primary-600 mt-5 text-white py-2 sm:py-3 rounded-full text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart();
+          }}
+        >
+          Agregar al Carrito
+        </button>
+    </>
+    
   );
 };
 
