@@ -10,10 +10,11 @@ import { LogoInitial } from "@/components/initial-page/logoInitial";
 import ProductCard from "@/components/product/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { Info_Bussiness } from "@/components/initial-page/bussiness";
-import { Product } from "@/interfaces/products";
+
 import ContactPage from "@/components/initial-page/contact";
 import Aos from "aos";
 import "aos/dist/aos.css";
+import { Product } from "@/types";
 
 const categories = [
   { id: "all", name: "Todas las Joyas" },
@@ -1598,7 +1599,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
     <div className="min-h-screen bg-white">
       {/* Navigation */}
 
-      <div className="py-14">
+      <div className="py-10">
         <LogoInitial></LogoInitial>
 
         {/* Categories */}
@@ -1687,7 +1688,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
       {/* Featured Collections Tabs */}
       <div
-        className=" py-16 sm:py-24 bg-primary-50 "
+        className="py-11 bg-primary-50 "
         data-aos="fade-up"
         data-aos-duration="1000"
       >
@@ -1751,7 +1752,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                   spaceBetween: 30,
                 },
               }}
-              className="pb-12"
+              
             >
               {bestSellers.map((product) => (
                 <SwiperSlide key={product.id}>
@@ -1809,7 +1810,11 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       </div>
 
       {/* Why Choose Us */}
-      <Info_Bussiness></Info_Bussiness>
+      <div className="py-11">
+        <Info_Bussiness></Info_Bussiness>
+
+      </div>
+      
 
       <ContactPage></ContactPage>
     </div>

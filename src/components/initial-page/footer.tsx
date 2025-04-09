@@ -3,7 +3,7 @@ export const Footer = () => {
   return (
     <>
       {/* Footer */}
-      <footer className="bg-primary-500 text-white py-8 sm:py-12">
+      <footer className="bg-primary-700 text-white py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Columna 1: Sobre Joyas de Lujo */}

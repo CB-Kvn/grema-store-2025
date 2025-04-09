@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react";
+import { Phone, MapPin, Clock, Facebook, Instagram } from "lucide-react";
 
 // TikTok icon component since it's not available in lucide-react
 const TikTokIcon = () => (
@@ -18,12 +18,12 @@ const TikTokIcon = () => (
 const ContactPage = () => {
   return (
     <div
-      className="min-h-screen bg-primary-50  mt-10"
+      className="min-h-screen bg-primary-50"
       data-aos="fade-up"
       data-aos-duration="1000"
     >
       {/* Hero Section */}
-      <div className=" py-16 sm:py-24 ">
+      <div className=" py-11 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-serif font-bold text-primary-900 sm:text-5xl">
@@ -45,26 +45,18 @@ const ContactPage = () => {
             <h3 className="text-lg font-semibold text-primary-900 mb-2">
               Teléfono
             </h3>
-            <p className="text-primary-600">+506 2222-2222</p>
-            <p className="text-primary-600">+506 8888-8888</p>
+            <p className="text-primary-600">+506 6194-1946</p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <Mail className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">
-              Email
-            </h3>
-            <p className="text-primary-600">info@joyasdelujo.com</p>
-            <p className="text-primary-600">ventas@joyasdelujo.com</p>
-          </div>
+
 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <MapPin className="h-8 w-8 text-primary-600 mb-4" />
             <h3 className="text-lg font-semibold text-primary-900 mb-2">
               Dirección
             </h3>
-            <p className="text-primary-600">Avenida Central</p>
-            <p className="text-primary-600">San José, Costa Rica</p>
+            <p className="text-primary-600">Cóbano,Los Mangos 100 metros norte y 75 metros oeste de la Escuela Los Mangos</p>
+            <p className="text-primary-600">Puntarenas, Costa Rica</p>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
@@ -72,8 +64,8 @@ const ContactPage = () => {
             <h3 className="text-lg font-semibold text-primary-900 mb-2">
               Horario
             </h3>
-            <p className="text-primary-600">Lun - Vie: 9:00 - 18:00</p>
-            <p className="text-primary-600">Sáb: 9:00 - 13:00</p>
+            <p className="text-primary-600">Lun - Sab: 9:00 am - 18:00</p>
+            <p className="text-primary-600">Dom: Cerrado</p>
           </div>
         </div>
       </div>

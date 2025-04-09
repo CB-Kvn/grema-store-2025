@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck, Gift, Shield, ArrowLeft, Copy } from 'lucide-react';
-import { AddressInfo, CheckoutPageProps } from '@/interfaces/checkout';
-import { Input } from '../ui/input';
+import { Truck, Gift, Shield, ArrowLeft, Copy, Phone, Wallet, AlertCircle } from 'lucide-react';
+
+
+import { cantones } from '@/utils/location';
+import { AddressInfo, CartItem } from '@/types';
 import { Label } from '../ui/label';
 import AddressForm from './addressForm';
+
+interface CheckoutPageProps {
+  cartItems: CartItem[];
+}
 
 const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const navigate = useNavigate();
@@ -37,14 +43,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
     provincia: '',
     canton: '',
   });
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '',
-    cardHolder: '',
-    expiryDate: '',
-    cvv: '',
-  });
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [needInvoice, setNeedInvoice] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'sinpe' | 'transfer'>('sinpe');
 
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => {
@@ -55,7 +56,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   };
 
   const calculateShipping = () => {
-    return 0; // Free shipping
+    if (!shippingInfo.provincia || !shippingInfo.canton) return 0;
+    
+    const provinciaId = shippingInfo.provincia as keyof typeof cantones;
+    const canton = cantones[provinciaId].find(c => c.nombre === shippingInfo.canton);
+    
+    return canton ? canton.costoEnvio : 0;
   };
 
   const calculateTotal = () => {
@@ -84,7 +90,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
     const orderData = {
       shippingInfo,
       billingInfo: needInvoice ? billingInfo : shippingInfo,
-      paymentInfo,
+      paymentMethod,
       cartItems,
       total: calculateTotal()
     };
@@ -92,35 +98,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
     setStep('confirmation');
   };
 
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || '';
-    const parts = [];
-
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return value;
-    }
-  };
-
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatCardNumber(e.target.value);
-    setPaymentInfo({ ...paymentInfo, cardNumber: formattedValue });
-  };
-
-  const copyShippingToBilling = () => {
-    setBillingInfo(shippingInfo);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      
+    <div className="min-h-screen bg-primary-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -138,7 +121,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="bg-primary-50 rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
               {/* Progress Steps */}
               <div className="mb-8">
                 <div className="flex items-center justify-between">
@@ -240,7 +223,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                   {!useSameAddress && (
                     <button
                       type="button"
-                      onClick={copyShippingToBilling}
+                      onClick={() => setBillingInfo(shippingInfo)}
                       className="flex items-center text-primary-600 hover:text-primary-700"
                     >
                       <Copy className="h-4 w-4 mr-2" />
@@ -253,58 +236,149 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
               {step === 'payment' && (
                 <form onSubmit={handlePaymentSubmit} className="space-y-6">
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-                      <div className="mt-1 relative">
-                        <Input
-                          type="text"
-                          id="cardNumber"
-                          required
-                          maxLength={19}
-                          value={paymentInfo.cardNumber}
-                          onChange={handleCardNumberChange}
-                          placeholder="1234 5678 9012 3456"
-                          className="pl-10"
-                        />
-                        <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="cardHolder">Titular de la Tarjeta</Label>
-                      <Input
-                        type="text"
-                        id="cardHolder"
-                        required
-                        value={paymentInfo.cardHolder}
-                        onChange={(e) => setPaymentInfo({ ...paymentInfo, cardHolder: e.target.value })}
-                      />
-                    </div>
+                    <h3 className="text-lg font-medium text-primary-900">Método de Pago</h3>
+                    
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiryDate">Fecha de Expiración</Label>
-                        <Input
-                          type="text"
-                          id="expiryDate"
-                          required
-                          placeholder="MM/YY"
-                          maxLength={5}
-                          value={paymentInfo.expiryDate}
-                          onChange={(e) => setPaymentInfo({ ...paymentInfo, expiryDate: e.target.value })}
-                        />
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('sinpe')}
+                        className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${
+                          paymentMethod === 'sinpe' 
+                            ? 'border-primary-600 bg-primary-50' 
+                            : 'border-primary-200 hover:border-primary-300'
+                        }`}
+                      >
+                        <Phone className="h-6 w-6 text-primary-600" />
+                        <span className="font-medium">SINPE Móvil</span>
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('transfer')}
+                        className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${
+                          paymentMethod === 'transfer' 
+                            ? 'border-primary-600 bg-primary-50' 
+                            : 'border-primary-200 hover:border-primary-300'
+                        }`}
+                      >
+                        <Wallet className="h-6 w-6 text-primary-600" />
+                        <span className="font-medium">Transferencia Bancaria</span>
+                      </button>
+                    </div>
+
+                    {/* Payment Instructions */}
+                    <div className="mt-6 p-4 bg-primary-50 rounded-lg space-y-4">
+                      <div className="flex items-start">
+                        <AlertCircle className="h-5 w-5 text-primary-600 mt-0.5 mr-2" />
+                        <p className="text-primary-600">
+                          Por favor, realiza el pago utilizando los siguientes datos. Una vez realizado,
+                          haz clic en "Confirmar Pedido" y te enviaremos los detalles por correo.
+                        </p>
                       </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input
-                          type="text"
-                          id="cvv"
-                          required
-                          maxLength={4}
-                          value={paymentInfo.cvv}
-                          onChange={(e) => setPaymentInfo({ ...paymentInfo, cvv: e.target.value })}
-                        />
-                      </div>
+
+                      {paymentMethod === 'sinpe' ? (
+                        <div className="space-y-3">
+                          <div>
+                            <Label>Número SINPE Móvil</Label>
+                            <div className="flex items-center mt-1">
+                              <div className="flex-1 bg-white p-3 rounded-lg font-medium">
+                                6194-1946
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard('61941946')}
+                                className="ml-2 p-2 hover:bg-primary-100 rounded-lg"
+                              >
+                                <Copy className="h-5 w-5 text-primary-600" />
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>A nombre de</Label>
+                            <div className="bg-white p-3 rounded-lg font-medium mt-1">
+                              Grettel María Barrantes Pérez
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div>
+                            <Label>Banco</Label>
+                            <div className="bg-white p-3 rounded-lg font-medium mt-1">
+                              Banco Nacional de Costa Rica
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Cuenta IBAN</Label>
+                            <div className="flex items-center mt-1">
+                              <div className="flex-1 bg-white p-3 rounded-lg font-medium">
+                                CR20015109020010099567
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard('CR88015100010023004932')}
+                                className="ml-2 p-2 hover:bg-primary-100 rounded-lg"
+                              >
+                                <Copy className="h-5 w-5 text-primary-600" />
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Cuenta Cliente</Label>
+                            <div className="flex items-center mt-1">
+                              <div className="flex-1 bg-white p-3 rounded-lg font-medium">
+                              15109020010099567
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard('15100010023004932')}
+                                className="ml-2 p-2 hover:bg-primary-100 rounded-lg"
+                              >
+                                <Copy className="h-5 w-5 text-primary-600" />
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Cuenta</Label>
+                            <div className="flex items-center mt-1">
+                              <div className="flex-1 bg-white p-3 rounded-lg font-medium">
+                              200-01-090-009956-8
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard('15100010023004932')}
+                                className="ml-2 p-2 hover:bg-primary-100 rounded-lg"
+                              >
+                                <Copy className="h-5 w-5 text-primary-600" />
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>A nombre de</Label>
+                            <div className="bg-white p-3 rounded-lg font-medium mt-1">
+                              Grettel María Barrantes Pérez
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Cédula Física</Label>
+                            <div className="flex items-center mt-1">
+                              <div className="flex-1 bg-white p-3 rounded-lg font-medium">
+                                1-149-30574
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard('3101123456')}
+                                className="ml-2 p-2 hover:bg-primary-100 rounded-lg"
+                              >
+                                <Copy className="h-5 w-5 text-primary-600" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
+
                   <div className="flex justify-between">
                     <button
                       type="button"
@@ -355,7 +429,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-primary-50 rounded-lg shadow-md p-6 space-y-6">
+            <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
               <h2 className="text-lg font-semibold text-primary-900">Resumen del Pedido</h2>
               
               {/* Items */}
@@ -397,11 +471,15 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-primary-600">Envío</span>
-                  <span className="text-green-600">Gratis</span>
+                  <span className={calculateShipping() > 0 ? "text-primary-900" : "text-green-600"}>
+                    {calculateShipping() > 0 ? `₡${calculateShipping().toLocaleString()}` : 'Por calcular'}
+                  </span>
                 </div>
                 <div className="flex justify-between text-lg font-semibold">
                   <span className="text-primary-900">Total</span>
-                  <span className="text-primary-900">${calculateTotal().toLocaleString()}</span>
+                  <span className="text-primary-900">
+                    ${calculateTotal().toLocaleString()}
+                  </span>
                 </div>
               </div>
 
@@ -409,7 +487,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
               <div className="border-t border-primary-100 pt-4 space-y-3">
                 <div className="flex items-center text-sm text-primary-600">
                   <Truck className="h-4 w-4 mr-2" />
-                  <span>Envío gratis en todos los pedidos</span>
+                  <span>Envío a todo el país</span>
                 </div>
                 <div className="flex items-center text-sm text-primary-600">
                   <Gift className="h-4 w-4 mr-2" />
