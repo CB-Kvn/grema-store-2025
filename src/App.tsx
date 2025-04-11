@@ -20,6 +20,7 @@ import { addToCartShop, removeFromCartShop, updateQuantityShop } from "./store/s
 import OrderDocumentsPage from "./pages/OrderDocumentsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import InventoryPage from "./pages/InventoryPage";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -56,6 +57,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Initial addToCart={addToCart}/>} />
+        <Route path="/login" element={<LoginPage />} />
         <Route
           path="/producto/:id"
           element={<ProductDetail addToCart={addToCart} updateQuantity={updateQuantity} />}

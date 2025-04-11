@@ -13,8 +13,10 @@ import SearchBar from "@/components/navigation/search-bar";
 import clsx from "clsx";
 import { products_list } from "@/utils/categoriesMsg";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { ArrowLeft, ShoppingCart, User } from "lucide-react";
 import { useAppSelector } from "@/hooks/useAppSelector";
+import { useNavigate } from "react-router-dom";
+import LoginModal from "../LoginModal";
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
@@ -54,6 +56,9 @@ ListItem.displayName = "ListItem";
 export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const cartItems = useAppSelector((state) => state.cart.items);
+  const navigate = useNavigate(); // Hook para redirigir
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
   return (
     <>
       <nav
@@ -102,7 +107,7 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             </Link>
 
             {/* Botones Navegación (Desktop) */}
-            <div className="hidden lg:flex">
+            <div className="hidden lg:flex items-center space-x-4">
               <NavigationMenu className="bg-transparent">
                 <NavigationMenuList>
                   <NavigationMenuItem className="bg-transparent">
@@ -163,35 +168,53 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
+
+              {/* Botón de Login */}
+              <button
+                onClick={() => setIsLoginOpen(true)}
+                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
+              >
+                Login
+              </button>
             </div>
 
             {/* Barra de búsqueda y carrito (600px a 1024px) */}
             <div className="flex items-center space-x-4 z-30">
-  {/* Barra de búsqueda - visible en sm y lg */}
-  <div className="hidden sm:block">
-    <SearchBar />
-  </div>
-  
-  {/* Botón del carrito - visible en sm */}
-  <div className="">
-    <button
-      className="p-2 hover:bg-primary-50 rounded-full relative"
-      onClick={() => {
-        isOpen();
-      }}
-    >
-      <ShoppingCart className="h-6 w-6 text-primary-600" />
-      {cartItems.length > 0 && (
-        <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-          {cartItems.reduce(
-            (total, item) => total + item.quantity,
-            0
-          )}
-        </span>
-      )}
-    </button>
-  </div>
-</div>
+              {/* Barra de búsqueda - visible en sm y lg */}
+              <div className="hidden sm:block">
+                <SearchBar />
+              </div>
+
+              {/* Botón del carrito - visible en sm */}
+              <div className="">
+                <button
+                  className="p-2 hover:bg-primary-50 rounded-full relative"
+                  onClick={() => {
+                    isOpen();
+                  }}
+                >
+                  <ShoppingCart className="h-6 w-6 text-primary-600" />
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartItems.reduce(
+                        (total, item) => total + item.quantity,
+                        0
+                      )}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              {/* Botón de login */}
+              <div>
+                <button
+                  className="p-2 hover:bg-primary-50 rounded-full"
+                  onClick={() => setIsLoginOpen(true)}
+                >
+                  <User className="h-6 w-6 text-primary-600" />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Menú móvil */}
@@ -200,7 +223,7 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
               <ul className="space-y-1 px-2 pb-3 pt-2">
                 {/* Enlace a una nueva página */}
                 <li>
-                <SearchBar />
+                  <SearchBar />
                 </li>
                 <li>
                   <Link
@@ -241,9 +264,10 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             </div>
           )}
         </div>
-        
       </nav>
-      
+
+      {/* Login Modal */}
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </>
   );
 };
