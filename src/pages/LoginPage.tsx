@@ -20,15 +20,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-200 to-accent-200 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-primary to-accent flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 bg-card p-8 rounded-xl shadow-lg">
         {/* Header */}
         <div className="text-center">
-          <LogIn className="mx-auto h-12 w-12 text-primary-500" />
-          <h2 className="mt-6 text-3xl font-bold text-primary-950 font-serif">
+          <LogIn className="mx-auto h-12 w-12 text-primary" />
+          <h2 className="mt-6 text-3xl font-bold text-primary-foreground font-serif">
             Iniciar sesión
           </h2>
-          <p className="mt-2 text-sm text-primary-800 font-sans">
+          <p className="mt-2 text-sm text-muted-foreground font-sans">
             Ingresa tus credenciales para acceder
           </p>
         </div>
@@ -42,7 +42,7 @@ const LoginPage = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-primary-400" />
+                  <Mail className="h-5 w-5 text-muted" />
                 </div>
                 <input
                   id="email"
@@ -52,7 +52,7 @@ const LoginPage = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent text-sm font-sans"
+                  className="block w-full pl-10 pr-3 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm font-sans"
                   placeholder="Correo electrónico"
                 />
               </div>
@@ -64,7 +64,7 @@ const LoginPage = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-primary-400" />
+                  <Lock className="h-5 w-5 text-muted" />
                 </div>
                 <input
                   id="password"
@@ -74,7 +74,7 @@ const LoginPage = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent text-sm font-sans"
+                  className="block w-full pl-10 pr-3 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm font-sans"
                   placeholder="Contraseña"
                 />
               </div>
@@ -82,7 +82,7 @@ const LoginPage = () => {
           </div>
 
           {error && (
-            <p className="text-center text-sm text-rose-500 font-sans">
+            <p className="text-center text-sm text-destructive font-sans">
               {error}
             </p>
           )}
@@ -93,11 +93,11 @@ const LoginPage = () => {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-primary-300 rounded"
+                className="h-4 w-4 text-primary focus:ring-primary border-muted rounded"
               />
               <label
                 htmlFor="remember-me"
-                className="ml-2 block text-sm text-primary-900 font-sans"
+                className="ml-2 block text-sm text-primary-foreground font-sans"
               >
                 Recordarme
               </label>
@@ -106,7 +106,7 @@ const LoginPage = () => {
             <div className="text-sm">
               <a
                 href="#"
-                className="font-medium text-rose-500 hover:text-rose-600 font-sans"
+                className="font-medium text-destructive hover:text-destructive-foreground font-sans"
               >
                 ¿Olvidaste tu contraseña?
               </a>
@@ -115,16 +115,16 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-button hover:bg-button-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200 font-sans"
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 font-sans"
           >
             Iniciar sesión
           </button>
 
-          <p className="text-center text-sm text-primary-800 font-sans">
+          <p className="text-center text-sm text-muted-foreground font-sans">
             ¿No tienes una cuenta?{" "}
             <a
               href="#"
-              className="font-medium text-rose-500 hover:text-rose-600"
+              className="font-medium text-primary hover:text-primary-foreground"
             >
               Regístrate
             </a>

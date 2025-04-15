@@ -5,6 +5,7 @@ import favoritesReducer from '@/store/slices/favoriteslice';
 import purchasesReducer from '@/store/slices/purchaseOrdersSlice';
 import warehousesReducer from '@/store/slices/warehousesSlice';
 import expensesReducer  from '@/store/slices/expensesSlice';
+import loaderReducer from './slices/loaderSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     expenses: expensesReducer,
     purchases: purchasesReducer,  
     warehouses: warehousesReducer,
+    loader: loaderReducer, // Agregar el loaderReducer
   },
 });
 

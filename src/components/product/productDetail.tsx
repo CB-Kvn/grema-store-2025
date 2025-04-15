@@ -22,6 +22,7 @@ import {
 import { products } from "@/pages/initial";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import RelatedProducts from "./RelatedProducts";
 
 interface ProductDetailProps {
   addToCart: (product: (typeof products)[0] & { quantity: number }) => void;
@@ -328,69 +329,24 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
             </div>
 
             {/* Product Details */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-primary-900">
-                Detalles del Producto
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-primary-900">Detalles del Producto</h3>
+              <ul className="space-y-2">
                 {Object.entries(product.details).map(([key, value]) => (
-                  <div key={key} className="bg-primary-50 p-3 rounded-lg">
-                    <span className="text-sm text-primary-600 capitalize">
-                      {key}
+                  <li key={key} className="flex items-start">
+                    <span className="font-medium text-primary-900 capitalize">{key}:</span>
+                    <span className="ml-2 text-primary-600">
+                      {Array.isArray(value)
+                        ? value.join(", ") // Si es un array, unir los valores con comas
+                        : typeof value === "object" && value !== null
+                        ? Object.entries(value)
+                            .map(([subKey, subValue]) => `${subKey}: ${subValue}`)
+                            .join(", ") // Si es un objeto, mostrar subclaves y valores
+                        : value}
                     </span>
-                    {Array.isArray(value) ? (
-                      <div className="space-y-1">
-                        {value.map((item, index) => (
-                          <div key={index} className="flex items-center">
-                            {item.hex && (
-                              <span
-                                className="w-4 h-4 rounded-full mr-2"
-                                style={{ backgroundColor: item.hex }}
-                              ></span>
-                            )}
-                            <p className="text-primary-900 font-medium">
-                              {item.name}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : typeof value === "object" && value !== null ? (
-                      <div className="space-y-1">
-                        {Object.entries(value).map(([subKey, subValue]) => (
-                          <div key={subKey}>
-                            {Array.isArray(subValue) ? (
-                              <div className="space-y-1">
-                                {subValue.map((item, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex items-center"
-                                  >
-                                    {item.hex && (
-                                      <span
-                                        className="w-4 h-4 rounded-full mr-2"
-                                        style={{ backgroundColor: item.hex }}
-                                      ></span>
-                                    )}
-                                    <p className="text-primary-900 font-medium">
-                                      {item.name}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-primary-900 font-medium">
-                                {subValue}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-primary-900 font-medium">{value}</p>
-                    )}
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
             {/* Quantity Selector */}
@@ -516,42 +472,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
         </div>
 
         {/* Related Products */}
-        <div className="mt-16 border-t border-primary-100 pt-12">
-          <Tabs defaultValue="related" className="w-full">
-            <TabsList className="grid w-full max-w-[400px] grid-cols-2 mx-auto mb-8">
-              <TabsTrigger value="related" className="flex items-center">
-                <Flame className="h-4 w-4 mr-2" />
-                Productos Relacionados
-              </TabsTrigger>
-              <TabsTrigger value="suggestions" className="flex items-center">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Sugerencias
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="related">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-serif font-bold text-primary-900 mb-4">
-                  Productos Relacionados
-                </h2>
-                <p className="text-primary-600 max-w-2xl mx-auto">
-                  Explora más piezas de nuestra colección {product.category}
-                </p>
-              </div>
-              <ProductSlider products={relatedProducts} />
-            </TabsContent>
-            <TabsContent value="suggestions">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-serif font-bold text-primary-900 mb-4">
-                  También te puede interesar
-                </h2>
-                <p className="text-primary-600 max-w-2xl mx-auto">
-                  Basado en tus preferencias y el rango de precio
-                </p>
-              </div>
-              {/* <ProductSlider products={suggestedProducts} /> */}
-            </TabsContent>
-          </Tabs>
-        </div>
+        <RelatedProducts relatedProducts={relatedProducts} category={product.category} />
      
       </div>
     </div>

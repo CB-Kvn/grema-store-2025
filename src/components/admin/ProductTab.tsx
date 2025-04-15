@@ -87,7 +87,7 @@ const ProductTab = () => {
               setSelectedProduct(null);
               setIsModalOpen(true);
             }}
-            className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-700"
           >
             <Plus className="h-5 w-5 mr-2" />
             <span>Nuevo Producto</span>

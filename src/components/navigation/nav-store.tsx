@@ -62,8 +62,8 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   return (
     <>
       <nav
-        className="sticky top-0 z-30 "
-        style={{ backgroundColor: "rgba(249, 242, 246)" }}
+        className="sticky top-0 z-30 bg-primary-600 bg-opacity-50 backdrop-blur-md   shadow-md"
+       
       >
         <div className="mx-auto max-w-7xl p-4 sm:px-6 lg:px-8 z-30">
           <div className="relative flex h-16 items-center justify-between z-30">
@@ -169,13 +169,6 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                 </NavigationMenuList>
               </NavigationMenu>
 
-              {/* Botón de Login */}
-              <button
-                onClick={() => setIsLoginOpen(true)}
-                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
-              >
-                Login
-              </button>
             </div>
 
             {/* Barra de búsqueda y carrito (600px a 1024px) */}

@@ -21,6 +21,7 @@ import OrderDocumentsPage from "./pages/OrderDocumentsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import InventoryPage from "./pages/InventoryPage";
 import LoginPage from "./pages/LoginPage";
+import Loader from '@/components/ui/Loader';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -39,13 +40,14 @@ function App() {
   };
 
   const updateQuantity = (productId: number, newQuantity: number) => {
-    console.log("Cantidad",{productId,newQuantity})
+    console.log("Cantidad", { productId, newQuantity })
     if (newQuantity < 1) return;
     dispatch(updateQuantityShop({ id: productId, quantity: newQuantity }));
   };
 
   return (
     <Router>
+      <Loader />
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -53,10 +55,10 @@ function App() {
         onRemove={removeFromCart}
         onUpdateQuantity={updateQuantity}
       />
-        <Menu_Bar isOpen={() => setIsCartOpen(true)}></Menu_Bar>
+      <Menu_Bar isOpen={() => setIsCartOpen(true)}></Menu_Bar>
 
       <Routes>
-        <Route path="/" element={<Initial addToCart={addToCart}/>} />
+        <Route path="/" element={<Initial addToCart={addToCart} />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/producto/:id"
@@ -71,7 +73,7 @@ function App() {
         <Route path="/nuestros-valores" element={<ValuesPage />} />
         <Route path="/admin/inventory" element={<InventoryPage />} />
         <Route path="/admin/documents" element={<OrderDocumentsPage />} />
-        <Route path="/tracking" element={<OrderTrackingPage/>}></Route>
+        <Route path="/tracking" element={<OrderTrackingPage />}></Route>
       </Routes>
       <Networking></Networking>
       <Footer></Footer>
