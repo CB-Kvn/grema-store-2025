@@ -12,7 +12,8 @@ export const authService = {
     const response = await api.post<LoginResponse>('/auth/login', { email, password });
     const { token } = response.data;
     localStorage.setItem('token', token);
-    return response.data;
+    console.log(response); // Log the token for debugging
+    return response;
   },
 
   logout: () => {

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Mail, Lock, LogIn, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { authService } from "@/services/authService";
+
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -13,15 +15,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Replace this with your actual authentication logic
-    if (email === "admin@example.com" && password === "password123") {
-      navigate("/admin/inventory");
-      onClose(); // Close the modal after successful login
-    } else {
-      setError("Correo o contraseña incorrectos");
+    try {
+      // Llamada al servicio de autenticación
+      const response = await authService.login( email, password );
+
+      // Si el login es exitoso, redirige y cierra el modal
+      if (response.status === 200) {
+        navigate("/admin/inventory");
+        onClose();
+      } else {
+        setError(response.status.toString() || "Correo o contraseña incorrectos");
+      }
+    } catch (err) {
+      // Manejo de errores
+      setError("Ocurrió un error al iniciar sesión. Inténtalo de nuevo.");
     }
   };
 

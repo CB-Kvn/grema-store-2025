@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   Search, Plus, Edit, Trash2, Package
@@ -8,8 +8,11 @@ import { Input } from '../ui/input';
 import ProductForm from './ProductForm';
 import InventoryManagementModal from './InventoryManagementModal';
 import { RootState } from '@/store';
-import { addProduct, updateProduct, deleteProduct } from '@/store/slices/productsSlice';
-import type { Product } from '@/types';
+import { addProduct, updateProduct, deleteProduct, setProducts, setProductInventory } from '@/store/slices/productsSlice';
+import type { Product, WarehouseItem } from '@/types';
+import { productService } from '@/services/productService';
+import { warehouseService } from '@/services/warehouseService';
+import { setWarehouseItems } from '@/store/slices/warehousesSlice';
 
 const ProductTab = () => {
   const dispatch = useDispatch();
@@ -28,8 +31,15 @@ const ProductTab = () => {
     return matchesSearch;
   });
 
+  const getByIdProducts = async (id: string) => {
+    const response = await warehouseService.getByIdProducts(id) as WarehouseItem[];
+    dispatch(setWarehouseItems(response));
+  }
   // Manejar edición de producto
   const handleEdit = (product: Product) => {
+
+    getByIdProducts
+    dispatch(setProductInventory(product))
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
@@ -63,6 +73,14 @@ const ProductTab = () => {
   const handleDelete = (productId: number) => {
     dispatch(deleteProduct(productId));
   };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await productService.getAll() as Product[];
+      dispatch(setProducts(response));
+    }
+    fetchProducts()
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -122,7 +140,7 @@ const ProductTab = () => {
                     </div>
                   </div>
                 </td>
-                <td className="py-3 px-4">
+                {/* <td className="py-3 px-4">
                   <span className="text-sm sm:text-base font-medium text-primary-900">${product.price.toLocaleString()}</span>
                   {product.discount && product.discount.isActive && (
                     <div className="text-xs text-green-600">
@@ -131,14 +149,14 @@ const ProductTab = () => {
                       {product.discount.type === 'BUY_X_GET_Y' && `${product.discount.value}+1 gratis`}
                     </div>
                   )}
-                </td>
-                <td className="py-3 px-4">
+                </td> */}
+                {/* <td className="py-3 px-4">
                   <span className={`px-2 py-1 rounded-full text-xs sm:text-sm ${
                     product.isBestSeller ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                   }`}>
                     {product.isBestSeller ? 'En Stock' : 'Bajo Stock'}
                   </span>
-                </td>
+                </td> */}
                 <td className="py-3 px-4">
                   <div className="flex items-center space-x-1 sm:space-x-2">
                     <button 

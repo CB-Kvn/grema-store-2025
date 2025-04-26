@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ShoppingCart, User } from "lucide-react";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { useNavigate } from "react-router-dom";
-import LoginModal from "../LoginModal";
+import LoginModal from "../admin/LoginModal";
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,

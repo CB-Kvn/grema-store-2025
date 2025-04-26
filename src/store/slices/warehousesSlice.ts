@@ -5,6 +5,7 @@ import { RootState } from '@/types';
 
 interface WarehousesState {
   warehouses: Warehouse[];
+  warehousesItems: WarehouseItem[];
   loading: boolean;
   error: string | null;
 }
@@ -13,6 +14,7 @@ const initialWarehouses: Warehouse[] = [];
 
 const initialState: WarehousesState = {
   warehouses: initialWarehouses,
+  warehousesItems:  [],
   loading: false,
   error: null,
 };
@@ -21,6 +23,15 @@ const warehousesSlice = createSlice({
   name: 'warehouses',
   initialState,
   reducers: {
+    setWarehouseItems: (state, action: PayloadAction<WarehouseItem[]>) => {
+      state.warehousesItems = action.payload;
+    },
+    addWarehousetems: (state, action: PayloadAction<WarehouseItem>) => {
+      state.warehousesItems.push(action.payload);
+    },
+    setWarehouse: (state, action: PayloadAction<Warehouse[]>) => {
+      state.warehouses = action.payload;
+    },
     addWarehouse: (state, action: PayloadAction<Warehouse>) => {
       state.warehouses.push(action.payload);
     },
@@ -72,6 +83,8 @@ export const {
   deleteItem,
   setLoading,
   setError,
+  setWarehouse,
+  setWarehouseItems
 } = warehousesSlice.actions;
 
 export const selectAllWarehouses = (state: RootState) => state.warehouses.warehouses;

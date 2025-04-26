@@ -114,6 +114,34 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                 </button>
               </div>
 
+              {/* Campos para Precio y Costo de Producción */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Precio</Label>
+                  <Input
+                    type="text" // Cambiado de "number" a "text"
+                    value={product.price || ''}
+                    onChange={(e) => {
+                      const newProduct = { ...product, price: e.target.value }; // Almacena como string
+                      setInventory([...inventory]); // Actualiza el estado si es necesario
+                    }}
+                    className="w-full mt-1 rounded-lg border border-primary-200 p-2"
+                  />
+                </div>
+                <div>
+                  <Label>Costo de Producción</Label>
+                  <Input
+                    type="text" // Cambiado de "number" a "text"
+                    value={product.productionCost || ''}
+                    onChange={(e) => {
+                      const newProduct = { ...product, productionCost: e.target.value }; // Almacena como string
+                      setInventory([...inventory]); // Actualiza el estado si es necesario
+                    }}
+                    className="w-full mt-1 rounded-lg border border-primary-200 p-2"
+                  />
+                </div>
+              </div>
+
               {inventory.map((item, index) => (
                 <div key={index} className="bg-primary-50 p-4 rounded-lg space-y-4">
                   <div className="flex justify-between items-center">

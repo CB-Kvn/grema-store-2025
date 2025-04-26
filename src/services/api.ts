@@ -3,7 +3,7 @@ import { store } from '@/store'; // Asegúrate de importar el store
 import { showLoader, hideLoader } from '@/store/slices/loaderSlice';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { 
   Package, Search, Filter, Plus, ArrowUpDown, Download, 
@@ -19,11 +19,14 @@ import {
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
-import type { PurchaseOrder } from '@/types';
+import type { PurchaseOrder, Warehouse } from '@/types';
 import { selectAllOrders } from '@/store/slices/purchaseOrdersSlice';
 import OrderDetailsModal from './OrderDetailsModal';
 import EditOrderModal from './EditOrderModal';
 import NewOrderModal from './NewOrderModal';
+import { warehouseService } from '@/services/warehouseService';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { setWarehouse } from '@/store/slices/warehousesSlice';
 
 ChartJS.register(
   CategoryScale,
@@ -36,6 +39,7 @@ ChartJS.register(
 );
 
 const PurchaseOrdersTab = () => {
+  const dispatch = useAppDispatch();
   const orders = useSelector(selectAllOrders);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
@@ -68,6 +72,7 @@ const PurchaseOrdersTab = () => {
     setIsEditModalOpen(true);
   };
 
+ 
   return (
     <div className="space-y-6">
       {/* Statistics Cards */}

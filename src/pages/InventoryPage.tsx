@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Search, Filter, X,
   ArrowUpDown, Calendar, FileText, Receipt, Wallet,
@@ -22,6 +22,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import ExpensesTab from '@/components/admin/ExpensesTab';
+import { setWarehouse } from '@/store/slices/warehousesSlice';
+import { warehouseService } from '@/services/warehouseService';
+import { Warehouse } from '@/types/warehouse';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
 
 // Registrar los elementos necesarios de Chart.js
 ChartJS.register(
@@ -36,6 +41,7 @@ ChartJS.register(
 );
 
 const InventoryPage = () => {
+  const dispatch = useAppDispatch();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNewExpenseModalOpen, setIsNewExpenseModalOpen] = useState(false);
   const [timePeriod, setTimePeriod] = useState('Mensual'); // Estado para el período de tiempo
@@ -118,6 +124,22 @@ const InventoryPage = () => {
       },
     },
   };
+
+    // useEffect para obtener los datos de los almacenes
+    useEffect(() => {
+      const fetchWarehouses = async () => {
+        try {
+          const response = await warehouseService.getAll();
+          dispatch(setWarehouse(response as Warehouse[]));
+        } catch (error) {
+          console.error('Error al obtener los almacenes:', error);
+        }
+      };
+  
+      fetchWarehouses();
+    }, []);
+  
+  
 
   return (
     <div className="min-h-screen bg-primary-50 py-4 sm:py-6 lg:py-8">
@@ -247,98 +269,7 @@ const InventoryPage = () => {
             </TabsContent>
 
             <TabsContent value="expenses" className="p-2 sm:p-4 lg:p-6">
-              {/* Statistics Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <StatCard
-                  title="Total Gastos"
-                  value="$10,000"
-                  icon={<Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-                />
-                <StatCard
-                  title="Este Mes"
-                  value="$2,500"
-                  icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-                />
-                <StatCard
-                  title="Promedio por Gasto"
-                  value="$500"
-                  icon={<Receipt className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-                />
-                <StatCard
-                  title="Total Registros"
-                  value="20"
-                  icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-                />
-              </div>
-
-              {/* Toolbar */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
-                    <Input
-                      type="text"
-                      placeholder="Buscar gastos..."
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                {/* Desktop Buttons */}
-                <div className="hidden sm:flex space-x-2">
-                  <button 
-                    onClick={() => setIsNewExpenseModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    <span>Nuevo Gasto</span>
-                  </button>
-                  <button className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50">
-                    <Filter className="h-5 w-5 text-primary-600 mr-2" />
-                    <span>Filtrar</span>
-                  </button>
-                  <button className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50">
-                    <Download className="h-5 w-5 text-primary-600 mr-2" />
-                    <span>Exportar</span>
-                  </button>
-                </div>
-                {/* Mobile Action Button */}
-                <div className="sm:hidden">
-                  <button 
-                    onClick={() => setIsNewExpenseModalOpen(true)}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    <span>Nuevo Gasto</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Expenses Table */}
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-primary-50">
-                      <tr>
-                        <th className="py-3 px-4 text-left">Fecha</th>
-                        <th className="py-3 px-4 text-left">Descripción</th>
-                        <th className="py-3 px-4 text-left">Monto</th>
-                        <th className="py-3 px-4 text-left">Método de Pago</th>
-                        <th className="py-3 px-4 text-left">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {/* Table rows would go here */}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* New Expense Modal */}
-              {isNewExpenseModalOpen && (
-                <NewExpenseModal
-                  onClose={() => setIsNewExpenseModalOpen(false)}
-                />
-              )}
+            <ExpensesTab></ExpensesTab>
             </TabsContent>
 
             <TabsContent value="warehouses" className="p-2 sm:p-4 lg:p-6">
@@ -355,19 +286,6 @@ const InventoryPage = () => {
   );
 };
 
-// Stat Card Component
-const StatCard = ({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) => (
-  <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-primary-100">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-primary-600">{title}</p>
-        <p className="text-lg sm:text-2xl font-bold text-primary-900">{value}</p>
-      </div>
-      <div className="bg-primary-100 p-2 sm:p-3 rounded-full">
-        {icon}
-      </div>
-    </div>
-  </div>
-);
+
 
 export default InventoryPage;

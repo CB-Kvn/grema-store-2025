@@ -126,9 +126,8 @@ const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
                 id="category"
                 value={formData.category ?? ''} // Manejo de null
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className={`w-full rounded-md border ${
-                  errors.category ? 'border-red-500' : 'border-input'
-                } bg-background px-3 py-2`}
+                className={`w-full rounded-md border ${errors.category ? 'border-red-500' : 'border-input'
+                  } bg-background px-3 py-2`}
               >
                 <option value="">Seleccionar categoría</option>
                 <option value="rings">Anillos</option>
@@ -183,16 +182,15 @@ const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={4}
-                className={`w-full rounded-md border ${
-                  errors.description ? 'border-red-500' : 'border-input'
-                } bg-background px-3 py-2`}
+                className={`w-full rounded-md border ${errors.description ? 'border-red-500' : 'border-input'
+                  } bg-background px-3 py-2`}
               />
               {errors.description && (
                 <p className="text-sm text-red-500 mt-1">{errors.description}</p>
               )}
             </div>
 
-            <div className="flex space-x-4">
+            {/* <div className="flex space-x-4">
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -211,11 +209,11 @@ const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
                 />
                 <span>Nuevo</span>
               </label>
-            </div>
+            </div> */}
           </div>
 
           {/* Images */}
-          <div className="space-y-4">        
+          <div className="space-y-4">
             <ImageUpload onImagesUploaded={handleImagesUploaded} />
             {errors.images && (
               <p className="text-sm text-red-500">{errors.images}</p>
@@ -257,7 +255,7 @@ const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
               <Label htmlFor="largo">Largo (cm)</Label>
               <Input
                 id="largo"
-                type="number"
+                type="text" // Cambiado de "number" a "text"
                 value={formData.details.largo || ''}
                 onChange={(e) => handleDetailsChange('largo', e.target.value)}
                 className={errors.largo ? 'border-red-500' : ''}
@@ -308,7 +306,7 @@ const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
                   Agregar Color
                 </button>
               </div>
-              
+
               {formData.details.color.map((color, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <Input
@@ -349,7 +347,7 @@ const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
             {/* Closure Details */}
             <div className="space-y-4 border-t border-primary-100 pt-4">
               <h4 className="font-medium text-primary-900">Detalles del Cierre</h4>
-              
+
               <div>
                 <Label htmlFor="closureType">Tipo de Cierre</Label>
                 <Input
@@ -372,7 +370,7 @@ const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
                     Agregar Color
                   </button>
                 </div>
-                
+
                 {formData.details.cierre.colores.map((color, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <Input

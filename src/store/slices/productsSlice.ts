@@ -47,6 +47,7 @@ const productsSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
+
     selectProductBySku(state, action: PayloadAction<string>) {
       const sku = action.payload;
       const product = state.items.find((item) => item.sku === sku);

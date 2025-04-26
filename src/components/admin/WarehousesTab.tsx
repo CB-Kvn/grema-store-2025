@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Warehouse as WarehouseIcon, Search, Filter, Plus, ArrowUpDown,
-  Download, Upload,AlertTriangle, CheckCircle2,
+  Download, Upload, AlertTriangle, CheckCircle2,
   Settings, Eye, Edit, Trash2, BarChart3
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -19,10 +19,12 @@ import {
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Input } from '../ui/input';
 import type { Warehouse } from '@/types';
-import { selectAllWarehouses } from '@/store/slices/warehousesSlice';
+import { selectAllWarehouses, setWarehouse } from '@/store/slices/warehousesSlice';
 import WarehouseDetailsModal from './WarehouseDetailsModal';
 import EditWarehouseModal from './EditWarehouseModal';
 import AddWarehouseModal from './AddWarehouseModal';
+import { warehouseService } from '@/services/warehouseService';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
 
 ChartJS.register(
   CategoryScale,
@@ -35,6 +37,7 @@ ChartJS.register(
 );
 
 const WarehousesTab = () => {
+  const dispatch = useAppDispatch();
   const warehouses = useSelector(selectAllWarehouses);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
@@ -45,7 +48,7 @@ const WarehousesTab = () => {
 
   // Filter warehouses
   const filteredWarehouses = warehouses.filter(warehouse => {
-    const matchesSearch = 
+    const matchesSearch =
       warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       warehouse.location.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
@@ -55,7 +58,7 @@ const WarehousesTab = () => {
   const totalCapacity = warehouses.reduce((sum, w) => sum + w.capacity, 0);
   const totalOccupancy = warehouses.reduce((sum, w) => sum + w.currentOccupancy, 0);
   const averageOccupancy = totalCapacity > 0 ? (totalOccupancy / totalCapacity) * 100 : 0;
-  const lowStockItems = warehouses.reduce((count, w) => 
+  const lowStockItems = warehouses.reduce((count, w) =>
     count + w.items.filter(i => i.status === 'low_stock').length, 0
   );
 
@@ -68,6 +71,9 @@ const WarehousesTab = () => {
     setSelectedWarehouse(warehouse);
     setIsEditModalOpen(true);
   };
+
+
+
 
   return (
     <div className="space-y-6">
@@ -180,14 +186,14 @@ const WarehousesTab = () => {
         </div>
         <div className="flex flex-wrap gap-2">
           {/* Primary Action - Always Visible */}
-          <button 
+          <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
             <Plus className="h-5 w-5 mr-2" />
             <span>Nuevo Almacén</span>
           </button>
-          
+
           {/* Secondary Actions - Hidden on Mobile */}
           <div className="hidden sm:flex items-center space-x-2">
             <button className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50">
@@ -245,14 +251,13 @@ const WarehousesTab = () => {
                   <p className="text-xs sm:text-sm text-primary-500">{warehouse.email}</p>
                 </td>
                 <td className="py-3 px-4">
-                  <span className={`px-2 py-1 rounded-full text-xs sm:text-sm ${
-                    warehouse.status === 'active' ? 'bg-green-100 text-green-800' :
-                    warehouse.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs sm:text-sm ${warehouse.status === 'active' ? 'bg-green-100 text-green-800' :
+                      warehouse.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                    }`}>
                     {warehouse.status === 'active' ? 'Activo' :
-                     warehouse.status === 'maintenance' ? 'Mantenimiento' :
-                     'Inactivo'}
+                      warehouse.status === 'maintenance' ? 'Mantenimiento' :
+                        'Inactivo'}
                   </span>
                 </td>
                 <td className="py-3 px-4">
@@ -280,27 +285,27 @@ const WarehousesTab = () => {
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex items-center space-x-1 sm:space-x-2">
-                    <button 
+                    <button
                       onClick={() => handleViewDetails(warehouse)}
                       className="p-1 hover:bg-primary-50 rounded"
                       title="Ver Detalles"
                     >
                       <Eye className="h-4 w-4 text-primary-600" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleEdit(warehouse)}
                       className="p-1 hover:bg-primary-50 rounded"
                       title="Editar Almacén"
                     >
                       <Edit className="h-4 w-4 text-primary-600" />
                     </button>
-                    <button 
+                    <button
                       className="p-1 hover:bg-primary-50 rounded"
                       title="Configuración"
                     >
                       <Settings className="h-4 w-4 text-primary-600" />
                     </button>
-                    <button 
+                    <button
                       className="p-1 hover:bg-primary-50 rounded"
                       title="Eliminar Almacén"
                     >
