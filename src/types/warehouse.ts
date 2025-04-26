@@ -23,6 +23,7 @@ export interface WarehouseItem {
   minimumStock: number;
   location: string;
   lastUpdated: string;
+  warehouseId?: string;
   status: 'in_stock' | 'low_stock' | 'out_of_stock';
 }
 

@@ -22,6 +22,7 @@ import OrderTrackingPage from "./pages/OrderTrackingPage";
 import InventoryPage from "./pages/InventoryPage";
 // import LoginPage from "./pages/LoginPage"; 
 import Loader from '@/components/ui/Loader';
+import { AlertProvider } from "./context/AlertContext";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -48,35 +49,39 @@ function App() {
   return (
     <Router>
       <Loader />
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onRemove={removeFromCart}
-        onUpdateQuantity={updateQuantity}
-      />
-      <Menu_Bar isOpen={() => setIsCartOpen(true)}></Menu_Bar>
+      <AlertProvider>
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          items={cartItems}
+          onRemove={removeFromCart}
+          onUpdateQuantity={updateQuantity}
+        />
+        <Menu_Bar isOpen={() => setIsCartOpen(true)}></Menu_Bar>
 
-      <Routes>
-        <Route path="/" element={<Initial addToCart={addToCart} />} />
-        {/* <Route path="/login" element={<LoginPage />} /> */}
-        <Route
-          path="/producto/:id"
-          element={<ProductDetail addToCart={addToCart} updateQuantity={updateQuantity} />}
-        />
-        <Route
-          path="/checkout"
-          element={<CheckoutPage cartItems={cartItems} />}
-        />
-        <Route path="/tienda" element={<ShopPage addToCart={addToCart} />} />
-        <Route path="/sobre-nosotros" element={<HistoryUs />} />
-        <Route path="/nuestros-valores" element={<ValuesPage />} />
-        <Route path="/admin/inventory" element={<InventoryPage />} />
-        <Route path="/admin/documents" element={<OrderDocumentsPage />} />
-        <Route path="/tracking" element={<OrderTrackingPage />}></Route>
-      </Routes>
-      <Networking></Networking>
-      <Footer></Footer>
+        <Routes>
+          <Route path="/" element={<Initial addToCart={addToCart} />} />
+          {/* <Route path="/login" element={<LoginPage />} /> */}
+          <Route
+            path="/producto/:id"
+            element={<ProductDetail addToCart={addToCart} updateQuantity={updateQuantity} />}
+          />
+          <Route
+            path="/checkout"
+            element={<CheckoutPage cartItems={cartItems} />}
+          />
+          <Route path="/tienda" element={<ShopPage addToCart={addToCart} />} />
+          <Route path="/sobre-nosotros" element={<HistoryUs />} />
+          <Route path="/nuestros-valores" element={<ValuesPage />} />
+          <Route path="/admin/inventory" element={<InventoryPage />} />
+          <Route path="/admin/documents" element={<OrderDocumentsPage />} />
+          <Route path="/tracking" element={<OrderTrackingPage />}></Route>
+        </Routes>
+        <Networking></Networking>
+        <Footer></Footer>
+
+      </AlertProvider>
+
     </Router>
   );
 }

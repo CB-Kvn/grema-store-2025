@@ -12,7 +12,7 @@ import { addProduct, updateProduct, deleteProduct, setProducts, setProductInvent
 import type { Product, WarehouseItem } from '@/types';
 import { productService } from '@/services/productService';
 import { warehouseService } from '@/services/warehouseService';
-import { setWarehouseItems } from '@/store/slices/warehousesSlice';
+import { addWarehouseItems, setWarehouseItems } from '@/store/slices/warehousesSlice';
 
 const ProductTab = () => {
   const dispatch = useDispatch();
@@ -31,14 +31,18 @@ const ProductTab = () => {
     return matchesSearch;
   });
 
-  const getByIdProducts = async (id: string) => {
+  const getByIdProducts = async (id: number) => {
     const response = await warehouseService.getByIdProducts(id) as WarehouseItem[];
-    dispatch(setWarehouseItems(response));
+
+    response.forEach(element => {
+      dispatch(addWarehouseItems({quantity: element.quantity, location: element.location, price: element.price}));
+    });
+    dispatch(setWarehouseItems(response[0].discount));
   }
   // Manejar edición de producto
   const handleEdit = (product: Product) => {
 
-    getByIdProducts
+   
     dispatch(setProductInventory(product))
     setSelectedProduct(product);
     setIsModalOpen(true);
@@ -46,6 +50,7 @@ const ProductTab = () => {
 
   // Manejar gestión de inventario
   const handleInventoryManagement = (product: Product) => {
+    getByIdProducts(product.id!)
     setSelectedProduct(product);
     setIsInventoryModalOpen(true);
   };
@@ -61,9 +66,19 @@ const ProductTab = () => {
     setSelectedProduct(null);
   };
 
+  const handleAddStock = async (warehouseId: string, productId: number, data: { quantity: number; location: string; price: number }) => {
+    await warehouseService.addStock(warehouseId, productId, data)
+  }
+
   // Manejar envío de inventario
   const handleInventorySubmit = (data: any) => {
     // Aquí se despacharía la acción correspondiente
+    console.log('Datos de inventario:', data);
+    data.inventory.forEach( element => {
+      handleAddStock(element.warehouseId, selectedProduct!.id!, {quantity: element.quantity, location: element.warehouseId, price: element.price});
+    });
+    
+    // Aquí puedes manejar la lógica de envío de datos de inventario
     console.log('Datos de inventario enviados:', data);
     setIsInventoryModalOpen(false);
     setSelectedProduct(null);

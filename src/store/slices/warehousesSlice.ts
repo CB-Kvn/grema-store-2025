@@ -5,7 +5,7 @@ import { RootState } from '@/types';
 
 interface WarehousesState {
   warehouses: Warehouse[];
-  warehousesItems: WarehouseItem[];
+  warehousesItems: {stock:WarehouseItem[], discount:{}};
   loading: boolean;
   error: string | null;
 }
@@ -14,7 +14,7 @@ const initialWarehouses: Warehouse[] = [];
 
 const initialState: WarehousesState = {
   warehouses: initialWarehouses,
-  warehousesItems:  [],
+  warehousesItems: { stock: [], discount: {} },
   loading: false,
   error: null,
 };
@@ -23,11 +23,17 @@ const warehousesSlice = createSlice({
   name: 'warehouses',
   initialState,
   reducers: {
-    setWarehouseItems: (state, action: PayloadAction<WarehouseItem[]>) => {
-      state.warehousesItems = action.payload;
+    setWarehouseItems: (state, action: PayloadAction<{stock:WarehouseItem[],discount:{}}>) => {
+      state.warehousesItems.discount = action.payload.discount;
     },
-    addWarehousetems: (state, action: PayloadAction<WarehouseItem>) => {
-      state.warehousesItems.push(action.payload);
+    addWarehouseItems: (state, action: PayloadAction<WarehouseItem>) => {
+      state.warehousesItems.stock.push(action.payload);
+    },
+    updateWarehouseItems: (state, action: PayloadAction<WarehouseItem>) => {
+      const index = state.warehousesItems.findIndex(w => w.id === action.payload.id);
+      if (index !== -1) {
+        state.warehousesItems[index] = action.payload;
+      }
     },
     setWarehouse: (state, action: PayloadAction<Warehouse[]>) => {
       state.warehouses = action.payload;
@@ -71,6 +77,10 @@ const warehousesSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    clearItems: (state) => {
+      state.warehousesItems.stock = [];
+      state.warehousesItems.discount = {};
+    }
   },
 });
 
@@ -84,7 +94,9 @@ export const {
   setLoading,
   setError,
   setWarehouse,
-  setWarehouseItems
+  setWarehouseItems,
+  addWarehouseItems,
+  clearItems
 } = warehousesSlice.actions;
 
 export const selectAllWarehouses = (state: RootState) => state.warehouses.warehouses;

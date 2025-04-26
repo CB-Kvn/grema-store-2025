@@ -13,8 +13,8 @@ export const warehouseService = {
     return response.data;
   },
 
-  getByIdProducts: async (id: string) => {
-    const response = await api.get(`/warehouse-items/product/${id}`);
+  getByIdProducts: async (id: number) => {
+    const response = await api.get(`/warehouses/warehouse-items/product/${id}`);
     return response.data;
   },
 
@@ -36,6 +36,7 @@ export const warehouseService = {
   addStock: async (warehouseId: string, productId: number, data: {
     quantity: number;
     location: string;
+    price: number;
   }) => {
     const response = await api.post(`/warehouses/${warehouseId}/stock/${productId}`, data);
     return response.data;
