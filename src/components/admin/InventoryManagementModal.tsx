@@ -4,9 +4,10 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import type { Product, Warehouse as WarehouseType, Discount, WarehouseItem } from '@/types';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
-import { clearItems, setWarehouseItems } from '@/store/slices/warehousesSlice';
+import { addWarehouseItems, clearItems, setWarehouseItems, updateItemQuantity } from '@/store/slices/warehousesSlice';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAlert } from '@/context/AlertContext'; // Importar el hook de alertas
+import { add } from 'date-fns';
 
 interface InventoryManagementModalProps {
   product: Product;
@@ -26,7 +27,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState<'inventory' | 'discount' | 'distribution'>('inventory');
-  const [inventory, setInventory] = useState<{ quantity: number; warehouseId: string; price?: string; productionCost?: string }[]>([]);
+  const [inventory, setInventory] = useState<{ quantity: number; location: string; price?: string; productionCost?: string }[]>([]);
   const warehouseItems = useAppSelector((state) => state.warehouses.warehousesItems);
   const [discount, setDiscount] = useState<Partial<Discount>>({
     type: 'PERCENTAGE',
@@ -37,6 +38,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
   const { showAlert } = useAlert(); // Usar el hook de alertas
 
   const handleSubmit = (e: React.FormEvent) => {
+
     e.preventDefault();
 
     // Actualizar el slice con los valores locales
@@ -55,6 +57,11 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
 
     // Cerrar el modal
     onClose();
+  };
+
+  const handleUpdateQuantity = (warehouseId: string, itemId: string, quantity: number) => {
+    console.log('Updating quantity:', { warehouseId, itemId, quantity,product });
+    dispatch(updateItemQuantity({ warehouseId, itemId, quantity }));
   };
 
   useEffect(() => {
@@ -85,7 +92,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
             Gestión de Inventario - {product.name}
           </h2>
           <button
-            onClick={onClose}
+            onClick={(e) => e.stopPropagation()}
             className="p-2 hover:bg-primary-50 rounded-full"
           >
             <X className="h-5 w-5 text-primary-600" />
@@ -97,33 +104,30 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
           <div className="flex space-x-4">
             <button
               onClick={() => setActiveTab('inventory')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
-                activeTab === 'inventory'
+              className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'inventory'
                   ? 'bg-primary-100 text-primary-900'
                   : 'text-primary-600 hover:bg-primary-50'
-              }`}
+                }`}
             >
               <Package className="h-5 w-5 mr-2" />
               Inventario
             </button>
             <button
               onClick={() => setActiveTab('discount')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
-                activeTab === 'discount'
+              className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'discount'
                   ? 'bg-primary-100 text-primary-900'
                   : 'text-primary-600 hover:bg-primary-50'
-              }`}
+                }`}
             >
               <Tag className="h-5 w-5 mr-2" />
               Descuentos
             </button>
             <button
               onClick={() => setActiveTab('distribution')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
-                activeTab === 'distribution'
+              className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'distribution'
                   ? 'bg-primary-100 text-primary-900'
                   : 'text-primary-600 hover:bg-primary-50'
-              }`}
+                }`}
             >
               <Warehouse className="h-5 w-5 mr-2" />
               Distribución
@@ -147,16 +151,20 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                     }
 
                     // Validar que no exista un stock sin asignar bodega
-                    if (inventory.some((item) => item.warehouseId === '')) {
+                    if (inventory.some((item) => item.location === '')) {
                       showAlert('Ya existe un stock sin asignar bodega. Por favor, completa ese registro antes de agregar otro.', 'error');
                       return;
                     }
 
-                    // Agregar un nuevo stock
-                    setInventory([
-                      ...inventory,
-                      { quantity: 0, warehouseId: '', price: '', productionCost: '' },
-                    ]);
+                    // Crear un nuevo stock
+                    const newStock = { quantity: 0, location: '', price: '', productionCost: '' };
+
+                    // Actualizar el estado local
+                    setInventory([...inventory, newStock]);
+
+                    // Reflejar el cambio en el slice
+                    dispatch(setWarehouseItems({stock: [...inventory, newStock] as any, discount: discount as Discount}));
+
                     showAlert('Nuevo stock agregado correctamente.', 'success');
                   }}
                   className="flex items-center text-primary-600 hover:text-primary-700"
@@ -168,6 +176,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
 
               {inventory.map((item, index) => (
                 <div key={index} className="bg-primary-50 p-4 rounded-lg space-y-4">
+
                   <div className="flex justify-between items-center">
                     <h4 className="font-medium text-primary-900">Stock #{index + 1}</h4>
                     <button
@@ -176,56 +185,59 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                         const newInventory = [...inventory];
                         newInventory.splice(index, 1);
                         setInventory(newInventory);
-                        showAlert('Stock eliminado correctamente.', 'info');
+                        dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
                       }}
                       className="text-red-600 hover:text-red-700"
                     >
                       <X className="h-5 w-5" />
                     </button>
                   </div>
+                  <div>
+                    <Label>Bodega</Label>
+                    <select
+                      value={item.location}
+                      onChange={(e) => {
+                        const newWarehouseId = e.target.value;
+
+                        // Validar que no exista otro stock con la misma bodega
+                        if (inventory.some((inv, i) => inv.location === newWarehouseId && i !== index)) {
+                          showAlert('Ya existe un stock asignado a esta bodega. Por favor, selecciona otra.', 'error');
+                          return;
+                        }
+
+                        const newInventory = [...inventory];
+                        newInventory[index].location = newWarehouseId;
+                        setInventory(newInventory);
+                        dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
+                      }}
+                      className="w-full mt-1 rounded-lg border border-primary-200 p-2"
+                    >
+                      <option value="">Seleccionar bodega</option>
+                      {warehouses.map((warehouse) => (
+                        <option key={warehouse.id} value={warehouse.id}>
+                          {warehouse.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Cantidad</Label>
+                      <Label>Cantidad Actual</Label>
+                      <p className="text-primary-900 font-medium">{item.quantity}</p> {/* Mostrar cantidad actual */}
+                    </div>
+
+                    <div>
+                      <Label>Agregar Cantidad</Label>
                       <Input
                         type="number"
-                        value={item.quantity}
-                        onChange={(e) => {
-                          const newInventory = [...inventory];
-                          newInventory[index].quantity = Math.max(0, parseInt(e.target.value) || 0);
-                          setInventory(newInventory);
+                        onBlur={(e) => {
+                          const newQuantity = parseInt(e.target.value) || 0;
+                          handleUpdateQuantity(item.location, product.id, item.quantity + newQuantity); // Llamar a la función para actualizar la cantidad
                         }}
                         className="w-full mt-1 rounded-lg border border-primary-200 p-2"
                         min="0"
                       />
-                    </div>
-
-                    <div>
-                      <Label>Bodega</Label>
-                      <select
-                        value={item.location}
-                        onChange={(e) => {
-                          const newWarehouseId = e.target.value;
-
-                          // Validar que no exista otro stock con la misma bodega
-                          if (inventory.some((inv, i) => inv.warehouseId === newWarehouseId && i !== index)) {
-                            showAlert('Ya existe un stock asignado a esta bodega. Por favor, selecciona otra.', 'error');
-                            return;
-                          }
-
-                          const newInventory = [...inventory];
-                          newInventory[index].warehouseId = newWarehouseId;
-                          setInventory(newInventory);
-                        }}
-                        className="w-full mt-1 rounded-lg border border-primary-200 p-2"
-                      >
-                        <option value="">Seleccionar bodega</option>
-                        {warehouses.map((warehouse) => (
-                          <option key={warehouse.id} value={warehouse.id}>
-                            {warehouse.name}
-                          </option>
-                        ))}
-                      </select>
                     </div>
                   </div>
                 </div>
@@ -233,8 +245,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
             </div>
           )}
 
-           {/* Discount Tab */}
-           {activeTab === 'discount' && (
+          {/* Discount Tab */}
+          {activeTab === 'discount' && (
             <div className="space-y-4">
               <div className="flex items-center mb-4">
                 <input
@@ -264,8 +276,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                   <div>
                     <Label>
                       {discount.type === 'PERCENTAGE' ? 'Porcentaje' :
-                       discount.type === 'FIXED_AMOUNT' ? 'Monto' :
-                       'Cantidad mínima'}
+                        discount.type === 'FIXED_AMOUNT' ? 'Monto' :
+                          'Cantidad mínima'}
                     </Label>
                     <Input
                       type="number"

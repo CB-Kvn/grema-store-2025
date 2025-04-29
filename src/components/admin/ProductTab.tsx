@@ -37,7 +37,7 @@ const ProductTab = () => {
     response.forEach(element => {
       dispatch(addWarehouseItems({quantity: element.quantity, location: element.location, price: element.price}));
     });
-    dispatch(setWarehouseItems(response[0].discount));
+    // dispatch(setWarehouseItems(response[0].discount));
   }
   // Manejar edición de producto
   const handleEdit = (product: Product) => {
@@ -74,8 +74,9 @@ const ProductTab = () => {
   const handleInventorySubmit = (data: any) => {
     // Aquí se despacharía la acción correspondiente
     console.log('Datos de inventario:', data);
+    console.log('Producto seleccionado:', selectedProduct);
     data.inventory.forEach( element => {
-      handleAddStock(element.warehouseId, selectedProduct!.id!, {quantity: element.quantity, location: element.warehouseId, price: element.price});
+      handleAddStock(element.location, selectedProduct!.id!, {quantity: element.quantity, location: element.location, price: element.price});
     });
     
     // Aquí puedes manejar la lógica de envío de datos de inventario

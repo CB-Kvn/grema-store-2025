@@ -24,6 +24,7 @@ const warehousesSlice = createSlice({
   initialState,
   reducers: {
     setWarehouseItems: (state, action: PayloadAction<{stock:WarehouseItem[],discount:{}}>) => {
+      state.warehousesItems.stock = action.payload.stock;
       state.warehousesItems.discount = action.payload.discount;
     },
     addWarehouseItems: (state, action: PayloadAction<WarehouseItem>) => {
@@ -80,7 +81,28 @@ const warehousesSlice = createSlice({
     clearItems: (state) => {
       state.warehousesItems.stock = [];
       state.warehousesItems.discount = {};
-    }
+    },
+    updateItemQuantity: (
+      state,
+      action: PayloadAction<{ warehouseId: string; itemId: string; quantity: number }>
+    ) => {
+      const warehouse = state.warehouses.find(w => w.id === action.payload.warehouseId);
+      if (warehouse) {
+        const item = state.warehousesItems.stock.find(i => i.location === action.payload.warehouseId);
+        if (item) {
+          item.quantity = action.payload.quantity; // Actualizar la cantidad del item
+        }
+      }
+    },
+    updateItemWarehouse: (
+      state,
+      action: PayloadAction<{ itemId: string; newWarehouseId: string }>
+    ) => {
+      const item = state.warehousesItems.stock.find((i) => i.id === action.payload.itemId);
+      if (item) {
+        item.warehouseId = action.payload.newWarehouseId; // Actualizar la bodega del item
+      }
+    },
   },
 });
 
@@ -96,7 +118,9 @@ export const {
   setWarehouse,
   setWarehouseItems,
   addWarehouseItems,
-  clearItems
+  clearItems,
+  updateItemQuantity,
+  updateItemWarehouse
 } = warehousesSlice.actions;
 
 export const selectAllWarehouses = (state: RootState) => state.warehouses.warehouses;
