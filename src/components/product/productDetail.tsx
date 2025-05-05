@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination, Thumbs } from "swiper/modules";
@@ -19,8 +19,11 @@ import {
   Flame,
   Sparkles,
 } from "lucide-react";
-import { products } from "@/pages/initial";
+
 import { useAppSelector } from "@/hooks/useAppSelector";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useProductService } from "@/hooks/useProductService";
+import { setProducts } from "@/store/slices/productsSlice";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import RelatedProducts from "./RelatedProducts";
 
@@ -31,6 +34,8 @@ interface ProductDetailProps {
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity }) => {
   const { id } = useParams();
+  const dispatch = useAppDispatch();
+  const { getAllProducts, getProductById } = useProductService();
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isGift, setIsGift] = useState(false);
@@ -38,8 +43,23 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const productCartShop = useAppSelector((state) => state.cart.items);
-
+  const products = useAppSelector((state) => state.products.items);
   const product = products.find((p) => p.id === Number(id));
+
+  useEffect(() => {
+    if (!products || products.length === 0) {
+      const fetchData = async () => {
+        try {
+          const productData = await getProductById(Number(id));
+          dispatch(setProducts([productData]));
+        } catch (error) {
+          console.error("Error al cargar el producto:", error);
+        }
+      };
+
+      fetchData();
+    }
+  }, [products, id, dispatch, getProductById]);
 
   if (!product) {
     return (
@@ -55,6 +75,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
       </div>
     );
   }
+
+  // Obtener los colores disponibles del producto actual
+  const getAvailableColors = () => {
+    return products
+      .filter((p) => p.name === product.name) // Filtrar productos con el mismo nombre
+      .map((p) => ({
+        id: p.id,
+        color: p.details.color?.[0]?.name || "Desconocido",
+        hex: p.details.color?.[0]?.hex || "#000000",
+      }));
+  };
+
+  // Cambiar al producto del color seleccionado
+  const handleColorChange = (colorId: number) => {
+    const selectedProduct = products.find((p) => p.id === colorId);
+    if (selectedProduct) {
+      dispatch(setProducts([selectedProduct])); // Actualizar el estado global con el producto seleccionado
+    }
+  };
+
+  const availableColors = getAvailableColors();
 
   // Verificar si el producto ya está en el carrito
   const isProductInCart = productCartShop.some((item) => item.id === product.id);
@@ -115,61 +156,61 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
     .filter((p) => p.id !== product.id && p.category === product.category)
     .slice(0, 8);
 
-    const ProductSlider = ({ products }: { products: typeof relatedProducts }) => (
-      <Swiper
-        modules={[Navigation, Pagination, Autoplay]}
-        spaceBetween={24}
-        slidesPerView={1}
-        navigation
-        pagination={{ clickable: true }}
-        autoplay={{
-          delay: 3000,
-          disableOnInteraction: false,
-        }}
-        breakpoints={{
-          640: {
-            slidesPerView: 2,
-          },
-          1024: {
-            slidesPerView: 4,
-          },
-        }}
-        className="pb-12"
-      >
-        {products.map(product => (
-          <SwiperSlide key={product.id}>
-            <Link 
-              to={`/producto/${product.id}`}
-              className="block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
-            >
-              <div className="relative pb-[100%]">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+  const ProductSlider = ({ products }: { products: typeof relatedProducts }) => (
+    <Swiper
+      modules={[Navigation, Pagination, Autoplay]}
+      spaceBetween={24}
+      slidesPerView={1}
+      navigation
+      pagination={{ clickable: true }}
+      autoplay={{
+        delay: 3000,
+        disableOnInteraction: false,
+      }}
+      breakpoints={{
+        640: {
+          slidesPerView: 2,
+        },
+        1024: {
+          slidesPerView: 4,
+        },
+      }}
+      className="pb-12"
+    >
+      {products.map(product => (
+        <SwiperSlide key={product.id}>
+          <Link
+            to={`/producto/${product.id}`}
+            className="block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
+          >
+            <div className="relative pb-[100%]">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="text-primary-900 font-medium line-clamp-2">{product.name}</h3>
+              <div className="mt-2 flex items-baseline">
+                <span className="text-lg font-bold text-primary-900">
+                  ${(product.price * 0.85).toLocaleString()}
+                </span>
+                <span className="ml-2 text-sm line-through text-primary-400">
+                  ${product.price.toLocaleString()}
+                </span>
               </div>
-              <div className="p-4">
-                <h3 className="text-primary-900 font-medium line-clamp-2">{product.name}</h3>
-                <div className="mt-2 flex items-baseline">
-                  <span className="text-lg font-bold text-primary-900">
-                    ${(product.price * 0.85).toLocaleString()}
-                  </span>
-                  <span className="ml-2 text-sm line-through text-primary-400">
-                    ${product.price.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    );
+            </div>
+          </Link>
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  );
 
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
-      <div className="bg-white  shadow-sm py-4">
+      <div className="bg-white shadow-sm py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
             <Link
@@ -194,7 +235,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               pagination={{ clickable: true }}
               className="h-[350px] xs:h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-lg overflow-hidden"
             >
-              {product.images.map((image, index) => (
+              {product.Images.map((image, index) => (
                 <SwiperSlide key={index}>
                   <div
                     className="zoom-container w-full h-full"
@@ -205,14 +246,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                     onMouseLeave={(e) => handleMouseLeave(e.currentTarget)}
                   >
                     <img
-                      src={image}
+                      src={image.url[0]} // Acceder al primer elemento del array `url`
                       alt={`${product.name} - Vista ${index + 1}`}
                       className="zoom-image w-full h-full object-contain"
                     />
                     <div
                       className="zoom-overlay"
                       style={{
-                        backgroundImage: `url(${image})`,
+                        backgroundImage: `url(${image.url[0]})`, // Acceder al primer elemento del array `url`
                       }}
                     />
                   </div>
@@ -229,11 +270,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               modules={[Navigation, Thumbs]}
               className="h-20 sm:h-24"
             >
-              {product.images.map((image, index) => (
+              {product.Images.map((image, index) => (
                 <SwiperSlide key={index}>
                   <div className="h-20 sm:h-24 w-full cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors">
                     <img
-                      src={image}
+                      src={image.url[0]} // Acceder al primer elemento del array `url`
                       alt={`${product.name} - Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -259,31 +300,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-baseline">
                   <span className="text-xl md:text-3xl font-bold text-primary-900">
-                  {new Intl.NumberFormat("es-CR", {
-                                style: "currency",
-                                currency: "CRC",
-                                maximumFractionDigits: 2,
-                                minimumFractionDigits: 2,
-                              }).format(
-                                product.price * 0.85
-                              )}
+                    {new Intl.NumberFormat("es-CR", {
+                      style: "currency",
+                      currency: "CRC",
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    }).format(product.WarehouseItem[0].price)}
                   </span>
-                  <span className="ml-2 text-lg line-through text-primary-400">
-                  {new Intl.NumberFormat("es-CR", {
-                                style: "currency",
-                                currency: "CRC",
-                                maximumFractionDigits: 2,
-                                minimumFractionDigits: 2,
-                              }).format(
-                                product.price
-                              )}
-                    
-                  </span>
+                  {product.WarehouseItem[0].discount > 0 && (
+                    <span className="ml-2 text-lg line-through text-primary-400">
+                      {new Intl.NumberFormat("es-CR", {
+                        style: "currency",
+                        currency: "CRC",
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 2,
+                      }).format(
+                        product.WarehouseItem[0].price / (1 - product.WarehouseItem[0].discount / 100)
+                      )}
+                    </span>
+                  )}
                 </div>
                 <div className="flex space-x-4">
-                  {/* <button className="p-2 hover:bg-primary-50 rounded-full transition-colors">
-                    <Heart className="h-6 w-6 text-primary-600" />
-                  </button> */}
                   <div className="relative">
                     <button
                       className="p-2 hover:bg-primary-50 rounded-full transition-colors"
@@ -328,26 +365,73 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               </div>
             </div>
 
+            {/* Separador */}
+            <hr className="border-primary-200 my-6" />
+
             {/* Product Details */}
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-primary-900">Detalles del Producto</h3>
               <ul className="space-y-2">
                 {Object.entries(product.details).map(([key, value]) => (
-                  <li key={key} className="flex items-start">
+                  <li key={key} className="flex flex-col sm:flex-row sm:items-start">
                     <span className="font-medium text-primary-900 capitalize">{key}:</span>
                     <span className="ml-2 text-primary-600">
-                      {Array.isArray(value)
-                        ? value.join(", ") // Si es un array, unir los valores con comas
-                        : typeof value === "object" && value !== null
-                        ? Object.entries(value)
-                            .map(([subKey, subValue]) => `${subKey}: ${subValue}`)
-                            .join(", ") // Si es un objeto, mostrar subclaves y valores
-                        : value}
+                      {Array.isArray(value) ? (
+                        // Si es un array, verificar si contiene objetos o valores simples
+                        value.every((item) => typeof item === "object") ? (
+                          value.map((item, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              {item.hex && (
+                                <button
+                                  onClick={() => console.log(`Color seleccionado: ${item.name}`)}
+                                  className="inline-block w-4 h-4 rounded-full border border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                  style={{ backgroundColor: item.hex }}
+                                  title={item.name} // Mostrar el nombre del color al pasar el mouse
+                                ></button>
+                              )}
+                              <span>{item.name}</span>
+                            </div>
+                          ))
+                        ) : (
+                          value.join(", ") // Si son valores simples, unirlos con comas
+                        )
+                      ) : typeof value === "object" && value !== null ? (
+                        // Si es un objeto, renderizar subclaves y valores
+                        Object.entries(value).map(([subKey, subValue]) => (
+                          <div key={subKey} className="flex items-start">
+                            <span className="font-medium text-primary-900 capitalize">{subKey}:</span>
+                            <span className="ml-2 text-primary-600">
+                              {Array.isArray(subValue) ? (
+                                subValue.map((item, index) => (
+                                  <div key={index} className="flex items-center space-x-2">
+                                    {item.hex && (
+                                      <button
+                                        onClick={() => console.log(`Color seleccionado: ${item.name}`)}
+                                        className="inline-block w-4 h-4 rounded-full border border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        style={{ backgroundColor: item.hex }}
+                                        title={item.name} // Mostrar el nombre del color al pasar el mouse
+                                      ></button>
+                                    )}
+                                    <span>{item.name || item}</span>
+                                  </div>
+                                ))
+                              ) : (
+                                subValue
+                              )}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        value // Si es un valor simple, mostrarlo directamente
+                      )}
                     </span>
                   </li>
                 ))}
               </ul>
             </div>
+
+            {/* Separador */}
+            <hr className="border-primary-200 my-6" />
 
             {/* Quantity Selector */}
             <div className="space-y-2">
@@ -379,6 +463,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               </div>
             </div>
 
+           
+
             {/* Gift Option */}
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
@@ -408,16 +494,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               )}
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <label className="block text-sm font-medium text-primary-700">
-                  ¿Requiere factura timbrada?
-                </label>
-                <p className="text-primary-600">
-                  Comuníquese al <a href="https://wa.me/1234567890" className="text-primary-600 hover:text-primary-700">WhatsApp</a> o solicítela al pagar.
-                </p>
-              </div>
-            </div>
+           
 
             {/* Add to Cart Button or Already Added Message */}
             {isProductInCart ? (
@@ -433,6 +510,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 Agregar al Carrito
               </button>
             )}
+
+            
 
             {/* Shipping Info */}
             <div className="border-t border-primary-100 pt-6 space-y-4">
@@ -472,8 +551,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
         </div>
 
         {/* Related Products */}
-        <RelatedProducts relatedProducts={relatedProducts} category={product.category} />
-     
+        {/* <RelatedProducts relatedProducts={relatedProducts} category={product.category} /> */}
+
       </div>
     </div>
   );

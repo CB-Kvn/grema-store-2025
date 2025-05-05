@@ -9,6 +9,18 @@ interface Product {
   image: string;
   description: string;
   category: string;
+  WareHouseItem:[
+    {
+      id:string,
+      price:number,
+      discount:number,
+    }
+  ],
+  Images:[
+    {
+      url:string[],
+    }
+  ]
 }
 
 interface ProductCardProps {
@@ -56,7 +68,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         <div
           className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-300 transform group-hover:scale-105"
           style={{
-            backgroundImage: `url(${product.image})`
+            backgroundImage: `url(${
+              product.Images && product.Images[0] && product.Images[0].url
+                ? product.Images[0].url[0]
+                : "https://via.placeholder.com/300" // Imagen de placeholder si no hay imágenes
+            })`,
           }}
         />
 
@@ -134,22 +150,28 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
             {product.name}
           </h3>
           <div className="flex items-baseline">
-            <span className="text-lg sm:text-xl font-bold text-primary-900">
-              {new Intl.NumberFormat("es-CR", {
-                style: "currency",
-                currency: "CRC",
-                maximumFractionDigits: 2,
-                minimumFractionDigits: 2,
-              }).format(discountedPrice)}
-            </span>
-            <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
-              {new Intl.NumberFormat("es-CR", {
-                style: "currency",
-                currency: "CRC",
-                maximumFractionDigits: 2,
-                minimumFractionDigits: 2,
-              }).format(product.price)}
-            </span>
+            {product.WareHouseItem && product.WareHouseItem[0] ? (
+              <>
+                <span className="text-lg sm:text-xl font-bold text-primary-900">
+                  {new Intl.NumberFormat("es-CR", {
+                    style: "currency",
+                    currency: "CRC",
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                  }).format(product.WareHouseItem[0].price)}
+                </span>
+                <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
+                  {new Intl.NumberFormat("es-CR", {
+                    style: "currency",
+                    currency: "CRC",
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                  }).format(product.WareHouseItem[0].price * (1 - product.WareHouseItem[0].discount / 100))}
+                </span>
+              </>
+            ) : (
+              <span className="text-xs sm:text-sm text-primary-400">Precio no disponible</span>
+            )}
           </div>
         </div>
         <button

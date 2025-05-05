@@ -146,7 +146,7 @@ const ProductTab = () => {
                 <td className="py-3 px-4">
                   <div className="flex items-center space-x-3">
                     <img
-                      src={product.image}
+                      src={product.Images[0].url[0]}
                       alt={product.name}
                       className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
                     />

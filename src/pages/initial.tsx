@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Flame, Sparkles } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
@@ -15,6 +15,12 @@ import ContactPage from "@/components/initial-page/contact";
 import Aos from "aos";
 import "aos/dist/aos.css";
 import { Product } from "@/types";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import { useProductService } from "@/hooks/useProductService";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { setProducts } from "@/store/slices/productsSlice";
 
 const categories = [
   { id: "all", name: "Todas las Joyas" },
@@ -1555,8 +1561,10 @@ type TabType = "bestSellers" | "newArrivals";
 
 export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
   const navigate = useNavigate();
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const products = useAppSelector((state) => state.products.items);
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1565,9 +1573,17 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       selectedCategory === "all" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+  const { loading, error, data, getAllProducts } = useProductService();
+
   const [activeTab, setActiveTab] = useState<TabType>("bestSellers");
-  const bestSellers = products.filter((product) => product.isBestSeller);
-  const newArrivals = products.filter((product) => product.isNew);
+
+  useEffect(() => {
+
+
+    getAllProducts();
+
+
+  }, []);
 
   const SectionTitle = ({
     icon: Icon,
@@ -1604,21 +1620,20 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
         {/* Categories */}
         <div
-          className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 "
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           data-aos="fade-up"
           data-aos-duration="1000"
         >
           <div className="flex justify-center">
-            <div className="inline-flex space-x-2 sm:space-x-4">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-xl font-medium transition-colors ${
-                    selectedCategory === category.id
+                  className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-xl font-medium transition-colors ${selectedCategory === category.id
                       ? "bg-primary-600 text-white"
                       : "bg-white text-primary-800 hover:bg-primary-50"
-                  }`}
+                    }`}
                 >
                   {category.name}
                 </button>
@@ -1645,39 +1660,51 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
             <div className="hidden sm:block w-32 h-px bg-primary-300 ml-4" />
           </div>
         </div>
-        <Swiper
-          modules={[Navigation]}
-          spaceBetween={20}
-          slidesPerView={1}
-          navigation
-          pagination={{ clickable: true }}
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-              spaceBetween: 30,
-            },
-            1024: {
-              slidesPerView: 3,
-              spaceBetween: 30,
-            },
-            1280: {
-              slidesPerView: 4,
-              spaceBetween: 30,
-            },
-          }}
-          className="pb-12"
-        >
-          {filteredProducts.map((product) => (
-            <SwiperSlide key={product.id}>
-              <ProductCard
-                product={product}
-                onAddToCart={() => addToCart(product)}
-                onClick={() => navigate(`/producto/${product.id}`)}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-        {filteredProducts.length === 0 && (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md p-4">
+                <Skeleton height={200} className="mb-4" />
+                <Skeleton height={20} width="60%" className="mb-2" />
+                <Skeleton height={20} width="40%" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Swiper
+            modules={[Navigation]}
+            spaceBetween={20}
+            slidesPerView={1}
+            navigation
+            pagination={{ clickable: true }}
+            breakpoints={{
+              640: {
+                slidesPerView: 2,
+                spaceBetween: 30,
+              },
+              1024: {
+                slidesPerView: 3,
+                spaceBetween: 30,
+              },
+              1280: {
+                slidesPerView: 4,
+                spaceBetween: 30,
+              },
+            }}
+            className="pb-12"
+          >
+            {filteredProducts.map((product: any) => (
+              <SwiperSlide key={product.id}>
+                <ProductCard
+                  product={product}
+                  onAddToCart={() => addToCart(product)}
+                  onClick={() => navigate(`/producto/${product.id}`)}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        )}
+        {filteredProducts.length === 0 && !loading && (
           <div className="text-center py-12">
             <p className="text-primary-500">
               No se encontraron productos que coincidan con tu búsqueda.
@@ -1702,22 +1729,20 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
             <div className="inline-flex bg-primary-100 rounded-full p-1">
               <button
                 onClick={() => setActiveTab("bestSellers")}
-                className={`flex items-center px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "bestSellers"
+                className={`flex items-center px-6 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === "bestSellers"
                     ? "bg-primary-600 text-white shadow-md"
                     : "text-primary-600 hover:bg-primary-50"
-                }`}
+                  }`}
               >
                 <Flame className="h-4 w-4 mr-2" />
                 Más Vendidos
               </button>
               <button
                 onClick={() => setActiveTab("newArrivals")}
-                className={`flex items-center px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "newArrivals"
+                className={`flex items-center px-6 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === "newArrivals"
                     ? "bg-primary-600 text-white shadow-md"
                     : "text-primary-600 hover:bg-primary-50"
-                }`}
+                  }`}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
                 Novedades
@@ -1752,9 +1777,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                   spaceBetween: 30,
                 },
               }}
-              
             >
-              {bestSellers.map((product) => (
+              {/* {bestSellers.map((product) => (
                 <SwiperSlide key={product.id}>
                   <ProductCard
                     product={product}
@@ -1762,7 +1786,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                     onClick={() => navigate(`/producto/${product.id}`)}
                   />
                 </SwiperSlide>
-              ))}
+              ))} */}
             </Swiper>
           </div>
 
@@ -1795,7 +1819,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               }}
               className="pb-12"
             >
-              {newArrivals.map((product) => (
+              {/* {newArrivals.map((product) => (
                 <SwiperSlide key={product.id}>
                   <ProductCard
                     product={product}
@@ -1803,7 +1827,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                     onClick={() => navigate(`/producto/${product.id}`)}
                   />
                 </SwiperSlide>
-              ))}
+              ))} */}
             </Swiper>
           </div>
         </div>
@@ -1814,7 +1838,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
         <Info_Bussiness></Info_Bussiness>
 
       </div>
-      
+
 
       <ContactPage></ContactPage>
     </div>

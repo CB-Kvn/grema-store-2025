@@ -18,7 +18,7 @@ export interface Product {
   id?: number;
   name: string;
   price: number;
-  image: string;
+  Images: string;
   description: string;
   category: string;
   isBestSeller: boolean;
@@ -48,7 +48,7 @@ export interface Product {
       }[];
     };
   };
-  images: string[];
+
 }
 
 export interface CartItem extends Pick<Product, 'id' | 'name' | 'price' | 'image'> {
