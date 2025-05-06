@@ -47,7 +47,7 @@ function App() {
   };
 
   return (
-    <Router>
+    <Router basename="/" >
       <Loader />
       <AlertProvider>
         <CartDrawer
