@@ -134,51 +134,61 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
       </div>
 
       {/* Product Details */}
-      <div className="p-4 bg-white">
-        <h3 className="text-base sm:text-lg font-medium text-primary-900 mb-2 line-clamp-1">
-          {product.name}
-        </h3>
-        <div className="flex items-baseline">
-          {product.WareHouseItem && product.WareHouseItem[0] ? (
-            <>
-              <span className="text-lg sm:text-xl font-bold text-primary-900">
-                {new Intl.NumberFormat("es-CR", {
-                  style: "currency",
-                  currency: "CRC",
-                  maximumFractionDigits: 2,
-                  minimumFractionDigits: 2,
-                }).format(product.WareHouseItem[0].price)}
-              </span>
-              {product.WareHouseItem[0].discount > 0 && (
-                <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
+      {isHovering && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+          <div className="text-center text-white px-4">
+            <h3 className="text-lg sm:text-xl font-medium">{product.name}</h3>
+            <p className="text-sm sm:text-base mt-2">{product.description}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Add to Cart Button */}
+      <div className="p-4 bg-white flex flex-col justify-between flex-grow">
+        <div>
+          <h3 className="text-base sm:text-lg font-medium text-primary-900 mb-2 line-clamp-1">
+            {product.name}
+          </h3>
+          <div className="flex items-baseline">
+            {product.WareHouseItem && product.WareHouseItem[0] ? (
+              <>
+                <span className="text-lg sm:text-xl font-bold text-primary-900">
                   {new Intl.NumberFormat("es-CR", {
                     style: "currency",
                     currency: "CRC",
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 2,
-                  }).format(
-                    product.WareHouseItem[0].price /
-                      (1 - product.WareHouseItem[0].discount / 100)
-                  )}
+                  }).format(product.WareHouseItem[0].price)}
                 </span>
-              )}
-            </>
-          ) : (
-            <span className="text-xs sm:text-sm text-primary-400">Precio no disponible</span>
-          )}
+                {product.WareHouseItem[0].discount > 0 && (
+                  <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
+                    {new Intl.NumberFormat("es-CR", {
+                      style: "currency",
+                      currency: "CRC",
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    }).format(
+                      product.WareHouseItem[0].price /
+                        (1 - product.WareHouseItem[0].discount / 100)
+                    )}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-xs sm:text-sm text-primary-400">Precio no disponible</span>
+            )}
+          </div>
         </div>
+        <button
+          className="w-full bg-primary-600 text-white py-2 sm:py-3 rounded-b-lg text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors mt-4"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart();
+          }}
+        >
+          Agregar al Carrito
+        </button>
       </div>
-
-      {/* Add to Cart Button */}
-      <button
-        className="w-full bg-primary-600 text-white py-2 sm:py-3 rounded-b-lg text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors"
-        onClick={(e) => {
-          e.stopPropagation();
-          onAddToCart();
-        }}
-      >
-        Agregar al Carrito
-      </button>
     </div>
   );
 };
