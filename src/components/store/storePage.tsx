@@ -60,13 +60,15 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     isBestSeller: false,
   });
 
-  // Extract unique categories and materials from products
+  // Extraer categorías y materiales únicos de los productos
   const categories = Array.from(new Set(products.map((p) => p.category)));
   const materials = Array.from(
-    new Set(products.map((p) => p.details.material))
+    new Set(
+      products.flatMap((p) => p.details.material || []).filter((m) => typeof m === "string")
+    )
   );
 
-  // Filter and sort products
+  // Filtrar y ordenar productos
   const filteredProducts = products
     .filter((product) => {
       const matchesSearch =
@@ -77,10 +79,10 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
         filters.categories.includes(product.category);
       const matchesMaterial =
         filters.materials.length === 0 ||
-        filters.materials.includes(product.details.material);
+        product.details.material?.some((m) => filters.materials.includes(m));
       const matchesPrice =
-        product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1];
+        product.WarehouseItem?.[0]?.price >= filters.priceRange[0] &&
+        product.WarehouseItem?.[0]?.price <= filters.priceRange[1];
       const matchesNew = !filters.isNew || product.isNew;
       const matchesBestSeller = !filters.isBestSeller || product.isBestSeller;
 
@@ -96,9 +98,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     .sort((a, b) => {
       switch (sortBy) {
         case "price-asc":
-          return a.price - b.price;
+          return (a.WarehouseItem?.[0]?.price || 0) - (b.WarehouseItem?.[0]?.price || 0);
         case "price-desc":
-          return b.price - a.price;
+          return (b.WarehouseItem?.[0]?.price || 0) - (a.WarehouseItem?.[0]?.price || 0);
         case "name-asc":
           return a.name.localeCompare(b.name);
         case "name-desc":
@@ -108,14 +110,14 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       }
     });
 
-  // Pagination
+  // Paginación
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset to first page when filters change
+  // Resetear a la primera página cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1);
   }, [filters, searchQuery, sortBy]);
@@ -358,32 +360,36 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   );
 
   const ProductListView = ({ product }: { product: Product }) => {
-    const discountedPrice = product.price * 0.85;
+    const warehouseItem = product.WarehouseItem?.[0];
+    const price = warehouseItem?.price || 0;
+    const discountedPrice = warehouseItem?.discount
+      ? price * (1 - warehouseItem.discount / 100)
+      : price;
 
     return (
       <div className="bg-white rounded-lg shadow-md p-4 flex gap-6">
         <div className="w-48 h-48">
           <img
-            src={product.image}
+            src={product.Images?.[0]?.url?.[0] || "https://via.placeholder.com/150"}
             alt={product.name}
             className="w-full h-full object-cover rounded-md"
           />
         </div>
         <div className="flex-1 space-y-4">
           <div>
-            <h3 className="text-xl font-medium text-primary-900">
-              {product.name}
-            </h3>
+            <h3 className="text-xl font-medium text-primary-900">{product.name}</h3>
             <p className="text-primary-600 mt-1">{product.description}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-baseline">
               <span className="text-2xl font-bold text-primary-900">
-                ${discountedPrice.toLocaleString()}
+                ₡{discountedPrice.toLocaleString()}
               </span>
-              <span className="ml-2 text-sm line-through text-primary-400">
-                ${product.price.toLocaleString()}
-              </span>
+              {warehouseItem?.discount && (
+                <span className="ml-2 text-sm line-through text-primary-400">
+                  ₡{price.toLocaleString()}
+                </span>
+              )}
             </div>
             {product.isNew && (
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
@@ -403,7 +409,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
             </div>
             <div className="flex items-center text-primary-600">
               <Star className="h-4 w-4 mr-1" />
-              <span className="text-sm">{product.details.material}</span>
+              <span className="text-sm">
+                {product.details.material?.join(", ") || "N/A"}
+              </span>
             </div>
           </div>
           <button
