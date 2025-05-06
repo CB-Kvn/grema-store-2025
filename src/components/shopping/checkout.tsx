@@ -49,18 +49,22 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => {
-      const itemTotal = item.price * item.quantity;
-      const discount = itemTotal * 0.15; // 15% discount
+      const warehouseItem = item.product.WarehouseItem?.[0];
+      if (!warehouseItem) return sum; // Ignorar si no hay WarehouseItem
+      const itemTotal = warehouseItem.price * item.quantity;
+      const discount = warehouseItem.discount
+        ? itemTotal * (warehouseItem.discount / 100)
+        : 0;
       return sum + (itemTotal - discount);
     }, 0);
   };
 
   const calculateShipping = () => {
     if (!shippingInfo.provincia || !shippingInfo.canton) return 0;
-    
+
     const provinciaId = shippingInfo.provincia as keyof typeof cantones;
-    const canton = cantones[provinciaId].find(c => c.nombre === shippingInfo.canton);
-    
+    const canton = cantones[provinciaId]?.find((c) => c.nombre === shippingInfo.canton);
+
     return canton ? canton.costoEnvio : 0;
   };
 
@@ -92,7 +96,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
       billingInfo: needInvoice ? billingInfo : shippingInfo,
       paymentMethod,
       cartItems,
-      total: calculateTotal()
+      total: calculateTotal(),
     };
     console.log('Order Data:', orderData);
     setStep('confirmation');
@@ -435,27 +439,36 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
               {/* Items */}
               <div className="space-y-4">
                 {cartItems.map((item) => {
-                  const itemTotal = item.price * item.quantity;
-                  const discount = itemTotal * 0.15;
+                  const warehouseItem = item.product.WarehouseItem?.[0];
+                  const imageUrl =
+                    item.product.Images?.[0]?.url?.[0] || 'https://via.placeholder.com/150';
+                  const itemTotal = warehouseItem ? warehouseItem.price * item.quantity : 0;
+                  const discount = warehouseItem
+                    ? itemTotal * (warehouseItem.discount || 0) / 100
+                    : 0;
                   const finalPrice = itemTotal - discount;
 
                   return (
-                    <div key={item.id} className="flex items-start space-x-4">
+                    <div key={item.product.id} className="flex items-start space-x-4">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={imageUrl}
+                        alt={item.product.name || 'Producto'}
                         className="w-16 h-16 object-cover rounded-md"
                       />
                       <div className="flex-1">
-                        <h3 className="text-sm font-medium text-primary-900">{item.name}</h3>
+                        <h3 className="text-sm font-medium text-primary-900">
+                          {item.product.name || 'Producto sin nombre'}
+                        </h3>
                         <p className="text-sm text-primary-500">Cantidad: {item.quantity}</p>
                         <div className="flex items-baseline mt-1">
                           <span className="text-sm font-medium text-primary-900">
-                            ${finalPrice.toLocaleString()}
+                            ₡{finalPrice.toLocaleString()}
                           </span>
-                          <span className="ml-2 text-xs line-through text-primary-400">
-                            ${itemTotal.toLocaleString()}
-                          </span>
+                          {discount > 0 && (
+                            <span className="ml-2 text-xs line-through text-primary-400">
+                              ₡{itemTotal.toLocaleString()}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -467,18 +480,26 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
               <div className="border-t border-primary-100 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-primary-600">Subtotal</span>
-                  <span className="text-primary-900">${calculateSubtotal().toLocaleString()}</span>
+                  <span className="text-primary-900">
+                    ₡{calculateSubtotal().toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-primary-600">Envío</span>
-                  <span className={calculateShipping() > 0 ? "text-primary-900" : "text-green-600"}>
-                    {calculateShipping() > 0 ? `₡${calculateShipping().toLocaleString()}` : 'Por calcular'}
+                  <span
+                    className={
+                      calculateShipping() > 0 ? 'text-primary-900' : 'text-green-600'
+                    }
+                  >
+                    {calculateShipping() > 0
+                      ? `₡${calculateShipping().toLocaleString()}`
+                      : 'Por calcular'}
                   </span>
                 </div>
                 <div className="flex justify-between text-lg font-semibold">
                   <span className="text-primary-900">Total</span>
                   <span className="text-primary-900">
-                    ${calculateTotal().toLocaleString()}
+                    ₡{calculateTotal().toLocaleString()}
                   </span>
                 </div>
               </div>
