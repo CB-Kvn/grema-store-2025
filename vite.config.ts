@@ -11,7 +11,12 @@ export default defineConfig({
   base: '/', // Añade esta línea (cambia a '/mi-app/' si está en subdirectorio)
   build: {
     outDir: 'dist',
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]'
+      }
+    }
   },
   resolve: {
     alias: {
