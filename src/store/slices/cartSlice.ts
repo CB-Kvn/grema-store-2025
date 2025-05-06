@@ -1,16 +1,23 @@
 import { Discount, RootState } from '@/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-
 export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
+  product: {
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    details?: {
+      color?: { hex: string; name: string }[];
+    };
+    WarehouseItem?: {
+      price: number;
+      discount?: number | null;
+    }[];
+  };
   quantity: number;
   isGift: boolean;
   giftMessage?: string;
-  discount?: Discount;
 }
 
 interface CartState {
@@ -25,45 +32,52 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCartShop: (state, action: PayloadAction<{
-      id: number;
-      name: string;
-      price: number;
-      image: string;
-      isGift?: boolean;
-      giftMessage?: string;
-      discount?: Discount;
-    }>) => {
-      const existingItem = state.items.find(item => item.id === action.payload.id);
+    addToCartShop: (
+      state,
+      action: PayloadAction<{
+        product: CartItem['product'];
+        quantity?: number;
+        isGift?: boolean;
+        giftMessage?: string;
+      }>
+    ) => {
+      const existingItem = state.items.find(
+        (item) => item.product.id === action.payload.product.id
+      );
+
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += action.payload.quantity || 1;
         if (action.payload.isGift !== undefined) {
           existingItem.isGift = action.payload.isGift;
           existingItem.giftMessage = action.payload.giftMessage;
         }
       } else {
         state.items.push({
-          ...action.payload,
-          quantity: 1,
+          product: action.payload.product,
+          quantity: action.payload.quantity || 1,
           isGift: action.payload.isGift || false,
+          giftMessage: action.payload.giftMessage,
         });
       }
     },
     removeFromCartShop: (state, action: PayloadAction<number>) => {
-      state.items = state.items.filter(item => item.id !== action.payload);
+      state.items = state.items.filter((item) => item.product.id !== action.payload);
     },
     updateQuantityShop: (state, action: PayloadAction<{ id: number; quantity: number }>) => {
-      const item = state.items.find(item => item.id === action.payload.id);
+      const item = state.items.find((item) => item.product.id === action.payload.id);
       if (item && action.payload.quantity > 0) {
         item.quantity = action.payload.quantity;
       }
     },
-    updateGiftStatusShop: (state, action: PayloadAction<{
-      id: number;
-      isGift: boolean;
-      giftMessage?: string;
-    }>) => {
-      const item = state.items.find(item => item.id === action.payload.id);
+    updateGiftStatusShop: (
+      state,
+      action: PayloadAction<{
+        id: number;
+        isGift: boolean;
+        giftMessage?: string;
+      }>
+    ) => {
+      const item = state.items.find((item) => item.product.id === action.payload.id);
       if (item) {
         item.isGift = action.payload.isGift;
         item.giftMessage = action.payload.giftMessage;
@@ -85,27 +99,16 @@ export const {
 
 export const selectCartItems = (state: RootState) => state.cart.items;
 
-export const selectCartTotal = (state: RootState) => 
+export const selectCartTotal = (state: RootState) =>
   state.cart.items.reduce((total, item) => {
-    let itemPrice = item.price;
-    
-    // Apply discount if available
-    if (item.discount) {
-      switch (item.discount.type) {
-        case 'PERCENTAGE':
-          itemPrice = itemPrice * (1 - item.discount.value / 100);
-          break;
-        case 'FIXED_AMOUNT':
-          itemPrice = Math.max(0, itemPrice - item.discount.value);
-          break;
-        case 'BUY_X_GET_Y':
-          // Example: Buy 2 get 1 free (value would be 1)
-          const freeItems = Math.floor(item.quantity / (item.discount.value + 1));
-          return (item.quantity - freeItems) * itemPrice;
-      }
-    }
-    
-    return total + (itemPrice * item.quantity);
+    const warehouseItem = item.product.WarehouseItem?.[0];
+    if (!warehouseItem) return total; // Si no hay WarehouseItem, ignorar este producto
+
+    const price = warehouseItem.price;
+    const discount = warehouseItem.discount || 0;
+    const discountedPrice = price * (1 - discount / 100);
+
+    return total + discountedPrice * item.quantity;
   }, 0);
 
 export const selectCartItemsCount = (state: RootState) =>
@@ -113,22 +116,14 @@ export const selectCartItemsCount = (state: RootState) =>
 
 export const selectCartSavings = (state: RootState) =>
   state.cart.items.reduce((savings, item) => {
-    if (!item.discount) return savings;
-    
-    const originalPrice = item.price * item.quantity;
-    const discountedTotal = item.price * item.quantity;
-    
-    switch (item.discount.type) {
-      case 'PERCENTAGE':
-        return savings + (originalPrice * (item.discount.value / 100));
-      case 'FIXED_AMOUNT':
-        return savings + (item.discount.value * item.quantity);
-      case 'BUY_X_GET_Y':
-        const freeItems = Math.floor(item.quantity / (item.discount.value + 1));
-        return savings + (freeItems * item.price);
-      default:
-        return savings;
-    }
+    const warehouseItem = item.product.WarehouseItem?.[0];
+    if (!warehouseItem || !warehouseItem.discount) return savings;
+
+    const price = warehouseItem.price;
+    const discount = warehouseItem.discount || 0;
+    const savingsPerItem = price * (discount / 100);
+
+    return savings + savingsPerItem * item.quantity;
   }, 0);
 
 export default cartSlice.reducer;
