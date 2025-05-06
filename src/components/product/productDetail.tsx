@@ -441,9 +441,25 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
             {/* Separador */}
             <hr className="border-primary-200 my-6" />
 
+            {/* Colores Disponibles */}
+            <div className="space-y-6">
+              <h3 className="font-medium text-primary-900 capitalize">Colores Disponibles</h3>
+              <div className="flex space-x-4">
+                {availableColors.map((color, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleColorChange(color.hex)} // Cambiar producto según el color seleccionado
+                    className="inline-block w-8 h-8 rounded-full border border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name} // Mostrar el nombre del color al pasar el mouse
+                  ></button>
+                ))}
+              </div>
+            </div>
+
             {/* Quantity Selector */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-primary-700">
+              <label className="block font-medium text-primary-900 capitalize">
                 Cantidad
               </label>
               <div className="flex items-center space-x-3">
