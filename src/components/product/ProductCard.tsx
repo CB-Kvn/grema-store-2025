@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart, ShoppingCart, Share2, Facebook, Twitter, Instagram, Link } from 'lucide-react';
 
 
@@ -32,6 +32,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick }) => {
   const [isHovering, setIsHovering] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const discountedPrice = product.price * 0.85; // 15% de descuento
 
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
@@ -41,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
       instagram: `https://instagram.com`,
-      copyLink: window.location.href,
+      copyLink: window.location.href
     };
 
     if (platform === 'copyLink') {
@@ -52,27 +53,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
     setShowShareMenu(false);
   };
 
+  useEffect(() => {
+    console.log('ProductCard mounted:', product);
+  },[]);
+
   return (
-    <div
-      className="relative h-[350px] sm:h-[400px] rounded-lg shadow-md overflow-hidden group cursor-pointer flex flex-col"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => {
-        setIsHovering(false);
-        setShowShareMenu(false);
-      }}
-      onClick={onClick}
-    >
-      {/* Full-size image background */}
+    <>
       <div
-        className="relative flex-grow bg-cover bg-center transition-all duration-300 transform group-hover:scale-105"
-        style={{
-          backgroundImage: `url(${
-            product.Images && product.Images[0] && product.Images[0].url
-              ? product.Images[0].url[0]
-              : "https://via.placeholder.com/300" // Imagen de placeholder si no hay imágenes
-          })`,
+        className="relative h-[300px] sm:h-[350px] md:h-[400px] rounded-lg shadow-md overflow-hidden group cursor-pointer flex flex-col"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => {
+          setIsHovering(false);
+          setShowShareMenu(false);
         }}
+        onClick={onClick}
       >
+        {/* Full-size image background */}
+        <div
+          className="flex-grow bg-cover bg-center transition-all duration-300 transform group-hover:scale-105"
+          style={{
+            backgroundImage: `url(${
+              product.Images && product.Images[0] && product.Images[0].url
+                ? product.Images[0].url[0]
+                : "https://via.placeholder.com/300" // Imagen de placeholder si no hay imágenes
+            })`,
+          }}
+        />
+
         {/* Action buttons */}
         <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex space-x-1 sm:space-x-2 z-20">
           <button
@@ -84,6 +91,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
           >
             <Share2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
           </button>
+          {/* <button 
+          className="p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-primary-50 transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+        </button> */}
           <button
             className="p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-primary-50 transition-colors"
             onClick={(e) => {
@@ -131,26 +144,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
             </button>
           </div>
         )}
-      </div>
 
-      {/* Product Details */}
-      {isHovering && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-          <div className="text-center text-white px-4">
-            <h3 className="text-lg sm:text-xl font-medium">{product.name}</h3>
-            <p className="text-sm sm:text-base mt-2">{product.description}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Add to Cart Button */}
-      <div className="p-4 bg-white flex flex-col justify-between flex-grow">
-        <div>
-          <h3 className="text-base sm:text-lg font-medium text-primary-900 mb-2 line-clamp-1">
+        {/* Product Details - Slides up from bottom on hover */}
+        <div
+          className={`absolute bottom-20 left-4 right-4 bg-white/80 backdrop-blur-md p-3 sm:p-4 rounded-lg transform transition-all duration-300 ease-out ${isHovering ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+            }`}
+        >
+          <h3 className="text-base sm:text-lg font-medium text-primary-900 mb-2 line-clamp-3">
             {product.name}
           </h3>
           <div className="flex items-baseline">
-            {product.WareHouseItem && product.WareHouseItem[0] ? (
+            {product.WarehouseItem && product.WarehouseItem.length > 0 && product.WarehouseItem[0].price ? (
               <>
                 <span className="text-lg sm:text-xl font-bold text-primary-900">
                   {new Intl.NumberFormat("es-CR", {
@@ -158,9 +162,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
                     currency: "CRC",
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 2,
-                  }).format(product.WareHouseItem[0].price)}
+                  }).format(product.WarehouseItem[0].price)}
                 </span>
-                {product.WareHouseItem[0].discount > 0 && (
+                {product.WarehouseItem[0].discount > 0 && (
                   <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
                     {new Intl.NumberFormat("es-CR", {
                       style: "currency",
@@ -169,7 +173,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
                       minimumFractionDigits: 2,
                     }).format(
                       product.WareHouseItem[0].price /
-                        (1 - product.WareHouseItem[0].discount / 100)
+                        (1 - product.WarehouseItem[0].discount / 100)
                     )}
                   </span>
                 )}
@@ -179,8 +183,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
             )}
           </div>
         </div>
+        {/* Add to Cart Button */}
         <button
-          className="w-full bg-primary-600 text-white py-2 sm:py-3 rounded-b-lg text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors mt-4"
+          className="w-full bg-primary-600 text-white py-2 sm:py-3 rounded-b-lg text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors mt-auto"
           onClick={(e) => {
             e.stopPropagation();
             onAddToCart();
@@ -189,7 +194,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
           Agregar al Carrito
         </button>
       </div>
-    </div>
+
+    </>
+
   );
 };
 
