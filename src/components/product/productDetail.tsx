@@ -80,11 +80,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   const getAvailableColors = () => {
     return products
       .filter((p) => p.name === product.name) // Filtrar productos con el mismo nombre
-      .map((p) => ({
-        id: p.id,
-        color: p.details.color?.[0]?.name || "Desconocido",
-        hex: p.details.color?.[0]?.hex || "#000000",
-      }));
+      .flatMap((p) => p.details.color || []) // Extraer los colores disponibles
+      .reduce((uniqueColors, color) => {
+        // Eliminar colores duplicados
+        if (!uniqueColors.some((c) => c.hex === color.hex)) {
+          uniqueColors.push(color);
+        }
+        return uniqueColors;
+      }, []);
   };
 
   // Cambiar al producto del color seleccionado
@@ -463,7 +466,21 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               </div>
             </div>
 
-           
+            {/* Colores Disponibles */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-primary-900">Colores Disponibles</h3>
+              <div className="flex space-x-4">
+                {availableColors.map((color, index) => (
+                  <button
+                    key={index}
+                    onClick={() => console.log(`Color seleccionado: ${color.name}`)}
+                    className="inline-block w-8 h-8 rounded-full border border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name} // Mostrar el nombre del color al pasar el mouse
+                  ></button>
+                ))}
+              </div>
+            </div>
 
             {/* Gift Option */}
             <div className="space-y-3">
@@ -494,8 +511,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               )}
             </div>
 
-           
-
             {/* Add to Cart Button or Already Added Message */}
             {isProductInCart ? (
               <div className="flex items-center justify-center space-x-2 bg-green-50 p-4 rounded-lg border border-green-200">
@@ -510,8 +525,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 Agregar al Carrito
               </button>
             )}
-
-            
 
             {/* Shipping Info */}
             <div className="border-t border-primary-100 pt-6 space-y-4">
