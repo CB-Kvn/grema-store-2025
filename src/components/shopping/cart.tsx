@@ -12,22 +12,27 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   onUpdateQuantity,
 }) => {
   const navigate = useNavigate();
-  
-  const calculateDiscount = (price: number) => {
-    return price * 0.15; // 15% discount
+
+  const calculateDiscount = (price: number, discount: number | null): number => {
+    if (!discount || discount === 0) return 0;
+    return price * (discount / 100);
   };
 
   const calculateTotal = () => {
     return items.reduce((sum, item) => {
-      const itemTotal = item.price * item.quantity;
-      const discount = calculateDiscount(itemTotal);
+      const warehouseItem = item.product.WarehouseItem?.[0];
+      if (!warehouseItem) return sum; // Si no hay WarehouseItem, ignorar este producto
+      const itemTotal = warehouseItem.price * item.quantity;
+      const discount = calculateDiscount(itemTotal, warehouseItem.discount);
       return sum + (itemTotal - discount);
     }, 0);
   };
 
   const calculateSavings = () => {
     return items.reduce((sum, item) => {
-      return sum + (calculateDiscount(item.price * item.quantity));
+      const warehouseItem = item.product.WarehouseItem?.[0];
+      if (!warehouseItem) return sum; // Si no hay WarehouseItem, ignorar este producto
+      return sum + calculateDiscount(warehouseItem.price * item.quantity, warehouseItem.discount);
     }, 0);
   };
 
@@ -73,49 +78,63 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
             ) : (
               <div className="space-y-4">
                 {items.map((item) => {
-                  const originalPrice = item.price * item.quantity;
-                  const discount = calculateDiscount(originalPrice);
+                  const warehouseItem = item.product.WarehouseItem?.[0];
+                  const imageUrl = item.product.Images?.[0]?.url?.[0] || 'https://via.placeholder.com/150';
+                  const originalPrice = warehouseItem ? warehouseItem.price * item.quantity : 0;
+                  const discount = warehouseItem ? calculateDiscount(originalPrice, warehouseItem.discount) : 0;
                   const finalPrice = originalPrice - discount;
 
                   return (
-                    <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm border border-primary-100">
+                    <div
+                      key={item.product.id}
+                      className="bg-white p-4 rounded-lg shadow-sm border border-primary-100"
+                    >
                       <div className="flex gap-4">
                         <img
-                          src={item.image}
-                          alt={item.name}
+                          src={imageUrl}
+                          alt={item.product.name || 'Producto'}
                           className="w-20 h-20 object-cover rounded-md"
                         />
                         <div className="flex-1">
-                          <h3 className="font-medium text-primary-900">{item.name}</h3>
-                          
+                          <h3 className="font-medium text-primary-900">
+                            {item.product.name || 'Producto sin nombre'}
+                          </h3>
+
                           {/* Price Information */}
                           <div className="mt-1 space-y-1">
                             <div className="flex items-center">
                               <span className="text-lg font-bold text-primary-900">
-                                ${finalPrice.toLocaleString()}
+                                {finalPrice > 0 ? `₡${finalPrice.toLocaleString()}` : 'N/A'}
                               </span>
-                              <span className="ml-2 text-sm line-through text-primary-400">
-                                ${originalPrice.toLocaleString()}
-                              </span>
+                              {discount > 0 && (
+                                <span className="ml-2 text-sm line-through text-primary-400">
+                                  ₡{originalPrice.toLocaleString()}
+                                </span>
+                              )}
                             </div>
-                            
+
                             {/* Discount Badge */}
-                            <div className="flex items-center text-sm text-green-600">
-                              <Tag className="h-4 w-4 mr-1" />
-                              <span>15% de descuento aplicado</span>
-                            </div>
-                            
+                            {discount > 0 && (
+                              <div className="flex items-center text-sm text-green-600">
+                                <Tag className="h-4 w-4 mr-1" />
+                                <span>{warehouseItem?.discount}% de descuento aplicado</span>
+                              </div>
+                            )}
+
                             {/* Savings */}
-                            <div className="text-xs text-primary-600">
-                              Ahorras: ${discount.toLocaleString()}
-                            </div>
+                            {discount > 0 && (
+                              <div className="text-xs text-primary-600">
+                                Ahorras: ₡{discount.toLocaleString()}
+                              </div>
+                            )}
                           </div>
 
                           {/* Quantity Controls */}
                           <div className="flex items-center mt-2">
                             <button
-                              onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
                               className="p-1 hover:bg-primary-50 rounded"
+                              disabled={item.quantity <= 1}
                             >
                               <Minus className="h-4 w-4 text-primary-600" />
                             </button>
@@ -123,16 +142,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
                               className="p-1 hover:bg-primary-50 rounded"
                             >
                               <Plus className="h-4 w-4 text-primary-600" />
                             </button>
                           </div>
                         </div>
-                        
+
                         <button
-                          onClick={() => onRemove(item.id)}
+                          onClick={() => onRemove(item.product.id)}
                           className="p-2 hover:bg-primary-50 rounded-full transition-colors self-start"
                         >
                           <Trash2 className="h-5 w-5 text-primary-500" />
@@ -150,18 +169,18 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
             {items.length > 0 && (
               <div className="mb-4 p-3 bg-green-50 rounded-lg">
                 <div className="text-green-700 text-sm font-medium">
-                  Ahorro total: ${calculateSavings().toLocaleString()}
+                  Ahorro total: ₡{calculateSavings().toLocaleString()}
                 </div>
               </div>
             )}
-            
+
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-primary-900">Total</span>
               <span className="text-lg font-semibold text-primary-900">
-                ${calculateTotal().toLocaleString()}
+                ₡{calculateTotal().toLocaleString()}
               </span>
             </div>
-            
+
             <button
               onClick={handleCheckout}
               className="w-full bg-primary-600 text-white py-3 rounded-full font-medium hover:bg-primary-700 transition-colors disabled:bg-primary-200 disabled:cursor-not-allowed"
