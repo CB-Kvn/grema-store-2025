@@ -41,10 +41,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeProductId, setActiveProductId] = useState(Number(id)); // Estado para el producto activo
   const productCartShop = useAppSelector((state) => state.cart.items);
   const products = useAppSelector((state) => state.products.items);
-  const product = products.find((p) => p.id === Number(id));
+  const product = products.find((p) => p.id === activeProductId); // Producto activo basado en el estado
 
   useEffect(() => {
     if (!products || products.length === 0) {
@@ -91,10 +91,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   };
 
   // Cambiar al producto del color seleccionado
-  const handleColorChange = (colorId: number) => {
-    const selectedProduct = products.find((p) => p.id === colorId);
+  const handleColorChange = (selectedColorHex: string) => {
+    const selectedProduct = products.find(
+      (p) =>
+        p.name === product.name &&
+        p.details.color?.some((color) => color.hex === selectedColorHex)
+    );
+
     if (selectedProduct) {
-      dispatch(setProducts([selectedProduct])); // Actualizar el estado global con el producto seleccionado
+      setActiveProductId(selectedProduct.id); // Actualizar el producto activo
     }
   };
 
@@ -473,7 +478,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 {availableColors.map((color, index) => (
                   <button
                     key={index}
-                    onClick={() => console.log(`Color seleccionado: ${color.name}`)}
+                    onClick={() => handleColorChange(color.hex)} // Cambiar producto según el color seleccionado
                     className="inline-block w-8 h-8 rounded-full border border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     style={{ backgroundColor: color.hex }}
                     title={color.name} // Mostrar el nombre del color al pasar el mouse
