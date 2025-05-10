@@ -1836,7 +1836,6 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       {/* Why Choose Us */}
       <div className="py-11">
         <Info_Bussiness></Info_Bussiness>
-
       </div>
 
 
