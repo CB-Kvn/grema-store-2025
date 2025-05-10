@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
 import { X, Plus } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import ImageUpload from './ImageUpload';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
+import ImageUpload from '../helpers/ImageUpload';
 import { Product } from '@/types';
 import { resetProductInventory, updateProductInventory } from '@/store/slices/productsSlice';
 

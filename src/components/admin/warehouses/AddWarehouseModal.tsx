@@ -3,24 +3,84 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 import type { Warehouse, WarehouseItem } from '@/types';
-import { updateWarehouse } from '@/store/slices/warehousesSlice';
+import { addWarehouse } from '@/store/slices/warehousesSlice';
 
-interface EditWarehouseModalProps {
-  warehouse: Warehouse;
+interface AddWarehouseModalProps {
   onClose: () => void;
 }
 
-const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onClose }) => {
+const initialWarehouse: Warehouse = {
+  id: uuidv4(),
+  name: '',
+  location: '',
+  address: '',
+  manager: '',
+  phone: '',
+  email: '',
+  capacity: 0,
+  currentOccupancy: 0,
+  status: 'active',
+  items: [],
+  lastInventoryDate: new Date().toISOString(),
+};
+
+const AddWarehouseModal: React.FC<AddWarehouseModalProps> = ({ onClose }) => {
   const dispatch = useDispatch();
-  const [formData, setFormData] = useState<Warehouse>(warehouse);
+  const [formData, setFormData] = useState<Warehouse>(initialWarehouse);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name) newErrors.name = 'El nombre es requerido';
+    if (!formData.location) newErrors.location = 'La ubicación es requerida';
+    if (!formData.address) newErrors.address = 'La dirección es requerida';
+    if (!formData.manager) newErrors.manager = 'El encargado es requerido';
+    if (!formData.phone) newErrors.phone = 'El teléfono es requerido';
+    if (!formData.email) newErrors.email = 'El email es requerido';
+    if (!formData.capacity || formData.capacity <= 0) newErrors.capacity = 'La capacidad debe ser mayor a 0';
+
+    return newErrors;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(updateWarehouse(formData));
+    const errors = validateForm();
+    
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      return;
+    }
+
+    dispatch(addWarehouse(formData));
     onClose();
+  };
+
+  const addItem = () => {
+    const newItem: WarehouseItem = {
+      id: uuidv4(),
+      productId: 0,
+      productName: '',
+      sku: '',
+      quantity: 0,
+      minimumStock: 0,
+      location: '',
+      lastUpdated: new Date().toISOString(),
+      status: 'in_stock',
+    };
+    setFormData({
+      ...formData,
+      items: [...formData.items, newItem],
+    });
+  };
+
+  const removeItem = (index: number) => {
+    const newItems = formData.items.filter((_, i) => i !== index);
+    const currentOccupancy = newItems.reduce((sum, item) => sum + item.quantity, 0);
+    setFormData({ ...formData, items: newItems, currentOccupancy });
   };
 
   const handleItemChange = (index: number, field: keyof WarehouseItem, value: any) => {
@@ -44,30 +104,6 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
     setFormData({ ...formData, items: newItems, currentOccupancy });
   };
 
-  const addItem = () => {
-    const newItem: WarehouseItem = {
-      id: uuidv4(),
-      productId: 0,
-      productName: '',
-      sku: '',
-      quantity: 0,
-      minimumStock: 0,
-      location: '',
-      lastUpdated: new Date().toISOString(),
-      status: 'out_of_stock',
-    };
-    setFormData({
-      ...formData,
-      items: [...formData.items, newItem],
-    });
-  };
-
-  const removeItem = (index: number) => {
-    const newItems = formData.items.filter((_, i) => i !== index);
-    const currentOccupancy = newItems.reduce((sum, item) => sum + item.quantity, 0);
-    setFormData({ ...formData, items: newItems, currentOccupancy });
-  };
-
   return (
     <>
       {/* Modal Backdrop */}
@@ -80,7 +116,7 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
       <div className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-primary-100 p-4 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-primary-900">
-            Editar Almacén
+            Nueva Bodega
           </h2>
           <button
             onClick={onClose}
@@ -96,13 +132,16 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
             <h3 className="text-lg font-medium text-primary-900">Información Básica</h3>
             
             <div>
-              <Label htmlFor="name">Nombre del Almacén</Label>
+              <Label htmlFor="name">Nombre de la Bodega</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
+                className={errors.name ? 'border-red-500' : ''}
               />
+              {errors.name && (
+                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+              )}
             </div>
 
             <div>
@@ -111,8 +150,11 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                required
+                className={errors.location ? 'border-red-500' : ''}
               />
+              {errors.location && (
+                <p className="text-sm text-red-500 mt-1">{errors.location}</p>
+              )}
             </div>
 
             <div>
@@ -121,34 +163,24 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                 id="address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                required
+                className={errors.address ? 'border-red-500' : ''}
               />
+              {errors.address && (
+                <p className="text-sm text-red-500 mt-1">{errors.address}</p>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="manager">Encargado</Label>
-                <Input
-                  id="manager"
-                  value={formData.manager}
-                  onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="status">Estado</Label>
-                <select
-                  id="status"
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as Warehouse['status'] })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  required
-                >
-                  <option value="active">Activo</option>
-                  <option value="inactive">Inactivo</option>
-                  <option value="maintenance">Mantenimiento</option>
-                </select>
-              </div>
+            <div>
+              <Label htmlFor="manager">Encargado</Label>
+              <Input
+                id="manager"
+                value={formData.manager}
+                onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
+                className={errors.manager ? 'border-red-500' : ''}
+              />
+              {errors.manager && (
+                <p className="text-sm text-red-500 mt-1">{errors.manager}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -158,8 +190,11 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  required
+                  className={errors.phone ? 'border-red-500' : ''}
                 />
+                {errors.phone && (
+                  <p className="text-sm text-red-500 mt-1">{errors.phone}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
@@ -168,8 +203,11 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                   id="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
+                  className={errors.email ? 'border-red-500' : ''}
                 />
+                {errors.email && (
+                  <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+                )}
               </div>
             </div>
 
@@ -182,25 +220,32 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: Number(e.target.value) })}
                   min="0"
-                  required
+                  className={errors.capacity ? 'border-red-500' : ''}
                 />
+                {errors.capacity && (
+                  <p className="text-sm text-red-500 mt-1">{errors.capacity}</p>
+                )}
               </div>
               <div>
-                <Label htmlFor="lastInventoryDate">Último Inventario</Label>
-                <Input
-                  type="date"
-                  id="lastInventoryDate"
-                  value={formData.lastInventoryDate?.split('T')[0]}
-                  onChange={(e) => setFormData({ ...formData, lastInventoryDate: e.target.value })}
-                />
+                <Label htmlFor="status">Estado</Label>
+                <select
+                  id="status"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as Warehouse['status'] })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                >
+                  <option value="active">Activo</option>
+                  <option value="inactive">Inactivo</option>
+                  <option value="maintenance">Mantenimiento</option>
+                </select>
               </div>
             </div>
           </div>
 
-          {/* Items */}
+          {/* Initial Inventory */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-primary-900">Productos</h3>
+              <h3 className="text-lg font-medium text-primary-900">Inventario Inicial</h3>
               <button
                 type="button"
                 onClick={addItem}
@@ -215,15 +260,13 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
               <div key={item.id} className="bg-primary-50 p-4 rounded-lg space-y-4">
                 <div className="flex justify-between">
                   <h4 className="font-medium text-primary-900">Producto {index + 1}</h4>
-                  {index > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => removeItem(index)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeItem(index)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -233,7 +276,6 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                       id={`productName-${index}`}
                       value={item.productName}
                       onChange={(e) => handleItemChange(index, 'productName', e.target.value)}
-                      required
                     />
                   </div>
                   <div>
@@ -242,7 +284,6 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                       id={`sku-${index}`}
                       value={item.sku}
                       onChange={(e) => handleItemChange(index, 'sku', e.target.value)}
-                      required
                     />
                   </div>
                 </div>
@@ -256,7 +297,6 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                       value={item.quantity}
                       onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
                       min="0"
-                      required
                     />
                   </div>
                   <div>
@@ -267,7 +307,6 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                       value={item.minimumStock}
                       onChange={(e) => handleItemChange(index, 'minimumStock', e.target.value)}
                       min="0"
-                      required
                     />
                   </div>
                   <div>
@@ -276,7 +315,7 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
                       id={`location-${index}`}
                       value={item.location}
                       onChange={(e) => handleItemChange(index, 'location', e.target.value)}
-                      required
+                      placeholder="Ej: A-101"
                     />
                   </div>
                 </div>
@@ -292,6 +331,7 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
               value={formData.notes || ''}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="w-full rounded-md border border-input bg-background px-3 py-2 min-h-[100px]"
+              placeholder="Notas adicionales sobre la bodega..."
             />
           </div>
 
@@ -308,7 +348,7 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
               type="submit"
               className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
-              Guardar Cambios
+              Crear Bodega
             </button>
           </div>
         </form>
@@ -317,4 +357,4 @@ const EditWarehouseModal: React.FC<EditWarehouseModalProps> = ({ warehouse, onCl
   );
 };
 
-export default EditWarehouseModal;
+export default AddWarehouseModal;

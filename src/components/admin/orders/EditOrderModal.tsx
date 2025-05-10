@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { X, Plus, Trash2, Package, BoxIcon } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 import type { PurchaseOrder, PurchaseOrderItem } from '@/types';
 import { updateOrder } from '@/store/slices/purchaseOrdersSlice';
-import StockDistributionModal from './StockDistributionModal';
+import StockDistributionModal from '../inventory/StockDistributionModal';
 
 interface EditOrderModalProps {
   order: PurchaseOrder;

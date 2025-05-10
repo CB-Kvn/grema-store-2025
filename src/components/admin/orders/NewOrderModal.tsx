@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { X, Plus, Trash2, Package } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 import type { PurchaseOrder, PurchaseOrderItem } from '@/types';
 import { addOrder } from '@/store/slices/purchaseOrdersSlice';
 

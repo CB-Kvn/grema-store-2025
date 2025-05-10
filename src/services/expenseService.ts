@@ -42,9 +42,9 @@ export const expenseService = {
 
   uploadReceipt: async (id: string, file: File) => {
     const formData = new FormData();
-    formData.append('receipt', file);
+    formData.append('file', file);
 
-    const response = await api.post(`/expenses/${id}/receipt`, formData, {
+    const response = await api.post(`/expenses/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

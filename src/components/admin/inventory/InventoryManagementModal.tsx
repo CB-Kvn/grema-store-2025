@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Plus, Package, Warehouse, Tag, AlertTriangle } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 import type { Product, Warehouse as WarehouseType, Discount, WarehouseItem } from '@/types';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { addWarehouseItems, clearItems, setWarehouseItems, updateItemQuantity } from '@/store/slices/warehousesSlice';

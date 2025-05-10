@@ -17,12 +17,12 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import { Input } from '../ui/input';
+import { Input } from '../../ui/input';
 import type { Warehouse } from '@/types';
 import { selectAllWarehouses, setWarehouse } from '@/store/slices/warehousesSlice';
-import WarehouseDetailsModal from './warehouses/WarehouseDetailsModal';
+import WarehouseDetailsModal from './WarehouseDetailsModal';
 import EditWarehouseModal from './EditWarehouseModal';
-import AddWarehouseModal from './warehouses/AddWarehouseModal';
+import AddWarehouseModal from './AddWarehouseModal';
 import { warehouseService } from '@/services/warehouseService';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 

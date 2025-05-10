@@ -6,10 +6,10 @@ import {
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import PurchaseOrdersTab from '@/components/admin/PurchaseOrdersTab';
-import WarehousesTab from '@/components/admin/WarehousesTab';
-import ProductTab from '@/components/admin/ProductTab';
-import NewExpenseModal from '@/components/admin/NewExpenseModal';
+import PurchaseOrdersTab from '@/components/admin/orders/PurchaseOrdersTab';
+import WarehousesTab from '@/components/admin/warehouses/WarehousesTab';
+import ProductTab from '@/components/admin/inventory/ProductTab';
+import NewExpenseModal from '@/components/admin/expenses/NewExpenseModal';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -22,7 +22,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import ExpensesTab from '@/components/admin/ExpensesTab';
+import ExpensesTab from '@/components/admin/expenses/ExpensesTab';
 import { setWarehouse } from '@/store/slices/warehousesSlice';
 import { warehouseService } from '@/services/warehouseService';
 import { Warehouse } from '@/types/warehouse';
