@@ -18,40 +18,40 @@ export const Info_Bussiness = () => {
           {/* Título y logo */}
           <div className="flex flex-col items-center">
             <p
-              className="mt-2 text-4xl font-serif font-bold sm:text-5xl"
+              className="mt-2 text-3xl font-serif font-bold sm:text-4xl lg:text-5xl text-[#4A3A42]"
               data-aos="fade-up"
               data-aos-duration="1000"
             >
               ¿Por qué comprar en
             </p>
-            <div className="relative -mt-28">
+            <div className="relative -mt-10 xs:-mt-16 sm:-mt-16">
               <img
                 src="/Logo en negro.png" // Ruta desde la carpeta public
                 alt="Logo de Joyas de Lujo" // Texto alternativo
-                className="w-48 h-48 sm:w-96 sm:h-96 object-contain" // Tamaño más grande
+                className="w-36 h-36 sm:w-56 sm:h-56 md:h-64 md:w-64 lg:w-64 lg:h-64 object-contain"
                 data-aos="fade-up"
                 data-aos-duration="1000"
-                data-aos-delay="200" // Retraso para la animación
+                data-aos-delay="200"
               />
             </div>
           </div>
         </div>
 
         {/* Lista de características */}
-        <div className="mx-auto max-w-2xl  lg:max-w-4xl -my-14">
-          <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
+        <div className="mx-auto max-w-2xl lg:max-w-4xl -my-10 sm:-my-14">
+          <dl className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:gap-y-16">
             {features.map((feature, index) => (
               <div
                 key={feature.name}
                 className="relative pl-16"
                 data-aos="fade-up"
                 data-aos-duration="1000"
-                data-aos-delay={`${index * 200}`} // Retraso escalonado para cada elemento
+                data-aos-delay={`${index * 200}`}
               >
                 <dt
                   className="text-base font-semibold leading-7"
                   style={{
-                    fontFamily: "Quicksand, sans-serif", // Fuente Quicksand para títulos
+                    fontFamily: "Quicksand, sans-serif",
                     color: "#4A3A42",
                   }}
                 >
@@ -64,9 +64,9 @@ export const Info_Bussiness = () => {
                   {feature.name}
                 </dt>
                 <dd
-                  className="mt-2 text-base leading-7"
+                  className="mt-2 text-sm sm:text-base leading-6 sm:leading-7"
                   style={{
-                    fontFamily: "Poppins, sans-serif", // Fuente Poppins para textos
+                    fontFamily: "Poppins, sans-serif",
                     color: "#686e7d",
                   }}
                 >
