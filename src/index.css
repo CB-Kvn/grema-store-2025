@@ -172,3 +172,14 @@
 .related-products-slider .swiper-slide-visible {
   visibility: visible;
 }
+
+/* Ocultar barra de desplazamiento en navegadores basados en WebKit */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ocultar barra de desplazamiento en otros navegadores */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE y Edge */
+  scrollbar-width: none; /* Firefox */
+}

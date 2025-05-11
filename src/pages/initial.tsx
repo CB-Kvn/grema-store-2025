@@ -23,7 +23,7 @@ import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { setProducts } from "@/store/slices/productsSlice";
 
 const categories = [
-  { id: "all", name: "Todas las Joyas" },
+  { id: "all", name: "Todo" },
   { id: "rings", name: "Anillos" },
   { id: "necklaces", name: "Collares" },
   { id: "earrings", name: "Aretes" },
@@ -1616,7 +1616,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       {/* Navigation */}
 
       <div className="py-10">
-        <LogoInitial></LogoInitial>
+        {/* <LogoInitial></LogoInitial> */}
 
         {/* Categories */}
         <div
@@ -1624,16 +1624,20 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
           data-aos="fade-up"
           data-aos-duration="1000"
         >
-          <div className="flex justify-center">
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+          <div className="flex justify-center mb-6">
+            {/* Contenedor desplazable horizontalmente con barra oculta */}
+            <div
+              className="inline-flex bg-primary-100 rounded-full p-1 overflow-x-auto sm:overflow-visible whitespace-nowrap scrollbar-hide"
+            >
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-sm sm:text-xl font-medium transition-colors ${selectedCategory === category.id
-                      ? "bg-primary-600 text-white"
-                      : "bg-white text-primary-800 hover:bg-primary-50"
-                    }`}
+                  className={`flex items-center px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-1 rounded-full text-sm sm:text-base lg:text-lg font-medium transition-colors ${
+                    selectedCategory === category.id
+                      ? "bg-primary-600 text-white shadow-md"
+                      : "text-primary-600 hover:bg-primary-50"
+                  }`}
                 >
                   {category.name}
                 </button>
