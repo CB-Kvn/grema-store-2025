@@ -50,6 +50,14 @@ const ExpensesTab: React.FC = () => {
   const dispatch = useAppDispatch();
   const expenses = useAppSelector((state) => state.expenses.items);
 
+  const handleViewReceipt = async (receiptUrl: string) => {
+  try {
+    await expenseService.downloadFile(receiptUrl);
+  } catch (error) {
+    console.error('Error en la solicitud:', error);
+  }
+};
+
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
@@ -241,41 +249,39 @@ const ExpensesTab: React.FC = () => {
                     {expense.paymentMethod === "CASH"
                       ? "Efectivo"
                       : expense.paymentMethod === "CREDIT_CARD"
-                      ? "Tarjeta de Crédito"
-                      : expense.paymentMethod === "DEBIT_CARD"
-                      ? "Tarjeta de Débito"
-                      : expense.paymentMethod === "BANK_TRANSFER"
-                      ? "Transferencia Bancaria"
-                      : expense.paymentMethod === "CHECK"
-                      ? "Cheque"
-                      : "Otro"}
+                        ? "Tarjeta de Crédito"
+                        : expense.paymentMethod === "DEBIT_CARD"
+                          ? "Tarjeta de Débito"
+                          : expense.paymentMethod === "BANK_TRANSFER"
+                            ? "Transferencia Bancaria"
+                            : expense.paymentMethod === "CHECK"
+                              ? "Cheque"
+                              : "Otro"}
                   </td>
                   <td className="py-3 px-4">
                     {expense.category === "MATERIALS"
                       ? "Materiales"
                       : expense.category === "TOOLS"
-                      ? "Herramientas"
-                      : expense.category === "MARKETING"
-                      ? "Marketing"
-                      : expense.category === "SALARIES"
-                      ? "Salarios"
-                      : expense.category === "RENT"
-                      ? "Alquiler"
-                      : expense.category === "SERVICES"
-                      ? "Servicios"
-                      : "Otros"}
+                        ? "Herramientas"
+                        : expense.category === "MARKETING"
+                          ? "Marketing"
+                          : expense.category === "SALARIES"
+                            ? "Salarios"
+                            : expense.category === "RENT"
+                              ? "Alquiler"
+                              : expense.category === "SERVICES"
+                                ? "Servicios"
+                                : "Otros"}
                   </td>
                   <td className="py-3 px-4">{expense.notes || "N/A"}</td>
                   <td className="py-3 px-4">
                     {expense.receipt ? (
-                      <a
-                        href={expense.receipt}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => handleViewReceipt(expense.receipt)}
                         className="text-primary-600 hover:underline"
                       >
                         Ver Recibo
-                      </a>
+                      </button>
                     ) : (
                       "No disponible"
                     )}

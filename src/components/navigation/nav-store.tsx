@@ -9,10 +9,11 @@ import {
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Store } from "lucide-react";
+import { ShoppingCart, Store, User } from "lucide-react";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import LoginModal from "../admin/login/LoginModal";
 import SearchBar from "./search-bar";
+
 
 export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -78,6 +79,14 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                     )}
                   </span>
                 )}
+              </button>
+
+              {/* Botón de login */}
+              <button
+                className="p-2 hover:bg-primary-50 rounded-full"
+                onClick={() => setIsLoginOpen(true)}
+              >
+                <User className="w-6 h-6 text-white" />
               </button>
             </div>
           </div>

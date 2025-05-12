@@ -56,4 +56,33 @@ export const expenseService = {
     const response = await api.get('/expenses/summary');
     return response.data;
   },
+
+  downloadFile: async (filePath:string) => {
+  try {
+    const response = await fetch(`/api/expenses/download?filePath=${encodeURIComponent(filePath)}`, {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer YOUR_ACCESS_TOKEN', // Reemplaza con el token de autenticación si es necesario
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error downloading file');
+    }
+
+    // Crear un enlace para descargar el archivo
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filePath.split('/').pop() || 'default-filename'; // Usa el nombre del archivo
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    alert('Error downloading file');
+  }
+}
 };
