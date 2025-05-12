@@ -157,14 +157,14 @@ const ExpensesTab: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Total Gastos"
-          value={`$${filteredExpenses
+          value={`₡${filteredExpenses
             .reduce((sum, expense) => sum + expense.amount, 0)
             .toFixed(2)}`}
           icon={<Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
         />
         <StatCard
           title="Promedio por Gasto"
-          value={`$${(
+          value={`₡${(
             filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0) /
             filteredExpenses.length || 0
           ).toFixed(2)}`}
@@ -299,7 +299,16 @@ const ExpensesTab: React.FC = () => {
                     {/* Botón Eliminar */}
                     <button
                       className="text-red-600 hover:bg-red-50 p-2 rounded-full"
-                      onClick={() => console.log("Eliminar", expense.id)}
+                      onClick={async () => {
+                        try {
+                          await expenseService.delete(expense.id); // Llama al servicio para eliminar el gasto
+                          dispatch(setExpenses(expenses.filter((e) => e.id !== expense.id))); // Actualiza el estado eliminando el gasto
+                          console.log("Gasto eliminado:", expense.id);
+                        } catch (error) {
+                          console.error("Error al eliminar el gasto:", error);
+                          alert("No se pudo eliminar el gasto. Inténtalo de nuevo.");
+                        }
+                      }}
                       title="Eliminar"
                     >
                       <Trash2 className="h-5 w-5" />

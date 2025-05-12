@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Receipt, DollarSign, Loader2 } from 'lucide-react';
+import { X, Receipt, Loader2, Calendar } from 'lucide-react'; // Elimina DollarSign si ya no se usa
 import { v4 as uuidv4 } from 'uuid';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -122,11 +122,11 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
     setErrors(prev => ({ ...prev, receipt: '' }));
   };
 
-  const calculateTotal = () => {
-    const subtotal = formData.subtotal || 0;
-    const taxes = formData.taxes || 0;
-    return subtotal + taxes;
-  };
+  // const calculateTotal = () => {
+  //   const subtotal = formData.subtotal || 0;
+  //   const taxes = formData.taxes || 0;
+  //   return subtotal + taxes;
+  // };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -173,7 +173,7 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
         ...formData,
         receipt: receiptUrl,
         userId: "admin",
-        amount: calculateTotal(),
+        // amount: calculateTotal(),
       };
 
       const createdExpense = await expenseService.create(expenseToCreate);
@@ -232,7 +232,7 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
                   placeholderText="Selecciona una fecha"
                   id="date"
                 />
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
               </div>
             </div>
 
@@ -254,7 +254,9 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
               <div>
                 <Label htmlFor="amount">Monto Total *</Label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400 text-lg">
+                    ₡
+                  </span>
                   <Input
                     type="number"
                     id="amount"
@@ -274,7 +276,9 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
               <div>
                 <Label htmlFor="taxes">Impuestos</Label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400 text-lg">
+    ₡
+  </span>
                   <Input
                     type="number"
                     id="taxes"
@@ -295,7 +299,9 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
             <div>
               <Label htmlFor="subtotal">Subtotal</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400 text-lg">
+    ₡
+  </span>
                 <Input
                   type="number"
                   id="subtotal"
