@@ -36,6 +36,7 @@ interface FilterState {
   materials: string[];
   isNew: boolean;
   isBestSeller: boolean;
+  colors: string[]; // Nuevo filtro de colores
 }
 
 const ITEMS_PER_PAGE = 9;
@@ -58,6 +59,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     materials: [],
     isNew: false,
     isBestSeller: false,
+    colors: [], // Nuevo filtro de colores
   });
 
   // Extraer categorías y materiales únicos de los productos
@@ -65,6 +67,11 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const materials = Array.from(
     new Set(
       products.flatMap((p) => p.details.material || []).filter((m) => typeof m === "string")
+    )
+  );
+  const colors = Array.from(
+    new Set(
+      products.flatMap((p) => p.details.colors || []).filter((c) => typeof c === "string")
     )
   );
 
@@ -85,6 +92,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
         product.WarehouseItem?.[0]?.price <= filters.priceRange[1];
       const matchesNew = !filters.isNew || product.isNew;
       const matchesBestSeller = !filters.isBestSeller || product.isBestSeller;
+      const matchesColor =
+        filters.colors.length === 0 ||
+        product.details.colors?.some((c) => filters.colors.includes(c));
 
       return (
         matchesSearch &&
@@ -92,7 +102,8 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
         matchesMaterial &&
         matchesPrice &&
         matchesNew &&
-        matchesBestSeller
+        matchesBestSeller &&
+        matchesColor
       );
     })
     .sort((a, b) => {
@@ -210,6 +221,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       materials: [],
       isNew: false,
       isBestSeller: false,
+      colors: [], // Nuevo filtro de colores
     });
     setSearchQuery("");
   };
@@ -288,32 +300,27 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
         </div>
       </div>
 
-      {/* Special Filters */}
+      {/* Colors */}
       <div>
-        <h4 className="font-medium text-primary-900 mb-3">
-          Filtros Especiales
-        </h4>
-        <div className="space-y-2">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={filters.isNew}
-              onChange={(e) => handleFilterChange("isNew", e.target.checked)}
-              className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
+        <h4 className="font-medium text-primary-900 mb-3">Colores</h4>
+        <div className="grid grid-cols-4 gap-2">
+          {colors.map((color) => (
+            <button
+              key={color}
+              onClick={() => {
+                const newColors = filters.colors.includes(color)
+                  ? filters.colors.filter((c) => c !== color)
+                  : [...filters.colors, color];
+                handleFilterChange("colors", newColors);
+              }}
+              className={`w-10 h-10 rounded-full border-2 ${
+                filters.colors.includes(color)
+                  ? "border-primary-600"
+                  : "border-primary-300"
+              }`}
+              style={{ backgroundColor: color }}
             />
-            <span className="ml-2 text-primary-700">Nuevos Productos</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={filters.isBestSeller}
-              onChange={(e) =>
-                handleFilterChange("isBestSeller", e.target.checked)
-              }
-              className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span className="ml-2 text-primary-700">Más Vendidos</span>
-          </label>
+          ))}
         </div>
       </div>
 

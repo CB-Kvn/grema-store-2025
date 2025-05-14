@@ -21,6 +21,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { setProducts } from "@/store/slices/productsSlice";
+import RelatedProducts from "@/components/product/RelatedProducts";
 
 const categories = [
   { id: "all", name: "Todo" },
@@ -1805,34 +1806,9 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 que marcan tendencia en joyería fina.
               </p>
             </div>
-            <Swiper
-              modules={[Navigation]}
-              spaceBetween={20}
-              slidesPerView={1}
-              navigation
-              pagination={{ clickable: true }}
-              breakpoints={{
-                640: {
-                  slidesPerView: 2,
-                  spaceBetween: 30,
-                },
-                1024: {
-                  slidesPerView: 4,
-                  spaceBetween: 30,
-                },
-              }}
-              className="pb-12"
-            >
-              {/* {newArrivals.map((product) => (
-                <SwiperSlide key={product.id}>
-                  <ProductCard
-                    product={product}
-                    onAddToCart={() => addToCart(product)}
-                    onClick={() => navigate(`/producto/${product.id}`)}
-                  />
-                </SwiperSlide>
-              ))} */}
-            </Swiper>
+             {/* Related Products */}
+                    <RelatedProducts relatedProducts={products} type={"now"} category={products.category} />
+            
           </div>
         </div>
       </div>

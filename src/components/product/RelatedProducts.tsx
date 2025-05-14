@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import ProductCard from "./ProductCard";
 
 interface RelatedProductsProps {
-  relatedProducts: typeof products;
+  relatedProducts: {
+    id: number;
+    name: string;
+    description: string;
+    category: string;
+    details: {
+      color: { hex: string; name: string }[];
+    };
+    WarehouseItem: {
+      price: number;
+      discount: number | null;
+    }[];
+    Images: {
+      url: string[];
+    }[];
+  }[];
   category: string;
+  type?: string;
 }
 
 const RelatedProducts: React.FC<RelatedProductsProps> = ({
   relatedProducts,
   category,
+  type,
 }) => {
   const [visibleProducts, setVisibleProducts] = useState(4); // Número inicial de productos visibles
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Función para cargar más productos
   const loadMoreProducts = () => {
@@ -40,45 +59,47 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
 
   return (
     <div className="mt-16 border-t border-primary-100 pt-12">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-serif font-bold text-primary-900 mb-4">
-          Productos Relacionados
-        </h2>
-        <p className="text-primary-600 max-w-2xl mx-auto">
-          Explora más piezas de nuestra colección {category}
-        </p>
-      </div>
+      {/* Título */}
+      {type !== "now" && (
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-serif font-bold text-primary-900 mb-4">
+            Productos Relacionados
+          </h2>
+          <p className="text-primary-600 max-w-2xl mx-auto">
+            Explora más piezas de nuestra colección {category}
+          </p>
+        </div>
+      )}
+
+      {/* Productos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {relatedProducts.slice(0, visibleProducts).map((product, index) => (
-          <Link
-            key={product.id}
-            to={`/producto/${product.id}`}
-            className={`block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 fade-in`}
-            style={{ animationDelay: `${index * 0.1}s` }} // Retraso para cada producto
-          >
-            <div className="relative pb-[100%]">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="text-primary-900 font-medium line-clamp-2">
-                {product.name}
-              </h3>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-lg font-bold text-primary-900">
-                  ${(product.price * 0.85).toLocaleString()}
-                </span>
-                <span className="ml-2 text-sm line-through text-primary-400">
-                  ${product.price.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </Link>
-        ))}
+        {relatedProducts.slice(0, visibleProducts).map((product) => {
+          const price = product.WarehouseItem[0]?.price || 0;
+          const discount = product.WarehouseItem[0]?.discount || 0;
+          const finalPrice = discount
+            ? price - price * (discount / 100)
+            : price;
+          const imageUrl =
+            product.Images[0]?.url[0] || "/placeholder.jpg"; // Usar un placeholder si no hay imagen
+
+          return (
+            <ProductCard
+              key={product.id}
+              product={{
+                id: product.id,
+                name: product.name,
+                price: finalPrice,
+                image: imageUrl,
+                description: product.description,
+              }}
+              onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
+              onClick={() => navigate(`/producto/${product.id}`)}
+            />
+          );
+        })}
       </div>
+
+      {/* Indicador de carga */}
       {loading && (
         <div className="text-center mt-8">
           <span className="text-primary-600">Cargando más productos...</span>

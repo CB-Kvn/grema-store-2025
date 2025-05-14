@@ -161,8 +161,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   };
 
   const relatedProducts = products
-    .filter((p) => p.id !== product.id && p.category === product.category)
-    .slice(0, 8);
+    .filter((p) => p.category === product.category && p.id !== product.id) // Filtrar por categoría y excluir el producto actual
+    .slice(0, 8); // Limitar a 8 productos relacionados
 
   const ProductSlider = ({ products }: { products: typeof relatedProducts }) => (
     <Swiper
@@ -185,28 +185,47 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
       }}
       className="pb-12"
     >
-      {products.map(product => (
-        <SwiperSlide key={product.id}>
+      {products.map((relatedProduct) => (
+        <SwiperSlide key={relatedProduct.id}>
           <Link
-            to={`/producto/${product.id}`}
+            to={`/producto/${relatedProduct.id}`}
             className="block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
           >
             <div className="relative pb-[100%]">
               <img
-                src={product.image}
-                alt={product.name}
+                src={relatedProduct.Images[0]?.url[0] || "/placeholder.jpg"} // Usar la primera imagen o un placeholder
+                alt={relatedProduct.name}
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
             <div className="p-4">
-              <h3 className="text-primary-900 font-medium line-clamp-2">{product.name}</h3>
+              <h3 className="text-primary-900 font-medium line-clamp-2">
+                {relatedProduct.name}
+              </h3>
               <div className="mt-2 flex items-baseline">
                 <span className="text-lg font-bold text-primary-900">
-                  ${(product.price * 0.85).toLocaleString()}
+                  {new Intl.NumberFormat("es-CR", {
+                    style: "currency",
+                    currency: "CRC",
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                  }).format(
+                    relatedProduct.WarehouseItem[0]?.price || 0 // Mostrar el precio del primer WarehouseItem
+                  )}
                 </span>
-                <span className="ml-2 text-sm line-through text-primary-400">
-                  ${product.price.toLocaleString()}
-                </span>
+                {relatedProduct.WarehouseItem[0]?.discount && (
+                  <span className="ml-2 text-sm line-through text-primary-400">
+                    {new Intl.NumberFormat("es-CR", {
+                      style: "currency",
+                      currency: "CRC",
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    }).format(
+                      relatedProduct.WarehouseItem[0]?.price /
+                        (1 - relatedProduct.WarehouseItem[0]?.discount / 100)
+                    )}
+                  </span>
+                )}
               </div>
             </div>
           </Link>
@@ -570,7 +589,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
         </div>
 
         {/* Related Products */}
-        {/* <RelatedProducts relatedProducts={relatedProducts} category={product.category} /> */}
+        <RelatedProducts relatedProducts={relatedProducts} category={product.category} />
 
       </div>
     </div>

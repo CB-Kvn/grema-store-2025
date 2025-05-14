@@ -25,8 +25,8 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: () => void;
-  onClick?: () => void;
+  onAddToCart: () => void | null;
+  onClick?: () => void | null;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick }) => {
