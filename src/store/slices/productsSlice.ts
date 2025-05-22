@@ -86,6 +86,37 @@ const productsSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    updateImagesToProduct(state, action: PayloadAction<{ productId: number; images: string[] }>) {
+      const { productId, images } = action.payload;
+      const product = state.items.find((item) => item.id === productId);
+      if (product) {
+        if (!product.Images);
+        product.Images = images;
+      }
+    },
+    updateImagesToItemInventory(state, action: PayloadAction<any[]>) {
+      if (state.itemInventory) {
+        if (!state.itemInventory.Images);
+        state.itemInventory.Images[0].url = action.payload;
+      }
+    },
+    updateImagesToProductFilePath(state, action: PayloadAction<{ productId: number; filepaths: string[] }>) {
+      const { productId, filepaths } = action.payload;
+      const product = state.items.find((item) => item.id === productId);
+      if (product) {
+        if (!product.filepaths);
+        product.filepaths[0].url = filepaths;
+      }
+    },
+    updateImagesToItemInventoryFilePath(state, action: PayloadAction<any[]>) {
+      if (state.itemInventory) {
+        if (!state.itemInventory.filepaths);
+        state.itemInventory.filepaths[0].url = action.payload;
+      }
+    },
+    clearItemInventory(state) {
+      state.itemInventory = null; // Limpia el producto seleccionado
+    },
   },
 });
 
@@ -98,7 +129,12 @@ export const {
   setError,
   setProductInventory,
   updateProductInventory,
-  resetProductInventory
+  resetProductInventory,
+  updateImagesToProduct,
+  updateImagesToItemInventory,
+  updateImagesToProductFilePath,
+  updateImagesToItemInventoryFilePath,
+  clearItemInventory
 } = productsSlice.actions;
 
 export const selectAllProducts = (state: RootState) => state.products.items;

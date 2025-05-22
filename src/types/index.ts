@@ -16,35 +16,35 @@ export interface Discount {
 
 export interface Product {
   id?: number;
-  name: string;
-  price: number;
-  Images: string;
-  description: string;
-  category: string;
-  isBestSeller: boolean;
-  isNew: boolean;
+  name?: string;
+  price?: number;
+  Images?: string;
+  description?: string;
+  category?: string;
+  isBestSeller?: boolean;
+  isNew?: boolean;
   isGift?: boolean;
   discount?: Discount;
-  sku: string;
-  details: {
-    material: string;
+  sku?: string;
+  details?: {
+    material?: string;
     piedra?: string;
-    peso: string;
+    peso?: string;
     pureza?: string;
-    color: {
-      hex: string;
-      name: string;
+    color?: {
+      hex?: string;
+      name?: string;
     }[];
     certificado?: string;
-    garantia: string;
+    garantia?: string;
     diámetro?: string;
     largo?: string;
     broche?: string;
     cierre?: {
-      tipo: string;
-      colores: {
-        hex: string;
-        name: string;
+      tipo?: string;
+      colores?: {
+        hex?: string;
+        name?: string;
       }[];
     };
   };

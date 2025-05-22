@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { 
+import {
   Search, Plus, Edit, Trash2, Package, Percent, Filter, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Input } from '../../ui/input';
@@ -89,14 +89,14 @@ const ProductTab = () => {
     const response = await warehouseService.getByIdProducts(id) as WarehouseItem[];
 
     response.forEach(element => {
-      dispatch(addWarehouseItems({quantity: element.quantity, location: element.location, price: element.price}));
+      dispatch(addWarehouseItems({ quantity: element.quantity, location: element.location, price: element.price }));
     });
     // dispatch(setWarehouseItems(response[0].discount));
   }
   // Manejar edición de producto
   const handleEdit = (product: Product) => {
 
-   
+
     dispatch(setProductInventory(product))
     setSelectedProduct(product);
     setIsModalOpen(true);
@@ -129,10 +129,10 @@ const ProductTab = () => {
     // Aquí se despacharía la acción correspondiente
     console.log('Datos de inventario:', data);
     console.log('Producto seleccionado:', selectedProduct);
-    data.inventory.forEach( element => {
-      handleAddStock(element.location, selectedProduct!.id!, {quantity: element.quantity, location: element.location, price: element.price});
+    data.inventory.forEach(element => {
+      handleAddStock(element.location, selectedProduct!.id!, { quantity: element.quantity, location: element.location, price: element.price });
     });
-    
+
     // Aquí puedes manejar la lógica de envío de datos de inventario
     console.log('Datos de inventario enviados:', data);
     setIsInventoryModalOpen(false);
@@ -275,8 +275,8 @@ const ProductTab = () => {
                   {discount.type === 'PERCENTAGE'
                     ? 'Porcentaje'
                     : discount.type === 'FIXED_AMOUNT'
-                    ? 'Monto'
-                    : 'Cantidad mínima'}
+                      ? 'Monto'
+                      : 'Cantidad mínima'}
                 </Label>
                 <Input
                   type="number"
@@ -368,106 +368,121 @@ const ProductTab = () => {
             </tr>
           </thead>
           <tbody>
-            {currentProducts.map((product) => (
-              <tr key={product.id} className="border-b border-primary-100">
-                {discount.isActive && (
+            {currentProducts.map((product) => {
+              // Validaciones seguras para detalles y arrays anidados
+              const details = product.details || {};
+              const colores = details.color || [];
+              return (
+                <tr key={product.id} className="border-b border-primary-100">
+                  {discount.isActive && (
+                    <td className="py-3 px-4">
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          className="w-5 h-5 bg-primary-500 text-white border-primary-500 rounded focus:ring-primary-500 focus:ring-2 checked:bg-primary-600"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProduct(product);
+                            } else {
+                              setSelectedProduct(null);
+                            }
+                          }}
+                        />
+                      </div>
+                    </td>
+                  )}
                   <td className="py-3 px-4">
-                    <div className="flex items-center justify-center">
-                      <input
-                        type="checkbox"
-                        className="w-5 h-5 bg-primary-500 text-white border-primary-500 rounded focus:ring-primary-500 focus:ring-2 checked:bg-primary-600"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProduct(product);
-                          } else {
-                            setSelectedProduct(null);
-                          }
-                        }}
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={
+                          product.Images &&
+                          product.Images.length > 0 &&
+                          Array.isArray(product.Images[0].url) &&
+                          product.Images[0].url.length > 0
+                            ? product.Images[0].url[0]
+                            : "/placeholder.png"
+                        }
+                        alt={product.name}
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
                       />
+                      <div>
+                        <p className="text-sm sm:text-base font-medium text-primary-900 line-clamp-1">{product.name}</p>
+                        <p className="text-xs sm:text-sm text-primary-500">SKU: {product.sku}</p>
+                      </div>
                     </div>
                   </td>
-                )}
-                <td className="py-3 px-4">
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={product.Images[0]?.url[0]}
-                      alt={product.name}
-                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
-                    />
-                    <div>
-                      <p className="text-sm sm:text-base font-medium text-primary-900 line-clamp-1">{product.name}</p>
-                      <p className="text-xs sm:text-sm text-primary-500">SKU: {product.sku}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3 px-4">
-                  <p className="text-sm sm:text-base font-medium text-primary-900">
-                    ₡{product.WarehouseItem[0]?.price.toLocaleString() || 'N/A'}
-                  </p>
-                </td>
-                <td className="py-3 px-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs sm:text-sm ${
-                      product.WarehouseItem.some((item) => item.quantity > 0)
+                  <td className="py-3 px-4">
+                    <p className="text-sm sm:text-base font-medium text-primary-900">
+                      ₡{product.WarehouseItem?.[0]?.price?.toLocaleString() || 'N/A'}
+                    </p>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs sm:text-sm ${product.WarehouseItem?.some((item) => item.quantity > 0)
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {product.WarehouseItem.some((item) => item.quantity > 0) ? 'En Stock' : 'Agotado'}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <p className="text-sm text-primary-700">{product.category || 'N/A'}</p>
-                </td>
-                <td className="py-3 px-4">
-                  <p className="text-sm text-primary-700">{product.details?.peso || 'N/A'}</p>
-                </td>
-                <td className="py-3 px-4">
-                  <p className="text-sm text-primary-700">{product.details?.material?.join(', ') || 'N/A'}</p>
-                </td>
-                <td className="py-3 px-4">
-                  {product.details?.color?.map((color, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <span
-                        className="inline-block w-4 h-4 rounded-full"
-                        style={{ backgroundColor: color.hex }}
-                      ></span>
-                      <span className="text-sm text-primary-700">{color.name}</span>
+                        }`}
+                    >
+                      {product.WarehouseItem?.some((item) => item.quantity > 0) ? 'En Stock' : 'Agotado'}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">{product.category || 'N/A'}</p>
+                  </td>
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">{details.peso || 'N/A'}</p>
+                  </td>
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">{details.material || 'N/A'}</p>
+                  </td>
+                  <td className="py-3 px-4">
+                    {Array.isArray(colores) && colores.length > 0 ? (
+                      colores.map((color, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <span
+                            className="inline-block w-4 h-4 rounded-full"
+                            style={{ backgroundColor: color.hex }}
+                          ></span>
+                          <span className="text-sm text-primary-700">{color.name}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-sm text-primary-700">N/A</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">
+                      {product.WarehouseItem?.reduce((acc, item) => acc + (item.quantity || 0), 0) ?? 0}
+                    </p>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="p-1 hover:bg-primary-50 rounded"
+                        title="Editar Producto"
+                      >
+                        <Edit className="h-4 w-4 text-primary-600" />
+                      </button>
+                      <button
+                        onClick={() => handleInventoryManagement(product)}
+                        className="p-1 hover:bg-primary-50 rounded"
+                        title="Gestionar Inventario"
+                      >
+                        <Package className="h-4 w-4 text-primary-600" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id!)}
+                        className="p-1 hover:bg-primary-50 rounded"
+                        title="Eliminar Producto"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </button>
                     </div>
-                  )) || 'N/A'}
-                </td>
-                <td className="py-3 px-4">
-                  <p className="text-sm text-primary-700">
-                    {product.WarehouseItem.reduce((total, item) => total + item.quantity, 0)}
-                  </p>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center space-x-1 sm:space-x-2">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="p-1 hover:bg-primary-50 rounded"
-                      title="Editar Producto"
-                    >
-                      <Edit className="h-4 w-4 text-primary-600" />
-                    </button>
-                    <button
-                      onClick={() => handleInventoryManagement(product)}
-                      className="p-1 hover:bg-primary-50 rounded"
-                      title="Gestionar Inventario"
-                    >
-                      <Package className="h-4 w-4 text-primary-600" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id!)}
-                      className="p-1 hover:bg-primary-50 rounded"
-                      title="Eliminar Producto"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -477,9 +492,8 @@ const ProductTab = () => {
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-4 py-2 rounded-lg ${
-            currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-primary-500 text-white hover:bg-primary-700'
-          }`}
+          className={`px-4 py-2 rounded-lg ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-primary-500 text-white hover:bg-primary-700'
+            }`}
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -489,11 +503,10 @@ const ProductTab = () => {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
-          className={`px-4 py-2 rounded-lg ${
-            currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
+          className={`px-4 py-2 rounded-lg ${currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
               ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
               : 'bg-primary-500 text-white hover:bg-primary-700'
-          }`}
+            }`}
         >
           <ChevronRight className="h-5 w-5" />
         </button>

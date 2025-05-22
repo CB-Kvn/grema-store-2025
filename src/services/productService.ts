@@ -13,7 +13,7 @@ export const productService = {
     return response.data;
   },
 
-  create: async (product: Omit<Product, 'id'>) => {
+  create: async (product: Product) => {
     const response = await api.post('/products', product);
     return response.data;
   },
@@ -47,6 +47,33 @@ export const productService = {
     quantity: number;
   }) => {
     const response = await api.post(`/products/${id}/transfer`, data);
+    return response.data;
+  },
+
+  uploadImages: async (files: File[]) => {
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    const response = await api.post(`/photo/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  createImage: async (url: string, productId: number) => {
+    const response = await api.post('/products/image-create', { url, productId });
+    return response.data;
+  },
+  updateImage: async (id: number, url: string[], state: boolean, productId: number) => {
+    const response = await api.post('/products/image-update', { id, url, state, productId });
+    return response.data;
+  },
+  deleteImage: async (id: string) => {
+    const response = await api.delete(`/products/image-delete/${id}`);
     return response.data;
   },
 };

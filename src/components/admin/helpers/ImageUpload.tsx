@@ -1,110 +1,91 @@
-import React, { useRef, useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import React from "react";
+import { Upload, X } from "lucide-react";
+import { productService } from "@/services";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import { useProductImageState } from "@/hooks/useManageImages";
 
-interface ImageUploadProps {
-  onImagesUploaded: (files: File[]) => void; // Callback para enviar los archivos al componente padre
-  onError?: (error: string) => void;
+interface ProductImageUploadProps {
+  images: string[];
+  onAddImages: (files: File[]) => void;
+  onRemoveImage: (index: number) => void;
+  disabled?: boolean;
+  onImageClick?: (url: string) => void;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ onImagesUploaded, onError }) => {
-  const [images, setImages] = useState<File[]>([]); // Estado para almacenar los archivos de las imágenes
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]); // URLs para la vista previa
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const newImages: File[] = [];
-
-    Array.from(files).forEach((file) => {
-      // Validar tipo de archivo
-      if (!file.type.startsWith('image/')) {
-        onError?.('Solo se permiten archivos de imagen');
-        return;
-      }
-
-      // Validar tamaño del archivo (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        onError?.('El archivo es demasiado grande. Máximo 5MB');
-        return;
-      }
-
-      // Validar límite de 5 imágenes
-      if (images.length + newImages.length >= 5) {
-        onError?.('Solo puedes subir un máximo de 5 imágenes');
-        return;
-      }
-
-      // Generar vista previa
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPreviewUrls((prevUrls) => [...prevUrls, reader.result as string]); // Actualizar directamente
-      };
-      reader.readAsDataURL(file);
-
-      newImages.push(file);
-    });
-
-    // Actualizar el estado con las nuevas imágenes
-    setImages((prevImages) => {
-      const updatedImages = [...prevImages, ...newImages];
-      onImagesUploaded(updatedImages); // Enviar los archivos al componente padre
-      return updatedImages;
-    });
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prevImages) => {
-      const updatedImages = prevImages.filter((_, i) => i !== index);
-      onImagesUploaded(updatedImages); // Enviar los archivos actualizados al componente padre
-      return updatedImages;
-    });
-
-    setPreviewUrls((prevUrls) => prevUrls.filter((_, i) => i !== index));
+const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
+  images,
+  onAddImages,
+  onRemoveImage,
+  disabled = false,
+  onImageClick
+}) => {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const itemInventory = useAppSelector((state) => state.products.itemInventory);
+  const { createImageState, deleteImageState } = useProductImageState()
+  // Maneja la selección de archivos y sube cada uno
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files).slice(0, 5 - images.length);
+      console.log("FILES", files);
+      createImageState(files);
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        {previewUrls.map((url, index) => (
-          <div key={index} className="relative">
-            <img
-              src={url}
-              alt={`Imagen ${index + 1}`}
-              className="w-full h-32 object-cover rounded-lg"
-            />
-            <button
-              type="button"
-              onClick={() => removeImage(index)}
-              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
-        {images.length < 5 && (
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 hover:bg-primary-50 border-primary-300"
-          >
-            <Upload className="h-6 w-6 text-primary-600" />
-            <span className="text-sm text-primary-600">Subir Imagen</span>
-          </button>
-        )}
-      </div>
+    <div>
+      {/* Galería de imágenes */}
+      {images.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-2">
+          {images.map((url, idx) => (
+            <div key={url} className="relative group border rounded-lg overflow-hidden">
+              <img
+                src={url}
+                alt={`Imagen ${idx + 1}`}
+                className="w-full h-32 object-cover cursor-pointer"
+                onClick={() => onImageClick && onImageClick(url)}
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  // Envía la url a deleteImageState
+                  await deleteImageState(url, itemInventory.id);
+                }}
+                className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100"
+                title="Eliminar imagen"
+              >
+                <X className="h-4 w-4 text-red-600" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-500 mb-2">No hay imágenes cargadas.</p>
+      )}
+
+      {/* Botón para subir imágenes */}
+      {images.length < 5 && (
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={disabled}
+          className="block w-full border border-primary-300 text-primary-700 bg-white hover:bg-primary-50 hover:text-primary-900 rounded-md py-1.5 text-center text-sm font-medium transition-colors duration-200 cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 flex items-center justify-center gap-2"
+        >
+          <Upload className="h-5 w-5 text-primary-600" />
+          <span>Subir Imagen</span>
+        </button>
+      )}
 
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
         accept="image/*"
-        multiple // Permitir múltiples archivos
+        multiple
         className="hidden"
+        disabled={disabled}
       />
     </div>
   );
 };
 
-export default ImageUpload;
+export default ProductImageUpload;
