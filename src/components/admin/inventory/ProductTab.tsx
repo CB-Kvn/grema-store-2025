@@ -14,6 +14,7 @@ import type { Product, WarehouseItem } from '@/types';
 import { productService } from '@/services/productService';
 import { warehouseService } from '@/services/warehouseService';
 import { addWarehouseItems, setWarehouseItems } from '@/store/slices/warehousesSlice';
+import { useProductService } from '@/hooks/useProductService';
 
 const ProductTab = () => {
   const dispatch = useDispatch();
@@ -39,6 +40,7 @@ const ProductTab = () => {
     const savedPage = localStorage.getItem('currentPage');
     return savedPage ? parseInt(savedPage, 10) : 1;
   });
+  const {deleteProduct} = useProductService()
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
 
   // Guardar la página actual en localStorage
@@ -139,9 +141,15 @@ const ProductTab = () => {
     setSelectedProduct(null);
   };
 
-  // Manejar eliminación de producto
-  const handleDelete = (productId: number) => {
-    dispatch(deleteProduct(productId));
+  // Manejar eliminación de producto usando el hook useProductService
+  const handleDelete = async (productId: number) => {
+    try {
+      await deleteProduct(productId); // Llama al método del hook
+      dispatch(setProducts(products.filter((p) => p.id !== productId))); // Actualiza el estado local
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+      alert("No se pudo eliminar el producto.");
+    }
   };
 
   useEffect(() => {
@@ -356,7 +364,7 @@ const ProductTab = () => {
                   Seleccionar
                 </th>
               )}
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Producto</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900 w-full">Producto</th> {/* Cambia aquí */}
               <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Precio</th>
               <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Estado</th>
               <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Categoría</th>
@@ -391,8 +399,8 @@ const ProductTab = () => {
                       </div>
                     </td>
                   )}
-                  <td className="py-3 px-4">
-                    <div className="flex items-center space-x-3">
+                  <td className="py-3 px-4 w-full align-top">
+                    <div className="flex items-center space-x-3"> {/* Cambia items-start por items-center */}
                       <img
                         src={
                           product.Images &&
@@ -403,11 +411,15 @@ const ProductTab = () => {
                             : "/placeholder.png"
                         }
                         alt={product.name}
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover"
+                        style={{ minWidth: '4rem', minHeight: '4rem', maxHeight: '5rem' }}
                       />
                       <div>
-                        <p className="text-sm sm:text-base font-medium text-primary-900 line-clamp-1">{product.name}</p>
-                        <p className="text-xs sm:text-sm text-primary-500">SKU: {product.sku}</p>
+                        <p className="text-sm sm:text-base font-medium text-primary-900 break-words whitespace-pre-line">{product.name}</p>
+                        <p className="text-xs sm:text-sm text-primary-500 break-words whitespace-pre-line">SKU: {product.sku}</p>
+                        {product.description && (
+                          <p className="text-xs text-primary-700 mt-1 break-words whitespace-pre-line">{product.description}</p>
+                        )}
                       </div>
                     </div>
                   </td>

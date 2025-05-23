@@ -32,7 +32,7 @@ export const productService = {
     quantity: number;
     warehouseId: string;
   }) => {
-    const response = await api.post(`/products/${id}/inventory`, data);
+    const response = await api.post(`/products/${id}`);
     return response.data;
   },
 
@@ -46,7 +46,7 @@ export const productService = {
     targetWarehouseId: string;
     quantity: number;
   }) => {
-    const response = await api.post(`/products/${id}/transfer`, data);
+    const response = await api.post(`/warehouses/transfer/${data.sourceWarehouseId}/${data.targetWarehouseId}/${id}`, data);
     return response.data;
   },
 

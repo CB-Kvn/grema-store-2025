@@ -8,6 +8,7 @@ import { addWarehouseItems, clearItems, setWarehouseItems, updateItemQuantity } 
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAlert } from '@/context/AlertContext'; // Importar el hook de alertas
 import { add } from 'date-fns';
+import { productService } from '@/services/productService'; // Asegúrate de importar el servicio
 
 interface InventoryManagementModalProps {
   product: Product;
@@ -36,6 +37,9 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
     isActive: true,
   });
   const { showAlert } = useAlert(); // Usar el hook de alertas
+
+  // Estado local para transferencias
+  const [transferStates, setTransferStates] = useState<{ [warehouseId: string]: { target: string; quantity: number } }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
 
@@ -348,6 +352,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
 
               {warehouses.map(warehouse => {
                 const warehouseStock = warehouse.items.find(item => item.productId === product.id);
+                const transferState = transferStates[warehouse.id] || { target: '', quantity: 0 };
                 return (
                   <div key={warehouse.id} className="bg-white border border-primary-100 rounded-lg p-4">
                     <div className="flex justify-between items-start">
@@ -366,7 +371,13 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                         <Label>Transferir a</Label>
                         <select
                           className="w-full mt-1 rounded-lg border border-primary-200 p-2"
-                          defaultValue=""
+                          value={transferState.target}
+                          onChange={e => {
+                            setTransferStates(prev => ({
+                              ...prev,
+                              [warehouse.id]: { ...transferState, target: e.target.value }
+                            }));
+                          }}
                         >
                           <option value="" disabled>Seleccionar bodega</option>
                           {warehouses
@@ -383,9 +394,48 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                           type="number"
                           min="0"
                           max={warehouseStock?.quantity || 0}
-                          defaultValue="0"
+                          value={transferState.quantity}
+                          onChange={e => {
+                            setTransferStates(prev => ({
+                              ...prev,
+                              [warehouse.id]: { ...transferState, quantity: parseInt(e.target.value) || 0 }
+                            }));
+                          }}
                         />
                       </div>
+                    </div>
+                    <div className="flex justify-end mt-2">
+                      <button
+                        type="button"
+                        className="px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 text-sm"
+                        disabled={
+                          !transferState.target ||
+                          !transferState.quantity ||
+                          transferState.quantity > (warehouseStock?.quantity || 0)
+                        }
+                        onClick={async () => {
+                          // Recuperar la data necesaria para la transferencia
+                          console.log('Transferir stock:', {}, transferState);
+                          const transferData = {
+                            sourceWarehouseId: warehouse.id,
+                            targetWarehouseId: transferState.target,
+                            quantity: transferState.quantity,
+                          };
+                          try {
+                            await productService.transferStock(product.id, transferData);
+                            showAlert('Transferencia realizada correctamente.', 'success');
+                            // Opcional: refrescar datos o limpiar el estado de transferencia
+                            setTransferStates(prev => ({
+                              ...prev,
+                              [warehouse.id]: { target: '', quantity: 0 }
+                            }));
+                          } catch (err) {
+                            showAlert('Error al transferir stock.', 'error');
+                          }
+                        }}
+                      >
+                        Transferir
+                      </button>
                     </div>
                   </div>
                 );

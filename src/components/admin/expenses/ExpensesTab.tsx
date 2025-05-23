@@ -12,7 +12,7 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { Line } from "react-chartjs-2";
+import { Line, Pie, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -128,6 +128,81 @@ const ExpensesTab: React.FC = () => {
     },
   };
 
+  // --- NUEVO: Preparar datos para gráficos adicionales ---
+
+  // 1. Monto de gastos por categoría
+  const categoryTotals: Record<string, number> = {};
+  filteredExpenses.forEach((expense) => {
+    categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+  });
+  const categoryLabels = Object.keys(categoryTotals);
+  const categoryData = Object.values(categoryTotals);
+
+  // 2. Monto de gastos por tipo de pago
+  const paymentTotals: Record<string, number> = {};
+  filteredExpenses.forEach((expense) => {
+    paymentTotals[expense.paymentMethod] = (paymentTotals[expense.paymentMethod] || 0) + expense.amount;
+  });
+  const paymentLabels = Object.keys(paymentTotals);
+  const paymentData = Object.values(paymentTotals);
+
+  // --- FIN NUEVO ---
+
+  // --- NUEVO: Configuración de gráficos adicionales ---
+  const categoryChartData = {
+    labels: categoryLabels.map((cat) =>
+      cat === "MATERIALS"
+        ? "Materiales"
+        : cat === "TOOLS"
+        ? "Herramientas"
+        : cat === "MARKETING"
+        ? "Marketing"
+        : cat === "SALARIES"
+        ? "Salarios"
+        : cat === "RENT"
+        ? "Alquiler"
+        : cat === "SERVICES"
+        ? "Servicios"
+        : "Otros"
+    ),
+    datasets: [
+      {
+        label: "Monto por Categoría",
+        data: categoryData,
+        backgroundColor: [
+          "#6366F1", "#F59E42", "#10B981", "#F43F5E", "#FBBF24", "#3B82F6", "#A78BFA", "#F472B6"
+        ],
+      },
+    ],
+  };
+
+  const paymentChartData = {
+    labels: paymentLabels.map((pm) =>
+      pm === "CASH"
+        ? "Efectivo"
+        : pm === "CREDIT_CARD"
+        ? "Tarjeta de Crédito"
+        : pm === "DEBIT_CARD"
+        ? "Tarjeta de Débito"
+        : pm === "BANK_TRANSFER"
+        ? "Transferencia Bancaria"
+        : pm === "CHECK"
+        ? "Cheque"
+        : "Otro"
+    ),
+    datasets: [
+      {
+        label: "Monto por Tipo de Pago",
+        data: paymentData,
+        backgroundColor: [
+          "#6366F1", "#F59E42", "#10B981", "#F43F5E", "#FBBF24", "#3B82F6", "#A78BFA"
+        ],
+      },
+    ],
+  };
+
+  // --- FIN NUEVO ---
+
   // Stat Card Component
   const StatCard = ({
     title,
@@ -233,6 +308,7 @@ const ExpensesTab: React.FC = () => {
                 <th className="py-3 px-4 text-left">Método de Pago</th>
                 <th className="py-3 px-4 text-left">Categoría</th>
                 <th className="py-3 px-4 text-left">Notas</th>
+                <th className="py-3 px-4 text-left">Impuesto (%)</th> {/* NUEVO */}
                 <th className="py-3 px-4 text-left">Recibo</th>
                 <th className="py-3 px-4 text-left">Acciones</th>
               </tr>
@@ -274,6 +350,7 @@ const ExpensesTab: React.FC = () => {
                                 : "Otros"}
                   </td>
                   <td className="py-3 px-4">{expense.notes || "N/A"}</td>
+                  <td className="py-3 px-4">{expense.taxPercent !== undefined ? `${expense.taxPercent}%` : "N/A"}</td> {/* NUEVO */}
                   <td className="py-3 px-4">
                     {expense.receipt ? (
                       <button
@@ -329,7 +406,7 @@ const ExpensesTab: React.FC = () => {
       {/* Chart Modal */}
       {isChartModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl relative">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl relative">
             <button
               onClick={() => setIsChartModalOpen(false)}
               className="absolute top-4 right-4 p-2 hover:bg-primary-50 rounded-full"
@@ -337,9 +414,26 @@ const ExpensesTab: React.FC = () => {
               <X className="h-5 w-5 text-primary-600" />
             </button>
             <h2 className="text-xl font-semibold text-primary-900 mb-4">
-              Gráfico de Gastos
+              Gráficos de Gastos
             </h2>
-            <Line data={chartData} options={chartOptions} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-base font-semibold mb-2">Gastos por Fecha</h3>
+                <Line data={chartData} options={chartOptions} />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold mb-2">Monto por Categoría</h3>
+                <div className="flex justify-center">
+                  <div style={{ width: 220, height: 220 }}>
+                    <Pie data={categoryChartData} options={{ maintainAspectRatio: false }} />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-base font-semibold mb-2">Monto por Tipo de Pago</h3>
+                <Bar data={paymentChartData} options={{ plugins: { legend: { display: false } } }} />
+              </div>
+            </div>
           </div>
         </div>
       )}

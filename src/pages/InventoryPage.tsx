@@ -243,7 +243,38 @@ const InventoryPage = () => {
                   <h2 className="text-lg sm:text-xl font-semibold text-primary-900 mb-4">
                     Órdenes por Categoría
                   </h2>
-                  <Pie data={ordersByCategoryData} options={chartOptions} />
+                  <div className="flex flex-row justify-center items-center gap-4">
+                    {/* Leyenda a la izquierda */}
+                    <div className="hidden sm:block">
+                      <ul className="space-y-2">
+                        {ordersByCategoryData.labels.map((label, idx) => (
+                          <li key={label} className="flex items-center space-x-2">
+                            <span
+                              className="inline-block w-4 h-4 rounded"
+                              style={{
+                                backgroundColor: ordersByCategoryData.datasets[0].backgroundColor[idx],
+                              }}
+                            ></span>
+                            <span className="text-sm text-primary-900">{label}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    {/* Gráfico circular */}
+                    <div style={{ width: 220, height: 220 }}>
+                      <Pie
+                        data={ordersByCategoryData}
+                        options={{
+                          ...chartOptions,
+                          plugins: {
+                            ...chartOptions.plugins,
+                            legend: { display: false }, // Oculta leyenda por defecto
+                          },
+                          maintainAspectRatio: false,
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Gráfica de Tendencia de Gastos Mensuales */}
