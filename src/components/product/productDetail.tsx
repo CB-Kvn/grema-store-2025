@@ -301,7 +301,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 <SwiperSlide key={index}>
                   <div className="h-20 sm:h-24 w-full cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors">
                     <img
-                      src={image.url[0]} // Acceder al primer elemento del array `url`
+                      src={image.url[index]} // Acceder al primer elemento del array `url`
                       alt={`${product.name} - Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
