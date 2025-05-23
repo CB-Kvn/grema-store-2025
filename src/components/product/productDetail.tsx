@@ -255,6 +255,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div className="space-y-4">
+            {/* Swiper principal */}
             <Swiper
               modules={[Navigation, Pagination, Thumbs]}
               thumbs={{ swiper: thumbsSwiper }}
@@ -262,7 +263,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               pagination={{ clickable: true }}
               className="h-[350px] xs:h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-lg overflow-hidden"
             >
-              {product.Images.map((image, index) => (
+              {product.Images[0]?.url.map((image, index) => (
                 <SwiperSlide key={index}>
                   <div
                     className="zoom-container w-full h-full"
@@ -273,14 +274,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                     onMouseLeave={(e) => handleMouseLeave(e.currentTarget)}
                   >
                     <img
-                      src={image.url[0]} // Acceder al primer elemento del array `url`
+                      src={image}
                       alt={`${product.name} - Vista ${index + 1}`}
                       className="zoom-image w-full h-full object-contain"
                     />
                     <div
                       className="zoom-overlay"
                       style={{
-                        backgroundImage: `url(${image.url[0]})`, // Acceder al primer elemento del array `url`
+                        backgroundImage: `url(${image})`,
                       }}
                     />
                   </div>
@@ -293,15 +294,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               //@ts-ignore
               onSwiper={setThumbsSwiper}
               spaceBetween={10}
-              slidesPerView={4}
+              slidesPerView={Math.min(product.Images[0]?.url.length || 1, 4)}
               modules={[Navigation, Thumbs]}
               className="h-20 sm:h-24"
             >
-              {product.Images[0].url.map((image, index) => (
+              {product.Images[0]?.url.map((image, index) => (
                 <SwiperSlide key={index}>
                   <div className="h-20 sm:h-24 w-full cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors">
                     <img
-                      src={image} // Acceder al primer elemento del array `url`
+                      src={image}
                       alt={`${product.name} - Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
