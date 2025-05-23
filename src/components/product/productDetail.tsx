@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination, Thumbs } from "swiper/modules";
@@ -36,7 +36,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const { getAllProducts, getProductById } = useProductService();
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
+  const [mainSwiper, setMainSwiper] = useState<any>(null); // Nuevo: referencia al Swiper principal
   const [quantity, setQuantity] = useState(1);
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
@@ -262,6 +263,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               navigation
               pagination={{ clickable: true }}
               className="h-[350px] xs:h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-lg overflow-hidden"
+              onSwiper={setMainSwiper} // Guarda la instancia del Swiper principal
             >
               {product.Images[0]?.url.map((image, index) => (
                 <SwiperSlide key={index}>
@@ -301,14 +303,19 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               {product.Images[0]?.url.map((image, index) => (
                 <SwiperSlide key={index}>
                   <div
-                    className="flex items-center justify-center"
-                    style={{ width: "80px", height: "80px" }} // Tamaño fijo para el thumbnail
+                    className="flex items-center justify-center cursor-pointer"
+                    style={{ width: "80px", height: "80px" }}
+                    onClick={() => {
+                      if (mainSwiper) {
+                        mainSwiper.slideTo(index);
+                      }
+                    }}
                   >
                     <img
                       src={image}
                       alt={`${product.name} - Miniatura ${index + 1}`}
                       className="object-cover rounded-lg"
-                      style={{ width: "70px", height: "70px" }} // Tamaño fijo para la imagen
+                      style={{ width: "70px", height: "70px" }}
                     />
                   </div>
                 </SwiperSlide>
