@@ -300,11 +300,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
             >
               {product.Images[0]?.url.map((image, index) => (
                 <SwiperSlide key={index}>
-                  <div className="h-20 sm:h-24 w-full cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors">
+                  <div
+                    className="flex items-center justify-center"
+                    style={{ width: "80px", height: "80px" }} // Tamaño fijo para el thumbnail
+                  >
                     <img
                       src={image}
                       alt={`${product.name} - Miniatura ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="object-cover rounded-lg"
+                      style={{ width: "70px", height: "70px" }} // Tamaño fijo para la imagen
                     />
                   </div>
                 </SwiperSlide>
