@@ -76,6 +76,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                 ? 'bg-primary-100 text-primary-900'
                 : 'text-primary-600 hover:bg-primary-50'
                 }`}
+              data-step="20"
+              data-intro="Tab Inventario: Gestiona el stock de este producto en las diferentes bodegas. Puedes agregar, quitar o mover stock."
             >
               <Package className="h-5 w-5 mr-2" />
               Inventario
@@ -86,6 +88,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                 ? 'bg-primary-100 text-primary-900'
                 : 'text-primary-600 hover:bg-primary-50'
                 }`}
+              data-step="21"
+              data-intro="Tab Descuentos: Configura y administra los descuentos especiales para este producto."
             >
               <Tag className="h-5 w-5 mr-2" />
               Descuentos
@@ -96,6 +100,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                 ? 'bg-primary-100 text-primary-900'
                 : 'text-primary-600 hover:bg-primary-50'
                 }`}
+              data-step="22"
+              data-intro="Tab Distribución: Mueve inventario entre bodegas de forma sencilla y rápida."
             >
               <Warehouse className="h-5 w-5 mr-2" />
               Distribución

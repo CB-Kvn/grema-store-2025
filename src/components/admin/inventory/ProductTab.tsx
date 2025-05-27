@@ -604,6 +604,24 @@ const ProductTab = () => {
                   tooltipClass: 'bg-white text-primary-900 shadow-xl border border-primary-200 rounded-xl p-6 text-base',
                   highlightClass: 'ring-4 ring-primary-400',
                 }).start();
+              } else if (isInventoryModalOpen) {
+                // Tour SOLO para los tabs del modal de inventario
+                introJs().setOptions({
+                  steps: [
+                    { element: '[data-step="20"]', intro: 'Tab Inventario: Gestiona el stock de este producto en las diferentes bodegas. Puedes agregar, quitar o mover stock.', position: 'bottom' },
+                    { element: '[data-step="21"]', intro: 'Tab Descuentos: Configura y administra los descuentos especiales para este producto.', position: 'bottom' },
+                    { element: '[data-step="22"]', intro: 'Tab Distribución: Mueve inventario entre bodegas de forma sencilla y rápida.', position: 'bottom' },
+                  ],
+                  scrollToElement: true,
+                  nextLabel: 'Siguiente',
+                  prevLabel: 'Anterior',
+                  doneLabel: 'Listo',
+                  skipLabel: 'Saltar',
+                  showProgress: true,
+                  showBullets: false,
+                  tooltipClass: 'bg-white text-primary-900 shadow-xl border border-primary-200 rounded-xl p-6 text-base',
+                  highlightClass: 'ring-4 ring-primary-400',
+                }).start();
               } else {
                 // Tour general de la página
                 introJs().setOptions({
@@ -624,6 +642,7 @@ const ProductTab = () => {
                   nextLabel: 'Siguiente',
                   prevLabel: 'Anterior',
                   doneLabel: 'Listo',
+                  skipLabel: 'Saltar',
                   showProgress: true,
                   showBullets: false,
                   tooltipClass: 'bg-white text-primary-900 shadow-xl border border-primary-200 rounded-xl p-6 text-base',
