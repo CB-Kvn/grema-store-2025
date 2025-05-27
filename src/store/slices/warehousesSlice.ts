@@ -103,6 +103,46 @@ const warehousesSlice = createSlice({
         item.warehouseId = action.payload.newWarehouseId; // Actualizar la bodega del item
       }
     },
+    transferStock: (
+      state,
+      action: PayloadAction<{
+        productId: number;
+        sourceWarehouseId: string;
+        targetWarehouseId: string;
+        quantity: number;
+      }>
+    ) => {
+      const { productId, sourceWarehouseId, targetWarehouseId, quantity } = action.payload;
+
+      // Buscar el item de bodega origen
+      const sourceItem = state.warehousesItems.stock.find(
+        item => item.location === sourceWarehouseId
+      );
+      // Buscar el item de bodega destino
+      const targetItem = state.warehousesItems.stock.find(
+        item => item.location === targetWarehouseId
+      );
+
+      // Restar del origen
+      if (sourceItem && sourceItem.quantity >= quantity) {
+        sourceItem.quantity -= quantity;
+      }
+
+      // Sumar al destino
+      if (targetItem) {
+        targetItem.quantity += quantity;
+      } else if (sourceItem) {
+        // Si no existe en el destino, crear el registro
+        state.warehousesItems.stock.push({
+          ...sourceItem,
+          id: `${productId}-${targetWarehouseId}`,
+          warehouseId: targetWarehouseId,
+          location: targetWarehouseId,
+          quantity: quantity,
+          lastUpdated: new Date().toISOString(),
+        });
+      }
+    },
   },
 });
 
@@ -120,7 +160,8 @@ export const {
   addWarehouseItems,
   clearItems,
   updateItemQuantity,
-  updateItemWarehouse
+  updateItemWarehouse,
+  transferStock
 } = warehousesSlice.actions;
 
 export const selectAllWarehouses = (state: RootState) => state.warehouses.warehouses;

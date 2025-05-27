@@ -46,7 +46,7 @@ export const useProductService = () => {
     return handleRequest(() => productService.delete(id));
   };
 
-  const updateInventory = async (id: number, data: { quantity: number; warehouseId: string }) => {
+  const updateInventory = async (id: string, data: { quantity: number; warehouseId: string }) => {
     return handleRequest(() => productService.updateInventory(id, data));
   };
 

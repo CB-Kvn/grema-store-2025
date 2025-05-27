@@ -1,226 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { Plus, Warehouse } from 'lucide-react';
+import React, { useState } from 'react';
+import { Dialog } from "@headlessui/react";
+import { X, Plus } from "lucide-react";
+import ProductImageUpload from '../helpers/ImageUpload';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
+import { z } from "zod";
+import { productSchema, useProductForm } from "@/hooks/useProductForm";
 
-import { Product } from '@/types';
-import { clearItemInventory, resetProductInventory, updateProductInventory } from '@/store/slices/productsSlice';
-import { Dialog } from "@headlessui/react";
-import { X } from "lucide-react";
-import ProductImageUpload from '../helpers/ImageUpload';
-import { productService } from '@/services/productService';
-import { warehouseService } from '@/services/warehouseService';
+// Esquema de validación con Zod
 
-interface ProductFormProps {
+export type ProductFormType = z.infer<typeof productSchema>;
+
+export interface ProductFormProps {
+  product: ProductFormType;
   onClose: () => void;
-  onSubmit: (product: Product) => void;
+  onSubmit: (product: ProductFormType) => void;
 }
 
-const ProductTab: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
-  const dispatch = useDispatch();
-  // Obtiene el producto current del store de Redux
-  const formData = useSelector((state: RootState) => state.products.itemInventory) ?? {};
-  // Estado para errores de validación
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  // Estado para el modal de previsualización de imagen
-  const [imageModal, setImageModal] = useState<{ open: boolean; url: string | null }>({ open: false, url: null });
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [pendingName, setPendingName] = useState<string>('');
-  const [loadingCreate, setLoadingCreate] = useState(false);
-  const warehouseInfo = useSelector((state: RootState) => state.warehouses.warehouses);
 
-  // Simula tu servicio real
-  const createProduct = async (name: string) => {
-    // Aquí deberías llamar a tu backend real
-    const response =  await productService.create({ name });
-    const warehouse = buildWarehouseItems(response.id);
 
-    console.log("Warehouse Items", warehouse);
-    await productService.createImage(JSON.stringify([]), response.id);
+const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit }) => {
+  const {
+    formData,
 
-    for (const item of warehouse) {
-      await warehouseService.addStock(item.warehouseId, response.id, {
-        quantity: 0,
-        location: item.location,
-        price: item.price,
-      } as any);
-    }
+    errors,
+    setErrors,
+    imageModal,
+    setImageModal,
+    showCreateModal,
 
-    const productNew = await productService.getById(response.id);
-    console.log("Product New", productNew);
-    const product = {
-      description: "",
-      category: "",
-      sku: "",
-      details: {},
-      Images: [
-        {
-          state: true,
-          url: "",
-          productId: response.id,
-        }
-      ],
-      WarehouseItem: warehouse,
-      filepaths: [{
-        state: true,
-        url: "",
-        productId: response.id,
-      }],
-    };
+    pendingName,
 
-  };
+    loadingCreate,
+    details,
+    cierre,
+    coloresCierre,
+    colores,
+    piedra,
+    handleInputChange,
+    handleDetailsChange,
+    handleSubmit,
+    handleNameBlur,
+    handleConfirmCreate,
+    handleCancelCreate,
+    isFormFilled,
+    normalizeFormData,
+    validate,
+    handleUpdateProduct,
+    generateUniqueSku,
+  } = useProductForm(product, onSubmit, onClose);
 
-  // Utilidad para construir WarehouseItem a partir de warehouseInfo y formData
-const  buildWarehouseItems =(productId: number) =>{
-  console.log("warehouseInf",warehouseInfo)
-  return warehouseInfo.map((warehouse) =>{
-   return {
-        warehouseId: warehouse.id,
-        minimumStock: warehouse.minimumStock,
-        location: warehouse.id,
-        price: formData.price,
-        status: "IN_STOCK",
-        discount: warehouse.discount ?? null,
-      }
-  }
- 
-  );
-}
-
-  // Dispara el modal al perder foco si es producto nuevo y hay nombre
-  const handleNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (!formData.id && value) {
-      setPendingName(value);
-      setShowCreateModal(true);
-    }
-  };
-
-  // Confirmación del modal
-  const handleConfirmCreate = async () => {
-    setLoadingCreate(true);
-    try {
-      const newProduct = await createProduct(pendingName);
-      // dispatch(updateProductInventory(newProduct));
-      // setShowCreateModal(false);
-      // setPendingName('');
-    } finally {
-      // setLoadingCreate(false);
-    }
-  };
-
-  // Cancelación del modal
-  const handleCancelCreate = () => {
-    setShowCreateModal(false);
-    setPendingName('');
-    dispatch(updateProductInventory({ name: '' }));
-  };
-
-  // Maneja las imágenes subidas y actualiza el store
-  const handleImagesUploaded = (uploadedImages: File[]) => {
-    const urls = uploadedImages.map(file => URL.createObjectURL(file));
-    let currentUrls = formData.Images?.flatMap((img: any) => img.url) || [];
-    let allUrls = [...currentUrls, ...urls].slice(0, 5);
-
-    const Images = allUrls.map((url, idx) => ({
-      id: idx + 1,
-      url: [url],
-      productId: formData.id || null,
-    }));
-
-    dispatch(updateProductInventory({ Images }));
-  };
-
-  // Genera un SKU único basado en nombre y categoría
-  const generateUniqueSku = () => {
-    const random = Math.floor(1000 + Math.random() * 9000).toString();
-    const namePart = formData.name?.slice(0, 3).toUpperCase() || 'PRD';
-    const categoryPart = formData.category?.slice(0, 3).toUpperCase() || 'GEN';
-    return `${namePart}-${categoryPart}-${random}`;
-  };
-
-  // Valida los campos del formulario y retorna los errores
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name) newErrors.name = 'El nombre es requerido';
-    if (!formData.price || formData.price <= 0) newErrors.price = 'El precio debe ser mayor a 0';
-    if (!formData.sku) newErrors.sku = 'El SKU es requerido';
-    if (!formData.category) newErrors.category = 'La categoría es requerida';
-    if (!formData.description) newErrors.description = 'La descripción es requerida';
-    if (!formData.details?.material) newErrors.material = 'El material es requerido';
-    if (!formData.details?.peso) newErrors.peso = 'El peso es requerido';
-    if (!formData.details?.largo || Number(formData.details?.largo) <= 0) {
-      newErrors.largo = 'El largo debe ser mayor a 0';
-    }
-    if (!formData.details?.pureza) {
-      newErrors.pureza = 'La pureza es requerida';
-    }
-    if (!formData.details?.certificado) {
-      newErrors.certificado = 'El certificado es requerido';
-    }
-
-    return newErrors;
-  };
-
-  // Maneja el envío del formulario
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const errors = validateForm();
-
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors);
-      return;
-    }
-
-    onSubmit(formData);
-    dispatch(resetProductInventory()); // Limpia el formulario después de enviarlo
-  };
-
-  // Actualiza un campo del producto en el store
-  const handleInputChange = (field: string, value: any) => {
-    dispatch(updateProductInventory({ [field]: value }));
-  };
-
-  // Actualiza un campo dentro de details en el store
-  const handleDetailsChange = (field: string, value: any) => {
-    dispatch(updateProductInventory({ details: { ...(formData.details || {}), [field]: value } }));
-  };
-
-  // Elimina una imagen específica por índice
-  const handleRemoveImage = (imgIdx: number, urlIdx: number) => {
-    const newImages = (formData.Images || []).map((img: any, i: number) => {
-      if (i === imgIdx) {
-        return {
-          ...img,
-          url: img.url.filter((_: any, uIdx: number) => uIdx !== urlIdx)
-        };
-      }
-      return img;
-    }).filter((img: any) => img.url.length > 0); // Elimina objetos Images sin urls
-    dispatch(updateProductInventory({ Images: newImages }));
-  };
-
-  // Valores por defecto para evitar errores de acceso
-  const details = formData.details || {};
-  const cierre = details.cierre || {};
-  const coloresCierre = cierre.colores || [];
-  const colores = details.color || [];
-  const piedras = details.piedra || [];
-
-  // Utilidad para saber si el formulario tiene información relevante
-  const isFormFilled = () => {
-    return (
-      !!formData.name &&
-      !!formData.category &&
-      !!formData.sku &&
-      !!formData.description 
-
-    );
-  };
 
   return (
     <>
@@ -230,7 +60,7 @@ const  buildWarehouseItems =(productId: number) =>{
         onClick={onClose}
       />
 
-      {/* Modal para ver imagen en grande, siempre encima del sidebar */}
+      {/* Modal para ver imagen en grande */}
       <Dialog open={imageModal.open} onClose={() => setImageModal({ open: false, url: null })} className="z-[100]">
         <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-[100]">
           <Dialog.Panel className="bg-white rounded-lg shadow-lg p-4 max-w-lg w-full relative z-[101]">
@@ -251,17 +81,13 @@ const  buildWarehouseItems =(productId: number) =>{
 
       {/* Modal lateral para el formulario */}
       <div className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto">
-        {/* Header del modal lateral */}
+        {/* Header */}
         <div className="sticky top-0 bg-white border-b border-primary-100 p-4 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-primary-900">
-            {formData.id ? 'Editar Producto' : 'Nuevo Producto'}
+            {formData.sku ? 'Editar Producto' : 'Nuevo Producto'}
           </h2>
           <button
-            onClick={() => {
-              onClose();
-              dispatch(resetProductInventory()); // Limpia el formulario al cerrar
-              dispatch(clearItemInventory());    // Limpia el itemInventory al cerrar
-            }}
+            onClick={onClose}
             className="p-2 hover:bg-primary-50 rounded-full"
           >
             <X className="h-5 w-5 text-primary-600" />
@@ -280,7 +106,7 @@ const  buildWarehouseItems =(productId: number) =>{
                 <Label htmlFor="name">Nombre del Producto</Label>
                 <Input
                   id="name"
-                  value={formData.name ?? ''}
+                  value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   onBlur={handleNameBlur}
                   className={errors.name ? 'border-red-500 w-full' : 'w-full'}
@@ -292,7 +118,7 @@ const  buildWarehouseItems =(productId: number) =>{
                 <Label htmlFor="category">Categoría</Label>
                 <select
                   id="category"
-                  value={formData.category ?? ''}
+                  value={formData.category}
                   onChange={(e) => handleInputChange('category', e.target.value)}
                   className={`w-full rounded-md border ${errors.category ? 'border-red-500' : 'border-input'} bg-background px-3 py-2`}
                 >
@@ -309,7 +135,7 @@ const  buildWarehouseItems =(productId: number) =>{
                 <Label htmlFor="sku">SKU</Label>
                 <Input
                   id="sku"
-                  value={formData.sku ?? ''}
+                  value={formData.sku}
                   onFocus={() => {
                     if (!formData.sku) {
                       const newSku = generateUniqueSku();
@@ -325,12 +151,18 @@ const  buildWarehouseItems =(productId: number) =>{
               <div>
                 <Label htmlFor="price">Precio</Label>
                 <Input
-                  type="number"
+                  type="text"
                   id="price"
-                  value={formData.price ?? 0}
-                  onChange={(e) => handleInputChange('price', Number(e.target.value))}
-                  min="0"
-                  step="0.01"
+                  value={formData.price === 0 ? '' : formData.price}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    const sanitized = value.split('.').length > 2
+                      ? value.replace(/\.+$/, '')
+                      : value;
+                    handleInputChange('price', sanitized);
+                  }}
+                  inputMode="decimal"
+                  pattern="[0-9]*"
                   className={errors.price ? 'border-red-500' : ''}
                 />
                 {errors.price && <p className="text-sm text-red-500 mt-1">{errors.price}</p>}
@@ -339,12 +171,18 @@ const  buildWarehouseItems =(productId: number) =>{
               <div>
                 <Label htmlFor="cost">Costo</Label>
                 <Input
-                  type="number"
+                  type="text"
                   id="cost"
-                  value={formData.cost ?? 0}
-                  onChange={(e) => handleInputChange('cost', Number(e.target.value))}
-                  min="0"
-                  step="0.01"
+                  value={formData.cost === 0 ? '' : formData.cost}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    const sanitized = value.split('.').length > 2
+                      ? value.replace(/\.+$/, '')
+                      : value;
+                    handleInputChange('cost', sanitized);
+                  }}
+                  inputMode="decimal"
+                  pattern="[0-9]*"
                   className={errors.cost ? 'border-red-500' : ''}
                 />
                 {errors.cost && <p className="text-sm text-red-500 mt-1">{errors.cost}</p>}
@@ -355,7 +193,7 @@ const  buildWarehouseItems =(productId: number) =>{
               <Label htmlFor="description">Descripción</Label>
               <textarea
                 id="description"
-                value={formData.description ?? ''}
+                value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={4}
                 className={`w-full rounded-md border ${errors.description ? 'border-red-500' : 'border-input'} bg-background px-3 py-2`}
@@ -368,25 +206,12 @@ const  buildWarehouseItems =(productId: number) =>{
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-primary-900">Imágenes</h3>
             <ProductImageUpload
-              images={
-                formData.Images
-                  ? formData.Images.filter((img: any) => img.state).flatMap((img: any) => img.url)
-                  : []
-              }
-              onAddImages={handleImagesUploaded}
-              onRemoveImage={(idx) => {
-                let allUrls = formData.Images?.flatMap((img: any) => img.url) || [];
-                allUrls = allUrls.filter((_: any, i: number) => i !== idx);
-                const Images = allUrls.map((url: string, i: number) => ({
-                  id: i + 1,
-                  url: [url],
-                  productId: formData.id || null,
-                }));
-                dispatch(updateProductInventory({ Images }));
-              }}
-              disabled={(formData.Images?.flatMap((img: any) => img.url).length || 0) >= 5}
+              disabled={!formData.id || (formData.Images?.flatMap((img: any) => img.url).length || 0) >= 5}
               onImageClick={(url) => setImageModal({ open: true, url })}
             />
+            {!formData.id && (
+              <p className="text-sm text-yellow-600">Primero debes crear el producto para poder subir imágenes.</p>
+            )}
             {(formData.Images?.flatMap((img: any) => img.url).length || 0) >= 5 && (
               <p className="text-sm text-red-500">Solo puedes subir hasta 5 imágenes.</p>
             )}
@@ -461,33 +286,28 @@ const  buildWarehouseItems =(productId: number) =>{
               <Label>Piedras</Label>
               <button
                 type="button"
-                onClick={() =>
-                  handleDetailsChange('piedra', [
-                    ...piedras,
-                    { nombre: '', tipo: '' }
-                  ])
-                }
+                onClick={() => handleDetailsChange('piedra', [...piedra, ''])}
                 className="text-sm text-primary-600 hover:text-primary-700"
               >
                 <Plus className="h-4 w-4 inline mr-1" />
                 Agregar Piedra
               </button>
             </div>
-            {piedras.map((piedra: any, index: number) => (
+            {piedra.map((nombre: string, index: number) => (
               <div key={index} className="flex items-center space-x-2">
                 <Input
                   placeholder="Nombre de la piedra"
-                  value={piedra.nombre}
+                  value={nombre}
                   onChange={e => {
-                    const nuevasPiedras = [...piedras];
-                    nuevasPiedras[index] = { ...nuevasPiedras[index], nombre: e.target.value };
+                    const nuevasPiedras = [...piedra];
+                    nuevasPiedras[index] = e.target.value;
                     handleDetailsChange('piedra', nuevasPiedras);
                   }}
                 />
                 <button
                   type="button"
                   onClick={() => {
-                    const nuevasPiedras = piedras.filter((_: any, i: number) => i !== index);
+                    const nuevasPiedras = piedra.filter((_, i) => i !== index);
                     handleDetailsChange('piedra', nuevasPiedras);
                   }}
                   className="p-2 hover:bg-primary-50 rounded-full"
@@ -616,58 +436,62 @@ const  buildWarehouseItems =(productId: number) =>{
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              onClick={() => {
-                onClose();
-                dispatch(resetProductInventory());
-                dispatch(clearItemInventory()); // Limpia el itemInventory al cancelar
-              }}
+              onClick={onClose}
               className="px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg"
             >
               Cancelar
             </button>
-            {isFormFilled() && (
+            {formData.id ? (
+              <button
+                type="button"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                onClick={async () => {
+                  const normalized = normalizeFormData(formData);
+                  console.log('Datos del formulario:', normalized);
+                  const errs = validate(normalized);
+                  console.log('Errores de validación:', errs);
+                  setErrors(errs);
+                  if (Object.keys(errs).length === 0) {
+                    await handleUpdateProduct(normalized);
+                    onClose();
+                  }
+                }}
+              >
+                Actualizar producto
+              </button>
+            ) : (
               <button
                 type="submit"
                 className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                disabled={!isFormFilled()}
               >
-                {formData.id ? 'Guardar Cambios' : 'Crear Producto'}
+                Crear Producto
               </button>
             )}
           </div>
         </form>
       </div>
 
-      {/* Modal de confirmación para crear producto */}
-      <Dialog open={showCreateModal} onClose={handleCancelCreate} className="z-[200]">
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-[200]">
-          <Dialog.Panel className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
-            <Dialog.Title className="text-lg font-semibold mb-2">¿Crear nuevo producto?</Dialog.Title>
-            <Dialog.Description className="mb-4">
-              Se creará un producto nuevo con el nombre: <span className="font-bold">{pendingName}</span>
-            </Dialog.Description>
-            <div className="flex justify-end space-x-2">
-              <button
-                type="button"
-                onClick={handleCancelCreate}
-                className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200"
-                disabled={loadingCreate}
-              >
-                No
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmCreate}
-                className="px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700"
-                disabled={loadingCreate}
-              >
-                Sí
-              </button>
+      {/* Modal para creación rápida */}
+      {showCreateModal && (
+        <Dialog open={showCreateModal} onClose={handleCancelCreate}>
+          <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+            <div className="bg-white p-6 rounded shadow-lg">
+              <p>¿Crear el producto "{pendingName}"?</p>
+              <div className="flex gap-4 mt-4">
+                <button onClick={handleConfirmCreate} disabled={loadingCreate} className="bg-primary-600 text-white px-4 py-2 rounded">
+                  Confirmar
+                </button>
+                <button onClick={handleCancelCreate} className="bg-gray-200 px-4 py-2 rounded">
+                  Cancelar
+                </button>
+              </div>
             </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
+          </div>
+        </Dialog>
+      )}
     </>
   );
 };
 
-export default ProductTab;
+export default ProductForm;

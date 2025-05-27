@@ -35,7 +35,7 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity }) => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
-  const { getAllProducts, getProductById } = useProductService();
+  const { getProductById } = useProductService();
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [mainSwiper, setMainSwiper] = useState<any>(null); // Nuevo: referencia al Swiper principal
   const [quantity, setQuantity] = useState(1);

@@ -1,35 +1,43 @@
 import React from "react";
+import { useDropzone } from "react-dropzone";
 import { Upload, X } from "lucide-react";
-import { productService } from "@/services";
-import { useAppSelector } from "@/hooks/useAppSelector";
 import { useProductImageState } from "@/hooks/useManageImages";
 
 interface ProductImageUploadProps {
-  images: string[];
-  onAddImages: (files: File[]) => void;
-  onRemoveImage: (index: number) => void;
   disabled?: boolean;
   onImageClick?: (url: string) => void;
 }
 
 const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
-  images,
-  onAddImages,
-  onRemoveImage,
   disabled = false,
   onImageClick
 }) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const itemInventory = useAppSelector((state) => state.products.itemInventory);
-  const { createImageState, deleteImageState } = useProductImageState()
-  // Maneja la selección de archivos y sube cada uno
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files).slice(0, 5 - images.length);
-      console.log("FILES", files);
-      createImageState(files);
-    }
-  };
+  const {
+    fileInputRef,
+    itemInventory,
+    deleteImageState,
+    handleFileChange,
+    images
+  } = useProductImageState();
+
+  const onDrop = React.useCallback(
+    (acceptedFiles: File[]) => {
+      if (!disabled && acceptedFiles.length > 0) {
+        handleFileChange({
+          target: { files: acceptedFiles }
+        } as unknown as React.ChangeEvent<HTMLInputElement>);
+      }
+    },
+    [disabled, handleFileChange]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+    disabled,
+    maxFiles: 5 - images.length,
+    noClick: true // Usamos nuestro propio botón para abrir el file dialog
+  });
 
   return (
     <div>
@@ -47,7 +55,6 @@ const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
               <button
                 type="button"
                 onClick={async () => {
-                  // Envía la url a deleteImageState
                   await deleteImageState(url, itemInventory.id);
                 }}
                 className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100"
@@ -62,28 +69,46 @@ const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
         <p className="text-sm text-gray-500 mb-2">No hay imágenes cargadas.</p>
       )}
 
-      {/* Botón para subir imágenes */}
+      {/* Área Drag & Drop */}
       {images.length < 5 && (
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={disabled}
-          className="block w-full border border-primary-300 text-primary-700 bg-white hover:bg-primary-50 hover:text-primary-900 rounded-md py-1.5 text-center text-sm font-medium transition-colors duration-200 cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 flex items-center justify-center gap-2"
+        <div
+          {...getRootProps()}
+          className={`w-full border-2 border-dashed rounded-md p-4 mb-2 flex flex-col items-center justify-center transition-colors
+            ${isDragActive ? 'border-primary-600 bg-primary-50' : 'border-primary-300 bg-white'}
+            ${disabled ? 'opacity-50 pointer-events-none' : ''}
+          `}
+          style={{ minHeight: 80, cursor: disabled ? 'not-allowed' : 'pointer' }}
         >
-          <Upload className="h-5 w-5 text-primary-600" />
-          <span>Subir Imagen</span>
-        </button>
+          <input {...getInputProps()} />
+          <Upload className="h-8 w-8 text-primary-600 mb-2" />
+          <span className="text-sm text-primary-700">
+            Arrastra y suelta imágenes aquí o&nbsp;
+            <span
+              tabIndex={0}
+              role="button"
+              className="underline text-primary-700 hover:text-primary-900 cursor-pointer"
+              onClick={e => {
+                e.stopPropagation();
+                // Dispara el click en el input de dropzone
+                const input = (e.currentTarget.parentElement?.parentElement as HTMLElement).querySelector('input[type="file"]');
+                if (input && !disabled) (input as HTMLInputElement).click();
+              }}
+              onKeyDown={e => {
+                if ((e.key === "Enter" || e.key === " ") && !disabled) {
+                  e.preventDefault();
+                  const input = (e.currentTarget.parentElement?.parentElement as HTMLElement).querySelector('input[type="file"]');
+                  if (input) (input as HTMLInputElement).click();
+                }
+              }}
+              aria-disabled={disabled}
+            >
+              selecciona desde tu dispositivo
+            </span>
+          </span>
+          <span className="text-xs text-gray-400 mt-1">Máximo 5 imágenes</span>
+        </div>
       )}
 
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        multiple
-        className="hidden"
-        disabled={disabled}
-      />
     </div>
   );
 };

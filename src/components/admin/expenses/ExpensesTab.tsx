@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Search,
   Calendar,
@@ -26,11 +26,9 @@ import {
 
 import { Input } from "@/components/ui/input";
 import NewExpenseModal from "@/components/admin/expenses/NewExpenseModal";
-import { useAppDispatch } from "@/hooks/useAppDispatch";
-import { setExpenses } from "@/store/slices/expensesSlice";
-import { expenseService } from "@/services/expenseService";
-import { Expense } from "@/types/expense";
-import { useAppSelector } from "@/hooks/useAppSelector";
+import EditExpenseModal from "@/components/admin/expenses/EditExpenseModal";
+import { useExpensesTab } from "@/hooks/useExpensesTab";
+
 
 ChartJS.register(
   CategoryScale,
@@ -43,165 +41,26 @@ ChartJS.register(
 );
 
 const ExpensesTab: React.FC = () => {
-  const [isNewExpenseModalOpen, setIsNewExpenseModalOpen] = useState(false);
-  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState("thisMonth");
-  const [searchTerm, setSearchTerm] = useState(""); // Estado para el término de búsqueda
-  const dispatch = useAppDispatch();
-  const expenses = useAppSelector((state) => state.expenses.items);
+  const {
+    isNewExpenseModalOpen,
+    setIsNewExpenseModalOpen,
+    isChartModalOpen,
+    setIsChartModalOpen,
+    selectedPeriod,
+    setSelectedPeriod,
+    searchTerm,
+    setSearchTerm,
+    filteredExpenses,
+    chartData,
+    chartOptions,
+    categoryChartData,
+    paymentChartData,
+    handleViewReceipt,
+    handleDeleteExpense,
+  } = useExpensesTab();
 
-  const handleViewReceipt = async (receiptUrl: string) => {
-  try {
-    await expenseService.downloadFile(receiptUrl);
-  } catch (error) {
-    console.error('Error en la solicitud:', error);
-  }
-};
-
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const response = await expenseService.getAll();
-        if (Array.isArray(response)) {
-          dispatch(setExpenses(response as Expense[]));
-        } else {
-          console.error("Invalid response format:", response);
-        }
-      } catch (error) {
-        console.error("Error al obtener los gastos:", error);
-      }
-    };
-
-    fetchExpenses();
-  }, [dispatch]);
-
-  const filteredExpenses = expenses
-    .filter((expense) => {
-      const expenseDate = new Date(expense.date);
-      const now = new Date();
-
-      if (selectedPeriod === "thisMonth") {
-        return (
-          expenseDate.getMonth() === now.getMonth() &&
-          expenseDate.getFullYear() === now.getFullYear()
-        );
-      } else if (selectedPeriod === "last3Months") {
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(now.getMonth() - 3);
-        return expenseDate >= threeMonthsAgo && expenseDate <= now;
-      } else if (selectedPeriod === "thisYear") {
-        return expenseDate.getFullYear() === now.getFullYear();
-      } else {
-        return true;
-      }
-    })
-    .filter((expense) =>
-      expense.description.toLowerCase().includes(searchTerm.toLowerCase())
-    ); // Filtrar por término de búsqueda
-
-  // Preparar datos para el gráfico
-  const chartData = {
-    labels: filteredExpenses.map((expense) =>
-      new Date(expense.date).toLocaleDateString()
-    ),
-    datasets: [
-      {
-        label: "Gastos",
-        data: filteredExpenses.map((expense) => expense.amount),
-        borderColor: "#4F46E5",
-        backgroundColor: "rgba(79, 70, 229, 0.2)",
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top" as const,
-      },
-      title: {
-        display: true,
-        text: "Gastos por Fecha",
-      },
-    },
-  };
-
-  // --- NUEVO: Preparar datos para gráficos adicionales ---
-
-  // 1. Monto de gastos por categoría
-  const categoryTotals: Record<string, number> = {};
-  filteredExpenses.forEach((expense) => {
-    categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
-  });
-  const categoryLabels = Object.keys(categoryTotals);
-  const categoryData = Object.values(categoryTotals);
-
-  // 2. Monto de gastos por tipo de pago
-  const paymentTotals: Record<string, number> = {};
-  filteredExpenses.forEach((expense) => {
-    paymentTotals[expense.paymentMethod] = (paymentTotals[expense.paymentMethod] || 0) + expense.amount;
-  });
-  const paymentLabels = Object.keys(paymentTotals);
-  const paymentData = Object.values(paymentTotals);
-
-  // --- FIN NUEVO ---
-
-  // --- NUEVO: Configuración de gráficos adicionales ---
-  const categoryChartData = {
-    labels: categoryLabels.map((cat) =>
-      cat === "MATERIALS"
-        ? "Materiales"
-        : cat === "TOOLS"
-        ? "Herramientas"
-        : cat === "MARKETING"
-        ? "Marketing"
-        : cat === "SALARIES"
-        ? "Salarios"
-        : cat === "RENT"
-        ? "Alquiler"
-        : cat === "SERVICES"
-        ? "Servicios"
-        : "Otros"
-    ),
-    datasets: [
-      {
-        label: "Monto por Categoría",
-        data: categoryData,
-        backgroundColor: [
-          "#6366F1", "#F59E42", "#10B981", "#F43F5E", "#FBBF24", "#3B82F6", "#A78BFA", "#F472B6"
-        ],
-      },
-    ],
-  };
-
-  const paymentChartData = {
-    labels: paymentLabels.map((pm) =>
-      pm === "CASH"
-        ? "Efectivo"
-        : pm === "CREDIT_CARD"
-        ? "Tarjeta de Crédito"
-        : pm === "DEBIT_CARD"
-        ? "Tarjeta de Débito"
-        : pm === "BANK_TRANSFER"
-        ? "Transferencia Bancaria"
-        : pm === "CHECK"
-        ? "Cheque"
-        : "Otro"
-    ),
-    datasets: [
-      {
-        label: "Monto por Tipo de Pago",
-        data: paymentData,
-        backgroundColor: [
-          "#6366F1", "#F59E42", "#10B981", "#F43F5E", "#FBBF24", "#3B82F6", "#A78BFA"
-        ],
-      },
-    ],
-  };
-
-  // --- FIN NUEVO ---
+  const [editingExpense, setEditingExpense] = React.useState<Expense | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = React.useState<Expense | null>(null);
 
   // Stat Card Component
   const StatCard = ({
@@ -228,20 +87,18 @@ const ExpensesTab: React.FC = () => {
 
   return (
     <>
-      {/* Statistics Cards */}
+      {/* Estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Total Gastos"
-          value={`₡${filteredExpenses
-            .reduce((sum, expense) => sum + expense.amount, 0)
-            .toFixed(2)}`}
+          value={`₡${filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0).toFixed(2)}`}
           icon={<Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
         />
         <StatCard
           title="Promedio por Gasto"
           value={`₡${(
             filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0) /
-            filteredExpenses.length || 0
+              filteredExpenses.length || 0
           ).toFixed(2)}`}
           icon={<Receipt className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
         />
@@ -260,8 +117,8 @@ const ExpensesTab: React.FC = () => {
             <Input
               type="text"
               placeholder="Buscar gastos..."
-              value={searchTerm} // Enlazar el estado del término de búsqueda
-              onChange={(e) => setSearchTerm(e.target.value)} // Actualizar el término de búsqueda
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -277,133 +134,82 @@ const ExpensesTab: React.FC = () => {
             <option value="thisYear">Este Año</option>
             <option value="all">Todos</option>
           </select>
-
           <button
             onClick={() => setIsNewExpenseModalOpen(true)}
             className="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
             <Plus className="h-5 w-5 text-white mr-2" />
-            <span>Agregar Gasto</span>
+            Nuevo Gasto
           </button>
-
           <button
             onClick={() => setIsChartModalOpen(true)}
-            className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50"
+            className="flex items-center px-3 py-2 bg-primary-50 text-primary-600 rounded-lg border border-primary-200 hover:bg-primary-100"
           >
             <BarChart2 className="h-5 w-5 text-primary-600 mr-2" />
-            <span>Ver Gráfico</span>
+            Ver Gráficos
           </button>
         </div>
       </div>
 
-      {/* Expenses Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-primary-50">
-              <tr>
-                <th className="py-3 px-4 text-left">Fecha</th>
-                <th className="py-3 px-4 text-left">Descripción</th>
-                <th className="py-3 px-4 text-left">Monto</th>
-                <th className="py-3 px-4 text-left">Método de Pago</th>
-                <th className="py-3 px-4 text-left">Categoría</th>
-                <th className="py-3 px-4 text-left">Notas</th>
-                <th className="py-3 px-4 text-left">Impuesto (%)</th> {/* NUEVO */}
-                <th className="py-3 px-4 text-left">Recibo</th>
-                <th className="py-3 px-4 text-left">Acciones</th>
+      {/* Tabla de gastos */}
+      <div className="overflow-x-auto rounded-lg shadow border border-primary-100">
+        <table className="min-w-full divide-y divide-primary-100">
+          <thead className="bg-primary-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-900">Fecha</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-900">Descripción</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-900">Categoría</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-900">Monto</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-900">Método de Pago</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-900">Recibo</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-primary-900">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-primary-100">
+            {filteredExpenses.map((expense) => (
+              <tr key={expense.id}>
+                <td className="px-4 py-3 whitespace-nowrap">{new Date(expense.date).toLocaleDateString()}</td>
+                <td className="px-4 py-3">{expense.description}</td>
+                <td className="px-4 py-3">{expense.category}</td>
+                <td className="px-4 py-3">₡{expense.amount.toFixed(2)}</td>
+                <td className="px-4 py-3">{expense.paymentMethod}</td>
+                <td className="px-4 py-3">
+                  {expense.receipt && (
+                    <button
+                      onClick={() => handleViewReceipt(expense.receipt)}
+                      className="flex items-center text-primary-600 hover:underline"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Ver Recibo
+                    </button>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => setEditingExpense(expense)}
+                    className="text-primary-600 hover:text-primary-800 mr-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setExpenseToDelete(expense)}
+                    className="text-red-600 hover:text-red-800 ml-1"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredExpenses.map((expense) => (
-                <tr key={expense.id} className="hover:bg-primary-50">
-                  <td className="py-3 px-4">
-                    {new Date(expense.date).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4">{expense.description}</td>
-                  <td className="py-3 px-4">${expense.amount.toFixed(2)}</td>
-                  <td className="py-3 px-4">
-                    {expense.paymentMethod === "CASH"
-                      ? "Efectivo"
-                      : expense.paymentMethod === "CREDIT_CARD"
-                        ? "Tarjeta de Crédito"
-                        : expense.paymentMethod === "DEBIT_CARD"
-                          ? "Tarjeta de Débito"
-                          : expense.paymentMethod === "BANK_TRANSFER"
-                            ? "Transferencia Bancaria"
-                            : expense.paymentMethod === "CHECK"
-                              ? "Cheque"
-                              : "Otro"}
-                  </td>
-                  <td className="py-3 px-4">
-                    {expense.category === "MATERIALS"
-                      ? "Materiales"
-                      : expense.category === "TOOLS"
-                        ? "Herramientas"
-                        : expense.category === "MARKETING"
-                          ? "Marketing"
-                          : expense.category === "SALARIES"
-                            ? "Salarios"
-                            : expense.category === "RENT"
-                              ? "Alquiler"
-                              : expense.category === "SERVICES"
-                                ? "Servicios"
-                                : "Otros"}
-                  </td>
-                  <td className="py-3 px-4">{expense.notes || "N/A"}</td>
-                  <td className="py-3 px-4">{expense.taxPercent !== undefined ? `${expense.taxPercent}%` : "N/A"}</td> {/* NUEVO */}
-                  <td className="py-3 px-4">
-                    {expense.receipt ? (
-                      <button
-                        onClick={() => handleViewReceipt(expense.receipt)}
-                        className="text-primary-600 hover:underline"
-                      >
-                        Ver Recibo
-                      </button>
-                    ) : (
-                      "No disponible"
-                    )}
-                  </td>
-                  <td className="py-3 px-4 flex space-x-2">
-                    {/* Botón Editar */}
-                    <button
-                      className="text-primary-600 hover:bg-primary-50 p-2 rounded-full"
-                      onClick={() => console.log("Editar", expense.id)}
-                      title="Editar"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
-
-                    {/* Botón Eliminar */}
-                    <button
-                      className="text-red-600 hover:bg-red-50 p-2 rounded-full"
-                      onClick={async () => {
-                        try {
-                          await expenseService.delete(expense.id); // Llama al servicio para eliminar el gasto
-                          dispatch(setExpenses(expenses.filter((e) => e.id !== expense.id))); // Actualiza el estado eliminando el gasto
-                          console.log("Gasto eliminado:", expense.id);
-                        } catch (error) {
-                          console.error("Error al eliminar el gasto:", error);
-                          alert("No se pudo eliminar el gasto. Inténtalo de nuevo.");
-                        }
-                      }}
-                      title="Eliminar"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* New Expense Modal */}
+      {/* Modal para nuevo gasto */}
       {isNewExpenseModalOpen && (
         <NewExpenseModal onClose={() => setIsNewExpenseModalOpen(false)} />
       )}
 
-      {/* Chart Modal */}
+      {/* Modal de gráficos */}
       {isChartModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl relative">
@@ -436,6 +242,46 @@ const ExpensesTab: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de confirmación para eliminar */}
+      {expenseToDelete && (
+        <>
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setExpenseToDelete(null)} />
+          <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl z-50 flex flex-col justify-center items-center p-6 rounded-lg m-auto">
+            <h2 className="text-lg font-semibold mb-4">¿Eliminar gasto?</h2>
+            <p className="mb-6 text-center">¿Estás seguro que deseas eliminar este gasto? Esta acción no se puede deshacer.</p>
+            <div className="flex justify-end gap-3 w-full">
+              <button
+                onClick={() => setExpenseToDelete(null)}
+                className="px-4 py-2 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  handleDeleteExpense(expenseToDelete.id);
+                  setExpenseToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Modal de edición de gasto */}
+      {editingExpense && (
+        <EditExpenseModal
+          expense={editingExpense}
+          onClose={() => setEditingExpense(null)}
+          onExpenseUpdated={(updated) => {
+            // Aquí actualiza el gasto en tu store o backend
+            setEditingExpense(null);
+          }}
+        />
       )}
     </>
   );

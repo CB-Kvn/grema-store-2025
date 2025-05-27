@@ -9,6 +9,13 @@ export const Networking = () => {
     setIsOpen(!isOpen);
   };
 
+  // Ocultar el botón si la URL contiene /#/admin/
+  const isAdminRoute =
+    typeof window !== "undefined" &&
+    window.location.href.includes("/admin/");
+
+  if (isAdminRoute) return null;
+
   return (
     <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center space-y-4">
       {/* Botón principal */}

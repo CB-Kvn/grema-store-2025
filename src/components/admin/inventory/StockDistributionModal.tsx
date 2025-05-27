@@ -4,6 +4,8 @@ import { X, AlertTriangle } from 'lucide-react';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { selectAllWarehouses } from '@/store/slices/warehousesSlice';
+import { useStockDistributionModal } from '@/hooks/useStockDistributionModal';
+
 
 
 interface StockDistributionModalProps {
@@ -25,51 +27,14 @@ const StockDistributionModal: React.FC<StockDistributionModalProps> = ({
   onSave,
 }) => {
   const warehouses = useSelector(selectAllWarehouses);
-  const [distribution, setDistribution] = useState<WarehouseDistribution[]>([]);
-  const [error, setError] = useState<string>('');
 
-  useEffect(() => {
-    // Initialize distribution with available warehouses
-    const initialDistribution = warehouses.map(warehouse => {
-      const item = warehouse.items.find(item => item.productId === productId);
-      return {
-        warehouseId: warehouse.id,
-        quantity: 0,
-        available: item?.quantity || 0,
-      };
-    });
-    setDistribution(initialDistribution);
-  }, [warehouses, productId]);
-
-  const handleQuantityChange = (warehouseId: string, newQuantity: number) => {
-    const warehouse = warehouses.find(w => w.id === warehouseId);
-    const item = warehouse?.items.find(item => item.productId === productId);
-    const available = item?.quantity || 0;
-
-    if (newQuantity > available) {
-      setError(`No hay suficiente stock en ${warehouse?.name}`);
-      return;
-    }
-
-    setDistribution(prev =>
-      prev.map(d =>
-        d.warehouseId === warehouseId ? { ...d, quantity: newQuantity } : d
-      )
-    );
-    setError('');
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const totalDistributed = distribution.reduce((sum, d) => sum + d.quantity, 0);
-    if (totalDistributed !== quantity) {
-      setError(`La cantidad total debe ser igual a ${quantity}`);
-      return;
-    }
-
-    onSave(distribution);
-  };
+  const {
+    transferStates,
+    setTransferStates,
+    handleTransfer,
+    distribution, 
+    setDistribution
+  } = useStockDistributionModal({ productId, warehouses, onClose, onSave });
 
   return (
     <>
@@ -93,74 +58,82 @@ const StockDistributionModal: React.FC<StockDistributionModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="bg-primary-50 p-4 rounded-lg">
-            <div className="flex items-center justify-between">
-              <span className="text-primary-900">Cantidad Total Requerida:</span>
-              <span className="font-medium text-primary-900">{quantity}</span>
-            </div>
-          </div>
+        <div className="p-6 space-y-6">
+          {warehouses.map(warehouse => {
+            const warehouseStock = warehouse.items.find(item => item.productId === productId);
+            const transferState = transferStates[warehouse.id] || { target: '', quantity: 0 };
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-center text-red-700">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                {error}
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-4">
-            {warehouses.map(warehouse => {
-              const item = warehouse.items.find(item => item.productId === productId);
-              const available = item?.quantity || 0;
-              const dist = distribution.find(d => d.warehouseId === warehouse.id);
-
-              return (
-                <div key={warehouse.id} className="bg-white border border-primary-100 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-medium text-primary-900">{warehouse.name}</h3>
-                      <p className="text-sm text-primary-600">{warehouse.location}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-primary-600">Stock Disponible</p>
-                      <p className="font-medium text-primary-900">{available}</p>
-                    </div>
-                  </div>
-
+            return (
+              <div key={warehouse.id} className="bg-white border border-primary-100 rounded-lg p-4">
+                <div className="flex justify-between items-start">
                   <div>
-                    <Label>Cantidad a Tomar</Label>
+                    <h3 className="font-medium text-primary-900">{warehouse.name}</h3>
+                    <p className="text-sm text-primary-600">{warehouse.location}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-primary-600">Stock Actual</p>
+                    <p className="font-medium text-primary-900">{warehouseStock?.quantity || 0}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Transferir a</Label>
+                    <select
+                      className="w-full mt-1 rounded-lg border border-primary-200 p-2"
+                      value={transferState.target}
+                      onChange={e => {
+                        setTransferStates(prev => ({
+                          ...prev,
+                          [warehouse.id]: { ...transferState, target: e.target.value }
+                        }));
+                      }}
+                    >
+                      <option value="" disabled>Seleccionar bodega</option>
+                      {warehouses
+                        .filter(w => w.id !== warehouse.id)
+                        .map(w => (
+                          <option key={w.id} value={w.id}>{w.name}</option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <Label>Cantidad</Label>
                     <Input
                       type="number"
                       min="0"
-                      max={available}
-                      value={dist?.quantity || 0}
-                      onChange={(e) => handleQuantityChange(warehouse.id, parseInt(e.target.value) || 0)}
-                      className="mt-1"
+                      max={warehouseStock?.quantity || 0}
+                      value={transferState.quantity}
+                      onChange={e => {
+                        setTransferStates(prev => ({
+                          ...prev,
+                          [warehouse.id]: { ...transferState, quantity: parseInt(e.target.value) || 0 }
+                        }));
+                      }}
                     />
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-            >
-              Guardar Distribución
-            </button>
-          </div>
-        </form>
+                <div className="flex justify-end mt-2">
+                  <button
+                    type="button"
+                    className="px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 text-sm"
+                    disabled={
+                      !transferState.target ||
+                      !transferState.quantity ||
+                      transferState.quantity > (warehouseStock?.quantity || 0)
+                    }
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      await handleTransfer(warehouse, transferState);
+                    }}
+                  >
+                    Transferir
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </>
   );

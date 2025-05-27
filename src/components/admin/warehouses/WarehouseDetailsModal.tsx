@@ -2,6 +2,8 @@ import React from 'react';
 import { X, MapPin, Phone, Mail, User, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Warehouse } from '@/types';
+import { useWarehouseDetailsModal } from '@/hooks/useWarehouseDetailsModal';
+
 
 interface WarehouseDetailsModalProps {
   warehouse: Warehouse;
@@ -9,17 +11,13 @@ interface WarehouseDetailsModalProps {
 }
 
 const WarehouseDetailsModal: React.FC<WarehouseDetailsModalProps> = ({ warehouse, onClose }) => {
-  const statusColors = {
-    active: 'bg-green-100 text-green-800',
-    inactive: 'bg-gray-100 text-gray-800',
-    maintenance: 'bg-yellow-100 text-yellow-800',
-  };
-
-  const itemStatusColors = {
-    in_stock: 'bg-green-100 text-green-800',
-    low_stock: 'bg-yellow-100 text-yellow-800',
-    out_of_stock: 'bg-red-100 text-red-800',
-  };
+  const {
+    statusColors,
+    itemStatusColors,
+    occupancyPercent,
+    availableSpace,
+    formattedLastInventoryDate,
+  } = useWarehouseDetailsModal(warehouse);
 
   return (
     <>
@@ -98,14 +96,14 @@ const WarehouseDetailsModal: React.FC<WarehouseDetailsModalProps> = ({ warehouse
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-primary-900">Ocupación Actual</span>
                   <span className="font-medium text-primary-900">
-                    {((warehouse.currentOccupancy / warehouse.capacity) * 100).toFixed(1)}%
+                    {occupancyPercent}%
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-primary-600 rounded-full h-2"
                     style={{
-                      width: `${(warehouse.currentOccupancy / warehouse.capacity) * 100}%`
+                      width: `${occupancyPercent}%`
                     }}
                   />
                 </div>
@@ -121,7 +119,7 @@ const WarehouseDetailsModal: React.FC<WarehouseDetailsModalProps> = ({ warehouse
               <div className="flex justify-between items-center">
                 <span className="text-primary-900">Espacio Disponible</span>
                 <span className="font-medium">
-                  {warehouse.capacity - warehouse.currentOccupancy} unidades
+                  {availableSpace} unidades
                 </span>
               </div>
             </div>
@@ -185,9 +183,7 @@ const WarehouseDetailsModal: React.FC<WarehouseDetailsModalProps> = ({ warehouse
               <div>
                 <p className="text-sm text-primary-600">Último Inventario</p>
                 <p className="font-medium">
-                  {warehouse.lastInventoryDate
-                    ? format(new Date(warehouse.lastInventoryDate), 'dd/MM/yyyy')
-                    : 'No disponible'}
+                  {formattedLastInventoryDate}
                 </p>
               </div>
               {warehouse.notes && (

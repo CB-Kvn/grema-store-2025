@@ -9,6 +9,7 @@ import {
 } from "@/store/slices/productsSlice";
 import { useAppDispatch } from "./useAppDispatch";
 import { useAppSelector } from "./useAppSelector";
+import React from "react";
 
 /**
  * Hook para actualizar el estado de una imagen (por ejemplo, eliminar o activar/desactivar)
@@ -17,6 +18,16 @@ import { useAppSelector } from "./useAppSelector";
 export function useProductImageState() {
   const dispatch = useAppDispatch();
   const itemInventory = useAppSelector((state: RootState) => state.products.itemInventory);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const images = itemInventory?.Images[0].url || [];
+
+  // Maneja la selección de archivos y sube cada uno
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files).slice(0, 5 - images.length);
+      createImageState(files);
+    }
+  };
 
 
   /**
@@ -80,5 +91,12 @@ export function useProductImageState() {
 
   };
 
-  return { createImageState, deleteImageState };
+  return {
+    fileInputRef,
+    itemInventory,
+    createImageState,
+    deleteImageState,
+    handleFileChange,
+    images
+  };
 }

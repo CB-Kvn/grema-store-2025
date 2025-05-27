@@ -3,16 +3,11 @@ import { X, Plus, Package, Warehouse, Tag, AlertTriangle } from 'lucide-react';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import type { Product, Warehouse as WarehouseType, Discount, WarehouseItem } from '@/types';
-import { useAppDispatch } from '@/hooks/useAppDispatch';
-import { addWarehouseItems, clearItems, setWarehouseItems, updateItemQuantity } from '@/store/slices/warehousesSlice';
-import { useAppSelector } from '@/hooks/useAppSelector';
-import { useAlert } from '@/context/AlertContext'; // Importar el hook de alertas
-import { add } from 'date-fns';
-import { productService } from '@/services/productService'; // Asegúrate de importar el servicio
+import { setWarehouseItems } from '@/store/slices/warehousesSlice';
+import { useInventoryManagementModal } from '@/hooks/useInventoryManagementModal';
 
 interface InventoryManagementModalProps {
   product: Product;
-  warehouses: WarehouseType[];
   onClose: () => void;
   onSave: (data: {
     inventory: { quantity: number; warehouseId: string; price?: string; productionCost?: string }[];
@@ -22,64 +17,33 @@ interface InventoryManagementModalProps {
 
 const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
   product,
-  warehouses,
   onClose,
   onSave,
 }) => {
-  const dispatch = useAppDispatch();
-  const [activeTab, setActiveTab] = useState<'inventory' | 'discount' | 'distribution'>('inventory');
-  const [inventory, setInventory] = useState<{ quantity: number; location: string; price?: string; productionCost?: string }[]>([]);
-  const warehouseItems = useAppSelector((state) => state.warehouses.warehousesItems);
-  const [discount, setDiscount] = useState<Partial<Discount>>({
-    type: 'PERCENTAGE',
-    value: 0,
-    startDate: new Date().toISOString().split('T')[0],
-    isActive: true,
-  });
-  const { showAlert } = useAlert(); // Usar el hook de alertas
 
-  // Estado local para transferencias
-  const [transferStates, setTransferStates] = useState<{ [warehouseId: string]: { target: string; quantity: number } }>({});
+  const {
+    activeTab,
+    setActiveTab,
+    inventory,
+    setInventory,
+    discount,
+    setDiscount,
+    transferStates,
+    setTransferStates,
+    handleSubmit,
+    handleUpdateQuantity,
+    handleTransfer,
+    warehouses,
+    warehouseItems,
+    showAlert,
+    handleAddStock,
+    handleChangeWarehouse,
+    addQuantities,
+    handleChangeAddQty,
+    handleRemoveStock,
+    clearAddQty
+  } = useInventoryManagementModal({ product, onClose, onSave });
 
-  const handleSubmit = (e: React.FormEvent) => {
-
-    e.preventDefault();
-
-    // Actualizar el slice con los valores locales
-    dispatch(
-      setWarehouseItems({
-        stock: inventory as WarehouseItem[],
-        discount: discount as Discount,
-      })
-    );
-
-    // Llamar a la función onSave
-    onSave({
-      inventory,
-      discount: discount as Discount,
-    });
-
-    // Cerrar el modal
-    onClose();
-  };
-
-  const handleUpdateQuantity = (warehouseId: string, itemId: string, quantity: number) => {
-    console.log('Updating quantity:', { warehouseId, itemId, quantity,product });
-    dispatch(updateItemQuantity({ warehouseId, itemId, quantity }));
-  };
-
-  useEffect(() => {
-    // Crear una copia independiente de los valores del slice
-    setInventory(JSON.parse(JSON.stringify(warehouseItems.stock || [])));
-    setDiscount(JSON.parse(JSON.stringify(warehouseItems.discount || {})));
-  }, [warehouseItems]);
-
-  useEffect(() => {
-    // Limpiar el estado del modal al cerrarlo
-    return () => {
-      dispatch(clearItems());
-    };
-  }, []);
 
   return (
     <>
@@ -109,8 +73,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
             <button
               onClick={() => setActiveTab('inventory')}
               className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'inventory'
-                  ? 'bg-primary-100 text-primary-900'
-                  : 'text-primary-600 hover:bg-primary-50'
+                ? 'bg-primary-100 text-primary-900'
+                : 'text-primary-600 hover:bg-primary-50'
                 }`}
             >
               <Package className="h-5 w-5 mr-2" />
@@ -119,8 +83,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
             <button
               onClick={() => setActiveTab('discount')}
               className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'discount'
-                  ? 'bg-primary-100 text-primary-900'
-                  : 'text-primary-600 hover:bg-primary-50'
+                ? 'bg-primary-100 text-primary-900'
+                : 'text-primary-600 hover:bg-primary-50'
                 }`}
             >
               <Tag className="h-5 w-5 mr-2" />
@@ -129,8 +93,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
             <button
               onClick={() => setActiveTab('distribution')}
               className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'distribution'
-                  ? 'bg-primary-100 text-primary-900'
-                  : 'text-primary-600 hover:bg-primary-50'
+                ? 'bg-primary-100 text-primary-900'
+                : 'text-primary-600 hover:bg-primary-50'
                 }`}
             >
               <Warehouse className="h-5 w-5 mr-2" />
@@ -145,52 +109,26 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-primary-900">Gestión de Stock</h3>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Validar que no se puedan agregar más stocks que bodegas
-                    if (inventory.length >= warehouses.length) {
-                      showAlert('No puedes agregar más stocks que bodegas disponibles.', 'error');
-                      return;
-                    }
-
-                    // Validar que no exista un stock sin asignar bodega
-                    if (inventory.some((item) => item.location === '')) {
-                      showAlert('Ya existe un stock sin asignar bodega. Por favor, completa ese registro antes de agregar otro.', 'error');
-                      return;
-                    }
-
-                    // Crear un nuevo stock
-                    const newStock = { quantity: 0, location: '', price: '', productionCost: '' };
-
-                    // Actualizar el estado local
-                    setInventory([...inventory, newStock]);
-
-                    // Reflejar el cambio en el slice
-                    dispatch(setWarehouseItems({stock: [...inventory, newStock] as any, discount: discount as Discount}));
-
-                    showAlert('Nuevo stock agregado correctamente.', 'success');
-                  }}
-                  className="flex items-center text-primary-600 hover:text-primary-700"
-                >
-                  <Plus className="h-5 w-5 mr-1" />
-                  Agregar Stock
-                </button>
+                {/* Ocultar el botón si se alcanzó el límite */}
+                {inventory.length < warehouses.length && (
+                  <button
+                    type="button"
+                    onClick={handleAddStock}
+                    className="flex items-center text-primary-600 hover:text-primary-700"
+                  >
+                    <Plus className="h-5 w-5 mr-1" />
+                    Agregar Stock
+                  </button>
+                )}
               </div>
 
               {inventory.map((item, index) => (
                 <div key={index} className="bg-primary-50 p-4 rounded-lg space-y-4">
-
                   <div className="flex justify-between items-center">
                     <h4 className="font-medium text-primary-900">Stock #{index + 1}</h4>
                     <button
                       type="button"
-                      onClick={() => {
-                        const newInventory = [...inventory];
-                        newInventory.splice(index, 1);
-                        setInventory(newInventory);
-                        dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
-                      }}
+                      onClick={() => handleRemoveStock(index)}
                       className="text-red-600 hover:text-red-700"
                     >
                       <X className="h-5 w-5" />
@@ -200,21 +138,9 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                     <Label>Bodega</Label>
                     <select
                       value={item.location}
-                      onChange={(e) => {
-                        const newWarehouseId = e.target.value;
-
-                        // Validar que no exista otro stock con la misma bodega
-                        if (inventory.some((inv, i) => inv.location === newWarehouseId && i !== index)) {
-                          showAlert('Ya existe un stock asignado a esta bodega. Por favor, selecciona otra.', 'error');
-                          return;
-                        }
-
-                        const newInventory = [...inventory];
-                        newInventory[index].location = newWarehouseId;
-                        setInventory(newInventory);
-                        dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
-                      }}
+                      onChange={e => handleChangeWarehouse(e.target.value, index)}
                       className="w-full mt-1 rounded-lg border border-primary-200 p-2"
+                      disabled={inventory.length >= warehouses.length}
                     >
                       <option value="">Seleccionar bodega</option>
                       {warehouses.map((warehouse) => (
@@ -233,15 +159,29 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
 
                     <div>
                       <Label>Agregar Cantidad</Label>
-                      <Input
-                        type="number"
-                        onBlur={(e) => {
-                          const newQuantity = parseInt(e.target.value) || 0;
-                          handleUpdateQuantity(item.location, product.id, item.quantity + newQuantity); // Llamar a la función para actualizar la cantidad
-                        }}
-                        className="w-full mt-1 rounded-lg border border-primary-200 p-2"
-                        min="0"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          value={addQuantities[index] || 0}
+                          onChange={e => handleChangeAddQty(index, Number(e.target.value))}
+                          className="w-full mt-1 rounded-lg border border-primary-200 p-2"
+                          min="0"
+                        />
+                        <button
+                          type="button"
+                          className="px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 text-sm"
+                          onClick={() => {
+                            if ((addQuantities[index] || 0) > 0) {
+                              handleUpdateQuantity(item.location, product.id, item.quantity + (addQuantities[index] || 0));
+                              clearAddQty(index); // Limpiar input después de agregar
+                            } else {
+                              showAlert('Ingresa una cantidad válida.', 'error');
+                            }
+                          }}
+                        >
+                          Agregar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -351,7 +291,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
               </div>
 
               {warehouses.map(warehouse => {
-                const warehouseStock = warehouse.items.find(item => item.productId === product.id);
+                const warehouseStock = warehouseItems.stock.find(item => item.location === warehouse.id);
                 const transferState = transferStates[warehouse.id] || { target: '', quantity: 0 };
                 return (
                   <div key={warehouse.id} className="bg-white border border-primary-100 rounded-lg p-4">
@@ -413,25 +353,11 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                           !transferState.quantity ||
                           transferState.quantity > (warehouseStock?.quantity || 0)
                         }
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.preventDefault();
                           // Recuperar la data necesaria para la transferencia
                           console.log('Transferir stock:', {}, transferState);
-                          const transferData = {
-                            sourceWarehouseId: warehouse.id,
-                            targetWarehouseId: transferState.target,
-                            quantity: transferState.quantity,
-                          };
-                          try {
-                            await productService.transferStock(product.id, transferData);
-                            showAlert('Transferencia realizada correctamente.', 'success');
-                            // Opcional: refrescar datos o limpiar el estado de transferencia
-                            setTransferStates(prev => ({
-                              ...prev,
-                              [warehouse.id]: { target: '', quantity: 0 }
-                            }));
-                          } catch (err) {
-                            showAlert('Error al transferir stock.', 'error');
-                          }
+                          handleTransfer(warehouse, transferState);
                         }}
                       >
                         Transferir
@@ -444,7 +370,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-4 pt-4 border-t border-primary-100">
+          {/* <div className="flex justify-end space-x-4 pt-4 border-t border-primary-100">
             <button
               type="button"
               onClick={onClose}
@@ -458,7 +384,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
             >
               Guardar Cambios
             </button>
-          </div>
+          </div> */}
         </form>
       </div>
     </>

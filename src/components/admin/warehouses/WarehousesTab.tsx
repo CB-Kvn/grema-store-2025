@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import {
   Warehouse as WarehouseIcon, Search, Filter, Plus, ArrowUpDown,
   Download, Upload, AlertTriangle, CheckCircle2,
@@ -18,13 +17,10 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Input } from '../../ui/input';
-import type { Warehouse } from '@/types';
-import { selectAllWarehouses, setWarehouse } from '@/store/slices/warehousesSlice';
 import WarehouseDetailsModal from './WarehouseDetailsModal';
 import EditWarehouseModal from './EditWarehouseModal';
 import AddWarehouseModal from './AddWarehouseModal';
-import { warehouseService } from '@/services/warehouseService';
-import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useWarehousesTab } from '@/hooks/useWarehousesTab';
 
 ChartJS.register(
   CategoryScale,
@@ -37,43 +33,24 @@ ChartJS.register(
 );
 
 const WarehousesTab = () => {
-  const dispatch = useAppDispatch();
-  const warehouses = useSelector(selectAllWarehouses);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  // const [showMobileActions, setShowMobileActions] = useState(false);
-
-  // Filter warehouses
-  const filteredWarehouses = warehouses.filter(warehouse => {
-    const matchesSearch =
-      warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      warehouse.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
-
-  // Calculate statistics
-  const totalCapacity = warehouses.reduce((sum, w) => sum + w.capacity, 0);
-  const totalOccupancy = warehouses.reduce((sum, w) => sum + w.currentOccupancy, 0);
-  const averageOccupancy = totalCapacity > 0 ? (totalOccupancy / totalCapacity) * 100 : 0;
-  const lowStockItems = warehouses.reduce((count, w) =>
-    count + w.items.filter(i => i.status === 'low_stock').length, 0
-  );
-
-  const handleViewDetails = (warehouse: Warehouse) => {
-    setSelectedWarehouse(warehouse);
-    setIsDetailsModalOpen(true);
-  };
-
-  const handleEdit = (warehouse: Warehouse) => {
-    setSelectedWarehouse(warehouse);
-    setIsEditModalOpen(true);
-  };
-
-
-
+  const {
+    warehouses,
+    searchQuery,
+    setSearchQuery,
+    selectedWarehouse,
+    setSelectedWarehouse,
+    isDetailsModalOpen,
+    setIsDetailsModalOpen,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    isAddModalOpen,
+    setIsAddModalOpen,
+    filteredWarehouses,
+    averageOccupancy,
+    lowStockItems,
+    handleViewDetails,
+    handleEdit,
+  } = useWarehousesTab();
 
   return (
     <div className="space-y-6">
@@ -185,7 +162,6 @@ const WarehousesTab = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {/* Primary Action - Always Visible */}
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
@@ -193,8 +169,6 @@ const WarehousesTab = () => {
             <Plus className="h-5 w-5 mr-2" />
             <span>Nuevo Almacén</span>
           </button>
-
-          {/* Secondary Actions - Hidden on Mobile */}
           <div className="hidden sm:flex items-center space-x-2">
             <button className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50">
               <Filter className="h-5 w-5 text-primary-600 mr-2" />

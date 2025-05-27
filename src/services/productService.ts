@@ -28,7 +28,7 @@ export const productService = {
     return response.data;
   },
 
-  updateInventory: async (id: number, data: {
+  updateInventory: async (id: string, data: {
     quantity: number;
     warehouseId: string;
   }) => {
