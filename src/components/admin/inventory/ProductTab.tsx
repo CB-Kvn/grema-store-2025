@@ -17,6 +17,9 @@ import { productService } from '@/services/productService';
 import { warehouseService } from '@/services/warehouseService';
 import { addWarehouseItems, setWarehouseItems } from '@/store/slices/warehousesSlice';
 import { useProductService } from '@/hooks/useProductService';
+import introJs from 'intro.js';
+import 'intro.js/introjs.css';
+import { Tooltip } from '@/components/ui/tooltip';
 
 const ProductTab = () => {
   const dispatch = useDispatch();
@@ -179,7 +182,10 @@ const ProductTab = () => {
         </div>
         {/* Botones flotantes a la derecha */}
         <div className="fixed right-8 bottom-8 z-50 flex flex-col gap-3 lg:static lg:flex-row lg:gap-2">
+          {/* Botón "Nuevo" */}
           <Button
+            data-intro="Haz clic aquí para agregar un nuevo producto."
+            data-step="1"
             onClick={() => {
               setSelectedProduct(null);
               setIsModalOpen(true);
@@ -201,7 +207,11 @@ const ProductTab = () => {
           </Button>
         </div>
         {/* Barra de filtros */}
-        <div className="flex-1 lg:max-w-xs">
+        <div
+          className="flex-1 lg:max-w-xs"
+          data-intro="Filtra los productos por stock, antigüedad y más."
+          data-step="2"
+        >
           <Select
             onValueChange={(filter) => {
               if (filter === 'with-stock') {
@@ -349,7 +359,11 @@ const ProductTab = () => {
       )}
 
       {/* Tabla de productos */}
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto"
+        data-intro="Aquí puedes ver, editar o eliminar productos."
+        data-step="3"
+      >
         <table className="w-full">
           <thead>
             <tr className="bg-primary-50">
@@ -469,6 +483,8 @@ const ProductTab = () => {
                         size="icon"
                         className="p-1 hover:bg-primary-50 rounded"
                         title="Editar Producto"
+                        data-intro="Edita el producto seleccionado."
+                        data-step="4"
                       >
                         <Edit className="h-4 w-4 text-primary-600" />
                       </Button>
@@ -478,6 +494,8 @@ const ProductTab = () => {
                         size="icon"
                         className="p-1 hover:bg-primary-50 rounded"
                         title="Gestionar Inventario"
+                        data-intro="Gestiona el inventario de este producto."
+                        data-step="5"
                       >
                         <Package className="h-4 w-4 text-primary-600" />
                       </Button>
@@ -487,6 +505,8 @@ const ProductTab = () => {
                         size="icon"
                         className="p-1 hover:bg-primary-50 rounded"
                         title="Eliminar Producto"
+                        data-intro="Elimina el producto de la tienda."
+                        data-step="6"
                       >
                         <Trash2 className="h-4 w-4 text-red-600" />
                       </Button>
@@ -525,14 +545,21 @@ const ProductTab = () => {
 
       {/* Modal de formulario de producto */}
       {isModalOpen && (
-        <ProductForm
-          product={selectedProduct || undefined}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedProduct(null);
-          }}
-          onSubmit={handleSubmit}
-        />
+        <div
+          id="product-form-modal-tour"
+          className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto"
+          data-intro="Aquí puedes crear o editar un producto. Completa los campos y guarda los cambios."
+          data-step="1"
+        >
+          <ProductForm
+            product={selectedProduct || undefined}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedProduct(null);
+            }}
+            onSubmit={handleSubmit}
+          />
+        </div>
       )}
 
       {/* Modal de gestión de inventario */}
@@ -547,6 +574,82 @@ const ProductTab = () => {
           onSave={handleInventorySubmit}
         />
       )}
+      <div>
+        {/* ...todo el contenido del componente... */}
+
+        {/* Botón flotante para iniciar el tour */}
+        <Tooltip content="Guía rápida" side="left" delayDuration={20000}>
+          <button
+            type="button"
+            aria-label="Iniciar guía rápida"
+            onClick={() => {
+              if (isModalOpen) {
+                // Tour SOLO para el formulario
+                introJs().setOptions({
+                  steps: [
+                    {
+                      element: '#product-form-modal-tour',
+                      intro:
+                        'Esta ventana es el formulario avanzado para crear o editar productos en tu inventario. Aquí puedes ingresar toda la información relevante del producto, incluyendo nombre, categoría, SKU, precio, costo, descripción, imágenes, detalles técnicos (como material, peso, largo, pureza y certificado), piedras y colores disponibles, así como detalles del cierre. Utiliza los botones para agregar imágenes, piedras o colores adicionales. Al finalizar, puedes guardar los cambios o cancelar la operación. Revisa cuidadosamente cada sección para asegurar que los datos sean correctos antes de guardar.',
+                      position: 'left',
+                    },
+                  ],
+                  scrollToElement: true,
+                  nextLabel: 'Siguiente',
+                  prevLabel: 'Anterior',
+                  doneLabel: 'Listo',
+                  skipLabel: 'Saltar',
+                  showProgress: true,
+                  showBullets: false,
+                  tooltipClass: 'bg-white text-primary-900 shadow-xl border border-primary-200 rounded-xl p-6 text-base',
+                  highlightClass: 'ring-4 ring-primary-400',
+                }).start();
+              } else {
+                // Tour general de la página
+                introJs().setOptions({
+                  steps: [
+                    { element: '[data-step="1"]', intro: 'Haz clic aquí para agregar un nuevo producto.', position: 'left' },
+                    { element: '[data-step="2"]', intro: 'Filtra los productos por stock, antigüedad y más.', position: 'right' },
+                    { element: '[data-step="3"]', intro: 'Aquí puedes ver, editar o eliminar productos.', position: 'top' },
+                    { element: '[data-step="4"]', intro: 'Edita el producto seleccionado.', position: 'left' },
+                    { element: '[data-step="5"]', intro: 'Gestiona el inventario de este producto.', position: 'left' },
+                    { element: '[data-step="6"]', intro: 'Elimina el producto de la tienda.', position: 'left' },
+                    { element: '[data-step="10"]', intro: 'Dashboard: Visualiza un resumen general del inventario, métricas clave y gráficos para tomar decisiones rápidas.', position: 'bottom' },
+                    { element: '[data-step="11"]', intro: 'Inventario: Consulta, administra y edita todos los productos registrados en tu inventario.', position: 'bottom' },
+                    { element: '[data-step="12"]', intro: 'Control de Gastos: Lleva el registro y control de los gastos relacionados con tu inventario.', position: 'bottom' },
+                    { element: '[data-step="13"]', intro: 'Bodegas: Administra las bodegas y consulta la ubicación de tus productos.', position: 'bottom' },
+                    { element: '[data-step="14"]', intro: 'Órdenes: Gestiona las órdenes de compra y el flujo de entrada de productos al inventario.', position: 'bottom' },
+                  ],
+                  scrollToElement: true,
+                  nextLabel: 'Siguiente',
+                  prevLabel: 'Anterior',
+                  doneLabel: 'Listo',
+                  showProgress: true,
+                  showBullets: false,
+                  tooltipClass: 'bg-white text-primary-900 shadow-xl border border-primary-200 rounded-xl p-6 text-base',
+                  highlightClass: 'ring-4 ring-primary-400',
+                }).start();
+              }
+            }}
+            className="fixed right-8 bottom-24 z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-xl p-4 flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-300"
+            style={{ boxShadow: '0 6px 24px rgba(80,80,160,0.18)' }}
+          >
+            <svg
+              className="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"
+              />
+            </svg>
+          </button>
+        </Tooltip>
+      </div>
     </div>
   );
 };

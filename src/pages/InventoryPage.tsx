@@ -66,33 +66,43 @@ const InventoryPage = () => {
               {/* Tab List */}
               <div className="px-4 sm:px-6 pt-4">
                 <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 gap-1 p-1 h-auto sm:h-10">
-                  <TabsTrigger 
-                    value="dashboard" 
+                  <TabsTrigger
+                    value="dashboard"
                     className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
+                    data-step="10"
+                    data-intro="Dashboard: Visualiza un resumen general del inventario, métricas clave y gráficos para tomar decisiones rápidas."
                   >
                     Dashboard
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="inventory" 
+                  <TabsTrigger
+                    value="inventory"
                     className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
+                    data-step="11"
+                    data-intro="Inventario: Consulta, administra y edita todos los productos registrados en tu inventario."
                   >
                     Inventario
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="expenses" 
+                  <TabsTrigger
+                    value="expenses"
                     className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
+                    data-step="12"
+                    data-intro="Control de Gastos: Lleva el registro y control de los gastos relacionados con tu inventario."
                   >
                     Control de Gastos
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="warehouses" 
+                  <TabsTrigger
+                    value="warehouses"
                     className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
+                    data-step="13"
+                    data-intro="Bodegas: Administra las bodegas y consulta la ubicación de tus productos."
                   >
                     Bodegas
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="orders" 
+                  <TabsTrigger
+                    value="orders"
                     className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
+                    data-step="14"
+                    data-intro="Órdenes: Gestiona las órdenes de compra y el flujo de entrada de productos al inventario."
                   >
                     Ordenes
                   </TabsTrigger>

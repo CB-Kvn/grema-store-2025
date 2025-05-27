@@ -47,7 +47,7 @@ interface ShopPageProps {
 
 export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const navigate = useNavigate();
-  const products = useAppSelector(selectAllProducts);
+  const productos = useAppSelector(selectAllProducts);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -63,20 +63,55 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   });
 
   // Extraer categorías y materiales únicos de los productos
-  const categories = Array.from(new Set(products.map((p) => p.category)));
+  const categories = Array.from(new Set(productos.map((p) => p.category)));
+  const pesos = Array.from(
+    new Set(
+      productos
+        .map((p) => p.details?.peso)
+        .filter(Boolean)
+    )
+  );
+  const largos = Array.from(
+    new Set(
+      productos
+        .map((p) => p.details?.largo)
+        .filter(Boolean)
+    )
+  );
   const materials = Array.from(
     new Set(
-      products.flatMap((p) => p.details.material || []).filter((m) => typeof m === "string")
+      productos.flatMap((p) =>
+        Array.isArray(p.details?.material)
+          ? p.details.material
+          : p.details?.material
+          ? [p.details.material]
+          : []
+      ).filter(Boolean)
+    )
+  );
+  const piedras = Array.from(
+    new Set(
+      productos.flatMap((p) =>
+        Array.isArray(p.details?.piedra)
+          ? p.details.piedra
+          : p.details?.piedra
+          ? [p.details.piedra]
+          : []
+      ).filter(Boolean)
     )
   );
   const colors = Array.from(
     new Set(
-      products.flatMap((p) => p.details.colors || []).filter((c) => typeof c === "string")
+      productos.flatMap((p) =>
+        Array.isArray(p.details?.color)
+          ? p.details.color.map((c) => c.hex  || c.name  || "")
+          : []
+      ).filter(Boolean)
     )
   );
 
   // Filtrar y ordenar productos
-  const filteredProducts = products
+  const filteredProducts = productos
     .filter((product) => {
       const matchesSearch =
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -94,7 +129,8 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       const matchesBestSeller = !filters.isBestSeller || product.isBestSeller;
       const matchesColor =
         filters.colors.length === 0 ||
-        product.details.colors?.some((c) => filters.colors.includes(c));
+        (Array.isArray(product.details.color) &&
+          product.details.color.some((c) => filters.colors.includes(c.hex)));
 
       return (
         matchesSearch &&
@@ -304,21 +340,32 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       <div>
         <h4 className="font-medium text-primary-900 mb-3">Colores</h4>
         <div className="grid grid-cols-4 gap-2">
-          {colors.map((color) => (
+          {Array.from(
+            new Map(
+              productos
+                .flatMap((p) =>
+                  Array.isArray(p.details?.color) ? p.details.color : []
+                )
+                .filter((c) => c && c.hex)
+                .map((c) => [c.hex, c.name])
+            )
+          ).map(([hex, name]) => (
             <button
-              key={color}
+              key={hex}
+              type="button"
               onClick={() => {
-                const newColors = filters.colors.includes(color)
-                  ? filters.colors.filter((c) => c !== color)
-                  : [...filters.colors, color];
+                const newColors = filters.colors.includes(hex)
+                  ? filters.colors.filter((c) => c !== hex)
+                  : [...filters.colors, hex];
                 handleFilterChange("colors", newColors);
               }}
-              className={`w-10 h-10 rounded-full border-2 ${
-                filters.colors.includes(color)
+              className={`w-6 h-6 rounded-full border-2 ${
+                filters.colors.includes(hex)
                   ? "border-primary-600"
                   : "border-primary-300"
               }`}
-              style={{ backgroundColor: color }}
+              style={{ backgroundColor: hex }}
+              title={name}
             />
           ))}
         </div>
@@ -523,10 +570,11 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
             {/* Active Filters */}
             {(filters.categories.length > 0 ||
               filters.materials.length > 0 ||
+              filters.colors.length > 0 || // <-- Agrega esto
               filters.isNew ||
               filters.isBestSeller) && (
               <div className="mb-6">
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                   {filters.categories.map((category) => (
                     <button
                       key={category}
@@ -557,6 +605,34 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
                       <X className="h-4 w-4 ml-1" />
                     </button>
                   ))}
+                  {/* Mostrar colores seleccionados */}
+                  {filters.colors.map((hex) => {
+                    // Busca el nombre del color para el tooltip
+                    const colorObj = productos
+                      .flatMap((p) => Array.isArray(p.details?.color) ? p.details.color : [])
+                      .find((c) => c.hex === hex);
+                    const colorName = colorObj?.name || hex;
+                    return (
+                      <button
+                        key={hex}
+                        onClick={() =>
+                          handleFilterChange(
+                            "colors",
+                            filters.colors.filter((c) => c !== hex)
+                          )
+                        }
+                        className="flex items-center px-2 py-1 rounded-full bg-primary-100 hover:bg-primary-200"
+                        title={colorName}
+                      >
+                        <span
+                          className="inline-block w-4 h-4 rounded-full border mr-2"
+                          style={{ backgroundColor: hex }}
+                        />
+                        <span className="text-primary-600 text-sm">{colorName}</span>
+                        <X className="h-4 w-4 ml-1 text-primary-600" />
+                      </button>
+                    );
+                  })}
                   {filters.isNew && (
                     <button
                       onClick={() => handleFilterChange("isNew", false)}

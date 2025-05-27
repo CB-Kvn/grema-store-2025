@@ -80,7 +80,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
       </Dialog>
 
       {/* Modal lateral para el formulario */}
-      <div className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto">
+      <div
+        id="product-form-modal-tour"
+        className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto"
+        data-intro="Esta ventana es el formulario avanzado para crear o editar productos en tu inventario. Aquí puedes ingresar toda la información relevante del producto, incluyendo nombre, categoría, SKU, precio, costo, descripción, imágenes, detalles técnicos (como material, peso, largo, pureza y certificado), piedras y colores disponibles, así como detalles del cierre. Utiliza los botones para agregar imágenes, piedras o colores adicionales. Al finalizar, puedes guardar los cambios o cancelar la operación. Revisa cuidadosamente cada sección para asegurar que los datos sean correctos antes de guardar."
+        data-step="1"
+      >
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-primary-100 p-4 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-primary-900">
@@ -96,7 +101,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
 
         {/* Formulario principal */}
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
-
           {/* Información Básica */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-primary-900">Información Básica</h3>
@@ -447,9 +451,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
                 className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
                 onClick={async () => {
                   const normalized = normalizeFormData(formData);
-                  console.log('Datos del formulario:', normalized);
                   const errs = validate(normalized);
-                  console.log('Errores de validación:', errs);
                   setErrors(errs);
                   if (Object.keys(errs).length === 0) {
                     await handleUpdateProduct(normalized);
