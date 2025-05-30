@@ -95,14 +95,20 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
                     ₡
                   </span>
                   <Input
-                    type="number"
+                    type="text"
                     id="amount"
                     value={formData.amount}
-                    onChange={handleAmountChange}
+                    onChange={(e) => {
+                      // Permite solo números y punto decimal
+                      const value = e.target.value;
+                      if (/^(\d+(\.\d{0,2})?)?$/.test(value)) {
+                        setFormData({ ...formData, amount: value });
+                      }
+                    }}
                     className={`pl-10 ${errors.amount ? 'border-red-500' : ''}`}
-                    min="0"
-                    step="0.01"
                     placeholder="0.00"
+                    inputMode="decimal"
+                    autoComplete="off"
                   />
                 </div>
                 {errors.amount && (
@@ -117,14 +123,19 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
                     ₡
                   </span>
                   <Input
-                    type="number"
+                    type="text"
                     id="taxes"
                     value={formData.taxes}
-                    onChange={handleTaxesChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^(\d+(\.\d{0,2})?)?$/.test(value)) {
+                        setFormData({ ...formData, taxes: value });
+                      }
+                    }}
                     className={`pl-10 ${errors.taxes ? 'border-red-500' : ''}`}
-                    min="0"
-                    step="0.01"
                     placeholder="0.00"
+                    inputMode="decimal"
+                    autoComplete="off"
                   />
                 </div>
                 {errors.taxes && (
@@ -140,13 +151,24 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
                   ₡
                 </span>
                 <Input
-                  type="number"
+                  type="text"
                   id="subtotal"
                   value={formData.subtotal}
-                  onChange={handleSubtotalChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^(\d+(\.\d{0,2})?)?$/.test(value)) {
+                      setFormData({ ...formData, subtotal: value });
+                    }
+                  }}
                   className={`pl-10 ${errors.subtotal ? 'border-red-500' : ''}`}
+                  placeholder="0.00"
+                  inputMode="decimal"
+                  autoComplete="off"
                 />
               </div>
+              {errors.subtotal && (
+                <p className="text-sm text-red-500 mt-1">{errors.subtotal}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

@@ -82,109 +82,162 @@ const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
                     ₡
                   </span>
                   <Input
-                    type="number"
+                    type="text"
                     id="amount"
                     value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^(\d+(\.\d{0,2})?)?$/.test(value)) {
+                        setFormData({ ...formData, amount: value });
+                      }
+                    }}
                     className={`pl-10 ${errors.amount ? 'border-red-500' : ''}`}
-                    min="0"
-                    step="0.01"
                     placeholder="0.00"
+                    inputMode="decimal"
+                    autoComplete="off"
                   />
                 </div>
                 {errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
               </div>
               <div>
-                <Label htmlFor="category">Categoría</Label>
-                <select
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value as Expense['category'] })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">Seleccionar categoría</option>
-                  {expenseCategories.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
-              </div>
-              <div>
-                <Label htmlFor="paymentMethod">Método de Pago *</Label>
-                <select
-                  id="paymentMethod"
-                  value={formData.paymentMethod}
-                  onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                  className={`w-full rounded-md border border-input bg-background px-3 py-2 text-sm ${errors.paymentMethod ? 'border-red-500' : ''
-                    }`}
-                >
-                  <option value="">Seleccionar método</option>
-                  {paymentMethods.map((method) => (
-                    <option key={method.value} value={method.value}>
-                      {method.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.paymentMethod && (
-                  <p className="text-sm text-red-500 mt-1">{errors.paymentMethod}</p>
-                )}
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="receipt">Comprobante</Label>
-              <input
-                type="file"
-                id="receipt"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept=".jpg,.jpeg,.png,.pdf"
-                className="hidden"
-              />
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg border-primary-300 hover:border-primary-400 cursor-pointer`}
-              >
-                <div className="space-y-1 text-center">
-                  <Receipt className="mx-auto h-12 w-12 text-primary-400" />
-                  <div className="flex text-sm text-primary-600">
-                    <span className="relative cursor-pointer rounded-md font-medium hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
-                      {(formData.receipt || formData.receipt)
-                        ? (
-                            <>
-                              Archivo seleccionado
-                              {formData.receipt && (
-                                <a
-                                  href={formData.receipt}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="ml-2 underline text-primary-600"
-                                >
-                                  Ver archivo
-                                </a>
-                              )}
-                            </>
-                          )
-                        : 'Subir un archivo'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-primary-500">
-                    JPG, PNG o PDF hasta 5MB
-                  </p>
+                <Label htmlFor="taxes">Impuestos</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400 text-lg">
+                    ₡
+                  </span>
+                  <Input
+                    type="text"
+                    id="taxes"
+                    value={formData.taxes}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^(\d+(\.\d{0,2})?)?$/.test(value)) {
+                        setFormData({ ...formData, taxes: value });
+                      }
+                    }}
+                    className={`pl-10 ${errors.taxes ? 'border-red-500' : ''}`}
+                    placeholder="0.00"
+                    inputMode="decimal"
+                    autoComplete="off"
+                  />
                 </div>
+                {errors.taxes && <p className="text-sm text-red-500 mt-1">{errors.taxes}</p>}
               </div>
             </div>
             <div>
-              <Label htmlFor="notes">Notas Adicionales</Label>
-              <textarea
-                id="notes"
-                value={formData.notes || ''}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 min-h-[100px] text-sm"
-                placeholder="Notas o comentarios adicionales..."
-              />
+              <Label htmlFor="subtotal">Subtotal</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400 text-lg">
+                  ₡
+                </span>
+                <Input
+                  type="text"
+                  id="subtotal"
+                  value={formData.subtotal}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^(\d+(\.\d{0,2})?)?$/.test(value)) {
+                      setFormData({ ...formData, subtotal: value });
+                    }
+                  }}
+                  className={`pl-10 ${errors.subtotal ? 'border-red-500' : ''}`}
+                  placeholder="0.00"
+                  inputMode="decimal"
+                  autoComplete="off"
+                />
+              </div>
+              {errors.subtotal && <p className="text-sm text-red-500 mt-1">{errors.subtotal}</p>}
             </div>
+            <div>
+              <Label htmlFor="category">Categoría</Label>
+              <select
+                id="category"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as Expense['category'] })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Seleccionar categoría</option>
+                {expenseCategories.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+              {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
+            </div>
+            <div>
+              <Label htmlFor="paymentMethod">Método de Pago *</Label>
+              <select
+                id="paymentMethod"
+                value={formData.paymentMethod}
+                onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                className={`w-full rounded-md border border-input bg-background px-3 py-2 text-sm ${errors.paymentMethod ? 'border-red-500' : ''
+                  }`}
+              >
+                <option value="">Seleccionar método</option>
+                {paymentMethods.map((method) => (
+                  <option key={method.value} value={method.value}>
+                    {method.label}
+                  </option>
+                ))}
+              </select>
+              {errors.paymentMethod && (
+                <p className="text-sm text-red-500 mt-1">{errors.paymentMethod}</p>
+              )}
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="receipt">Comprobante</Label>
+            <input
+              type="file"
+              id="receipt"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".jpg,.jpeg,.png,.pdf"
+              className="hidden"
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg border-primary-300 hover:border-primary-400 cursor-pointer`}
+            >
+              <div className="space-y-1 text-center">
+                <Receipt className="mx-auto h-12 w-12 text-primary-400" />
+                <div className="flex text-sm text-primary-600">
+                  <span className="relative cursor-pointer rounded-md font-medium hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                    {(formData.receipt || formData.receipt)
+                      ? (
+                        <>
+                          Archivo seleccionado
+                          {formData.receipt && (
+                            <a
+                              href={formData.receipt}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-2 underline text-primary-600"
+                            >
+                              Ver archivo
+                            </a>
+                          )}
+                        </>
+                      )
+                      : 'Subir un archivo'}
+                  </span>
+                </div>
+                <p className="text-xs text-primary-500">
+                  JPG, PNG o PDF hasta 5MB
+                </p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="notes">Notas Adicionales</Label>
+            <textarea
+              id="notes"
+              value={formData.notes || ''}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 min-h-[100px] text-sm"
+              placeholder="Notas o comentarios adicionales..."
+            />
           </div>
           <div className="flex justify-end space-x-4">
             <button
