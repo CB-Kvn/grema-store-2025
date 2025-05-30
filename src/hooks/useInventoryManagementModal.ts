@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { Discount, WarehouseItem, Warehouse, Product } from "@/types";
 import { useAlert } from "@/context/AlertContext";
 import { useAppDispatch } from "./useAppDispatch";
-import { transferProductStock } from "@/store/slices/productsSlice";
+import { setProducts, transferProductStock } from "@/store/slices/productsSlice";
 import { warehouseService } from "@/services/warehouseService";
 
 /**
@@ -195,9 +195,10 @@ export function useInventoryManagementModal({
   /**
    * Actualizar la cantidad de un producto en una bodega específica.
    */
-  const handleUpdateQuantity = async (warehouseId: string, itemId: string, quantity: number) => {
+  const handleUpdateQuantity = async (warehouseId: string, itemId: string, quantity: number, total:number) => {
     debugger
-    if (quantity < 0) {
+    console.log('handleUpdateQuantity', { warehouseId, itemId, quantity, total });
+    if (total < 0) {
       showAlert('Ingresa una cantidad válida.', 'error');
       return;
     }
@@ -207,7 +208,7 @@ export function useInventoryManagementModal({
       return;
     }
 
-    const updatedItem = { ...item, quantity };
+    const updatedItem = { ...item, quantity:total };
     const result = InventoryItemSchema.safeParse(updatedItem);
     if (!result.success) {
       showAlert(result.error.errors[0].message, "error");
@@ -218,8 +219,10 @@ export function useInventoryManagementModal({
     );
     setInventory(newInventory);
     await warehouseService.addStock(warehouseId, Number(itemId), { quantity, location: warehouseId, price: Number(updatedItem.price) || 0 });
-    dispatch(updateItemQuantity({ warehouseId, itemId, quantity }));
+    dispatch(updateItemQuantity({ warehouseId, itemId, quantity:total }));
     dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
+    const response = await productService.getAll() as Product[];
+    dispatch(setProducts(response));
     showAlert('Cantidad actualizada correctamente.', 'success');
   };
 

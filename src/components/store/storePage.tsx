@@ -36,10 +36,67 @@ interface FilterState {
   materials: string[];
   isNew: boolean;
   isBestSeller: boolean;
-  colors: string[]; // Nuevo filtro de colores
+  colors: string[]; // Ahora es grupo de color
 }
 
 const ITEMS_PER_PAGE = 9;
+
+// Definición de grupos de colores por rango de hue
+const COLOR_GROUPS = [
+  { name: "Rojo", hueMin: 340, hueMax: 20 },
+  { name: "Naranja", hueMin: 21, hueMax: 45 },
+  { name: "Amarillo", hueMin: 46, hueMax: 70 },
+  { name: "Verde", hueMin: 71, hueMax: 160 },
+  { name: "Cyan", hueMin: 161, hueMax: 200 },
+  { name: "Azul", hueMin: 201, hueMax: 260 },
+  { name: "Violeta", hueMin: 261, hueMax: 320 },
+  { name: "Rosa", hueMin: 321, hueMax: 339 },
+  { name: "Negro/Gris", isGray: true },
+  { name: "Blanco", isWhite: true },
+];
+
+function getColorGroup(hex: string): string | null {
+  let r = 0, g = 0, b = 0;
+  if (!hex) return null;
+  if (hex.length === 4) {
+    r = parseInt(hex[1] + hex[1], 16);
+    g = parseInt(hex[2] + hex[2], 16);
+    b = parseInt(hex[3] + hex[3], 16);
+  } else if (hex.length === 7) {
+    r = parseInt(hex[1] + hex[2], 16);
+    g = parseInt(hex[3] + hex[4], 16);
+    b = parseInt(hex[5] + hex[6], 16);
+  }
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  if (max === min) {
+    h = 0;
+  } else if (max === r) {
+    h = (60 * ((g - b) / (max - min)) + 360) % 360;
+  } else if (max === g) {
+    h = (60 * ((b - r) / (max - min)) + 120) % 360;
+  } else if (max === b) {
+    h = (60 * ((r - g) / (max - min)) + 240) % 360;
+  }
+
+  if (l > 0.95) return "Blanco";
+  if (l < 0.15 || (max - min < 0.05 && l < 0.8)) return "Negro/Gris";
+
+  for (const group of COLOR_GROUPS) {
+    if (group.isGray && (l < 0.15 || (max - min < 0.05 && l < 0.8))) return group.name;
+    if (group.isWhite && l > 0.95) return group.name;
+    if (group.hueMin !== undefined && group.hueMax !== undefined) {
+      if (group.hueMin > group.hueMax) {
+        if (h >= group.hueMin || h <= group.hueMax) return group.name;
+      } else {
+        if (h >= group.hueMin && h <= group.hueMax) return group.name;
+      }
+    }
+  }
+  return null;
+}
 
 interface ShopPageProps {
   addToCart: (product: (typeof products)[0]) => void;
@@ -59,25 +116,11 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     materials: [],
     isNew: false,
     isBestSeller: false,
-    colors: [], // Nuevo filtro de colores
+    colors: [], // Ahora es grupo de color
   });
 
   // Extraer categorías y materiales únicos de los productos
   const categories = Array.from(new Set(productos.map((p) => p.category)));
-  const pesos = Array.from(
-    new Set(
-      productos
-        .map((p) => p.details?.peso)
-        .filter(Boolean)
-    )
-  );
-  const largos = Array.from(
-    new Set(
-      productos
-        .map((p) => p.details?.largo)
-        .filter(Boolean)
-    )
-  );
   const materials = Array.from(
     new Set(
       productos.flatMap((p) =>
@@ -89,24 +132,16 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       ).filter(Boolean)
     )
   );
-  const piedras = Array.from(
+
+  // Obtener los grupos de color presentes en los productos
+  const colorGroupsInProducts = Array.from(
     new Set(
-      productos.flatMap((p) =>
-        Array.isArray(p.details?.piedra)
-          ? p.details.piedra
-          : p.details?.piedra
-          ? [p.details.piedra]
-          : []
-      ).filter(Boolean)
-    )
-  );
-  const colors = Array.from(
-    new Set(
-      productos.flatMap((p) =>
-        Array.isArray(p.details?.color)
-          ? p.details.color.map((c) => c.hex  || c.name  || "")
-          : []
-      ).filter(Boolean)
+      productos
+        .flatMap((p) =>
+          Array.isArray(p.details?.color) ? p.details.color : []
+        )
+        .map((c) => getColorGroup(c.hex))
+        .filter(Boolean)
     )
   );
 
@@ -130,7 +165,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       const matchesColor =
         filters.colors.length === 0 ||
         (Array.isArray(product.details.color) &&
-          product.details.color.some((c) => filters.colors.includes(c.hex)));
+          product.details.color.some((c) =>
+            filters.colors.includes(getColorGroup(c.hex) || "")
+          ));
 
       return (
         matchesSearch &&
@@ -257,7 +294,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       materials: [],
       isNew: false,
       isBestSeller: false,
-      colors: [], // Nuevo filtro de colores
+      colors: [],
     });
     setSearchQuery("");
   };
@@ -339,34 +376,25 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       {/* Colors */}
       <div>
         <h4 className="font-medium text-primary-900 mb-3">Colores</h4>
-        <div className="grid grid-cols-4 gap-2">
-          {Array.from(
-            new Map(
-              productos
-                .flatMap((p) =>
-                  Array.isArray(p.details?.color) ? p.details.color : []
-                )
-                .filter((c) => c && c.hex)
-                .map((c) => [c.hex, c.name])
-            )
-          ).map(([hex, name]) => (
+        <div className="grid grid-cols-2 gap-2">
+          {colorGroupsInProducts.map((group) => (
             <button
-              key={hex}
+              key={group as string}
               type="button"
               onClick={() => {
-                const newColors = filters.colors.includes(hex)
-                  ? filters.colors.filter((c) => c !== hex)
-                  : [...filters.colors, hex];
-                handleFilterChange("colors", newColors);
+                const newGroups = filters.colors.includes(group as string)
+                  ? filters.colors.filter((g) => g !== group)
+                  : [...filters.colors, group as string];
+                handleFilterChange("colors", newGroups);
               }}
-              className={`w-6 h-6 rounded-full border-2 ${
-                filters.colors.includes(hex)
-                  ? "border-primary-600"
-                  : "border-primary-300"
-              }`}
-              style={{ backgroundColor: hex }}
-              title={name}
-            />
+              className={`px-3 py-2 rounded-full border-2 text-sm font-medium
+                ${filters.colors.includes(group as string)
+                  ? "border-primary-600 bg-primary-100 text-primary-900"
+                  : "border-primary-300 bg-white text-primary-600"}
+              `}
+            >
+              {group}
+            </button>
           ))}
         </div>
       </div>
@@ -497,7 +525,6 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
               </Link>
             </div>
             <div className="flex items-center gap-4">
-             
               <button
                 onClick={() => setIsFilterDrawerOpen(true)}
                 className="lg:hidden p-2 hover:bg-primary-50 rounded-full"
@@ -570,7 +597,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
             {/* Active Filters */}
             {(filters.categories.length > 0 ||
               filters.materials.length > 0 ||
-              filters.colors.length > 0 || // <-- Agrega esto
+              filters.colors.length > 0 ||
               filters.isNew ||
               filters.isBestSeller) && (
               <div className="mb-6">
@@ -605,34 +632,24 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
                       <X className="h-4 w-4 ml-1" />
                     </button>
                   ))}
-                  {/* Mostrar colores seleccionados */}
-                  {filters.colors.map((hex) => {
-                    // Busca el nombre del color para el tooltip
-                    const colorObj = productos
-                      .flatMap((p) => Array.isArray(p.details?.color) ? p.details.color : [])
-                      .find((c) => c.hex === hex);
-                    const colorName = colorObj?.name || hex;
-                    return (
-                      <button
-                        key={hex}
-                        onClick={() =>
-                          handleFilterChange(
-                            "colors",
-                            filters.colors.filter((c) => c !== hex)
-                          )
-                        }
-                        className="flex items-center px-2 py-1 rounded-full bg-primary-100 hover:bg-primary-200"
-                        title={colorName}
-                      >
-                        <span
-                          className="inline-block w-4 h-4 rounded-full border mr-2"
-                          style={{ backgroundColor: hex }}
-                        />
-                        <span className="text-primary-600 text-sm">{colorName}</span>
-                        <X className="h-4 w-4 ml-1 text-primary-600" />
-                      </button>
-                    );
-                  })}
+                  {/* Mostrar grupos de colores seleccionados */}
+                  {filters.colors.map((group) => (
+                    <button
+                      key={group}
+                      onClick={() =>
+                        handleFilterChange(
+                          "colors",
+                          filters.colors.filter((g) => g !== group)
+                        )
+                      }
+                      className="flex items-center px-2 py-1 rounded-full bg-primary-100 hover:bg-primary-200"
+                      title={group}
+                    >
+                      <span className="inline-block w-4 h-4 rounded-full border mr-2 bg-gradient-to-br from-white to-primary-200" />
+                      <span className="text-primary-600 text-sm">{group}</span>
+                      <X className="h-4 w-4 ml-1 text-primary-600" />
+                    </button>
+                  ))}
                   {filters.isNew && (
                     <button
                       onClick={() => handleFilterChange("isNew", false)}

@@ -20,7 +20,6 @@ import { addToCartShop, removeFromCartShop, updateQuantityShop } from "./store/s
 import OrderDocumentsPage from "./pages/OrderDocumentsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import InventoryPage from "./pages/InventoryPage";
-// import LoginPage from "./pages/LoginPage"; 
 import Loader from '@/components/ui/Loader';
 import { AlertProvider } from "./context/AlertContext";
 
@@ -48,7 +47,7 @@ function App() {
 
   return (
     <Router>
-      <Loader />
+
       <AlertProvider>
         <CartDrawer
           isOpen={isCartOpen}
@@ -79,7 +78,7 @@ function App() {
         </Routes>
         <Networking></Networking>
         <Footer></Footer>
-
+        <Loader />
       </AlertProvider>
 
     </Router>

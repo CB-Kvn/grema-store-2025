@@ -49,7 +49,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
     <>
       {/* Modal Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black bg-opacity-50 z-50"
         onClick={onClose}
       />
 
@@ -177,8 +177,8 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                           type="button"
                           className="px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 text-sm"
                           onClick={() => {
-                            if ((addQuantities[index] || 0) > 0) {
-                              handleUpdateQuantity(item.location, product.id, item.quantity + (addQuantities[index] || 0));
+                            if ((addQuantities[index] || 0)) {
+                              handleUpdateQuantity(item.location || '', product.id, (addQuantities[index] || 0), item.quantity + (addQuantities[index] || 0));
                               clearAddQty(index); // Limpiar input después de agregar
                             } else {
                               showAlert('Ingresa una cantidad válida.', 'error');
