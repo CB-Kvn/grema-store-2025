@@ -3,13 +3,15 @@ import { useDispatch } from 'react-redux';
 import { updateWarehouse } from '@/store/slices/warehousesSlice';
 import { v4 as uuidv4 } from 'uuid';
 import type { Warehouse, WarehouseItem } from '@/types';
+import { warehouseService } from '@/services/warehouseService';
 
 export function useEditWarehouseModal(warehouse: Warehouse, onClose: () => void) {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState<Warehouse>(warehouse);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await warehouseService.update(warehouse.id, formData);
     dispatch(updateWarehouse(formData));
     onClose();
   };

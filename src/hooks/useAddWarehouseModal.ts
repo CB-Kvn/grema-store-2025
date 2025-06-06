@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import { addWarehouse } from '@/store/slices/warehousesSlice';
 import type { Warehouse, WarehouseItem } from '@/types';
+import { warehouseService } from '@/services/warehouseService';
 
 const initialWarehouse: Warehouse = {
   id: uuidv4(),
@@ -14,7 +15,7 @@ const initialWarehouse: Warehouse = {
   email: '',
   capacity: 0,
   currentOccupancy: 0,
-  status: 'active',
+  status: 'ACTIVE',
   items: [],
   lastInventoryDate: new Date().toISOString(),
 };
@@ -36,13 +37,14 @@ export function useAddWarehouseModal(onClose: () => void) {
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       return;
     }
+    await warehouseService.create(formData);
     dispatch(addWarehouse(formData));
     onClose();
   };

@@ -146,7 +146,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                       value={item.location}
                       onChange={e => handleChangeWarehouse(e.target.value, index)}
                       className="w-full mt-1 rounded-lg border border-primary-200 p-2"
-                      disabled={inventory.length >= warehouses.length}
+                      disabled={inventory[index].location !== ''}
                     >
                       <option value="">Seleccionar bodega</option>
                       {warehouses.map((warehouse) => (

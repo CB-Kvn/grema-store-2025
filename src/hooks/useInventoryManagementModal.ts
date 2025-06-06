@@ -13,9 +13,9 @@ import { warehouseService } from "@/services/warehouseService";
  * Esquema para un item de inventario
  */
 export const InventoryItemSchema = z.object({
-  quantity: z.number().min(0, "La cantidad debe ser mayor o igual a 0"),
-  location: z.string().min(1, "La bodega es obligatoria"),
-  price: z.number().optional(),
+  quantity: z.number().min(0, "La cantidad debe ser mayor o igual a 0").optional(),
+  location: z.string().optional(),
+  price: z.string().optional(),
   productionCost: z.string().optional(),
 });
 
@@ -142,6 +142,8 @@ export function useInventoryManagementModal({
    * Agregar un nuevo stock al inventario.
    */
   const handleAddStock = () => {
+
+    console.log('handleAddStock', { inventory, warehouses });
     if (inventory.length >= warehouses.length) {
       showAlert('No puedes agregar más stocks que bodegas disponibles.', 'error');
       return;
@@ -150,8 +152,13 @@ export function useInventoryManagementModal({
       showAlert('Ya existe un stock sin asignar bodega. Por favor, completa ese registro antes de agregar otro.', 'error');
       return;
     }
+
+    console.log('Adding new stock');
     const newStock = { quantity: 0, location: '', price: '', productionCost: '' };
+    console.log('New stock before validation:', newStock);
     const result = InventoryItemSchema.safeParse(newStock);
+
+    console.log('Validation result:', result);
     if (!result.success) {
       showAlert(result.error.errors[0].message, 'error');
       return;

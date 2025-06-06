@@ -18,7 +18,7 @@ export const warehouseService = {
     return response.data;
   },
 
-  create: async (warehouse: Omit<Warehouse, 'id'>) => {
+  create: async (warehouse:any) => {
     const response = await api.post('/warehouses', warehouse);
     return response.data;
   },

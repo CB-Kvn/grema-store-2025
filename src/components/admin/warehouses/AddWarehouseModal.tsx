@@ -148,7 +148,7 @@ const AddWarehouseModal: React.FC<AddWarehouseModalProps> = ({ onClose }) => {
                 <select
                   id="status"
                   value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as Warehouse['status'] })}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value.toUpperCase() as Warehouse['status'] })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2"
                 >
                   <option value="active">Activo</option>
@@ -157,87 +157,6 @@ const AddWarehouseModal: React.FC<AddWarehouseModalProps> = ({ onClose }) => {
                 </select>
               </div>
             </div>
-          </div>
-
-          {/* Initial Inventory */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-primary-900">Inventario Inicial</h3>
-              <button
-                type="button"
-                onClick={addItem}
-                className="text-sm text-primary-600 hover:text-primary-700"
-              >
-                <Plus className="h-4 w-4 inline mr-1" />
-                Agregar Producto
-              </button>
-            </div>
-
-            {formData.items.map((item, index) => (
-              <div key={item.id} className="bg-primary-50 p-4 rounded-lg space-y-4">
-                <div className="flex justify-between">
-                  <h4 className="font-medium text-primary-900">Producto {index + 1}</h4>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(index)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor={`productName-${index}`}>Nombre del Producto</Label>
-                    <Input
-                      id={`productName-${index}`}
-                      value={item.productName}
-                      onChange={(e) => handleItemChange(index, 'productName', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`sku-${index}`}>SKU</Label>
-                    <Input
-                      id={`sku-${index}`}
-                      value={item.sku}
-                      onChange={(e) => handleItemChange(index, 'sku', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor={`quantity-${index}`}>Cantidad</Label>
-                    <Input
-                      type="number"
-                      id={`quantity-${index}`}
-                      value={item.quantity}
-                      onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`minimumStock-${index}`}>Stock Mínimo</Label>
-                    <Input
-                      type="number"
-                      id={`minimumStock-${index}`}
-                      value={item.minimumStock}
-                      onChange={(e) => handleItemChange(index, 'minimumStock', e.target.value)}
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`location-${index}`}>Ubicación</Label>
-                    <Input
-                      id={`location-${index}`}
-                      value={item.location}
-                      onChange={(e) => handleItemChange(index, 'location', e.target.value)}
-                      placeholder="Ej: A-101"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
 
           {/* Notes */}

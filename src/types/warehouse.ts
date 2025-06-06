@@ -8,7 +8,7 @@ export interface Warehouse {
   email: string;
   capacity: number;
   currentOccupancy: number;
-  status: 'active' | 'inactive' | 'maintenance';
+  status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
   items: WarehouseItem[];
   lastInventoryDate?: string;
   notes?: string;

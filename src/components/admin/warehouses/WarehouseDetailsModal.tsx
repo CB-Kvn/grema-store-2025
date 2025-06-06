@@ -125,57 +125,6 @@ const WarehouseDetailsModal: React.FC<WarehouseDetailsModalProps> = ({ warehouse
             </div>
           </div>
 
-          {/* Inventory Items */}
-          <div>
-            <h4 className="text-lg font-medium text-primary-900 mb-4">Inventario</h4>
-            <div className="space-y-4">
-              {warehouse.items.map((item) => (
-                <div 
-                  key={item.id}
-                  className="bg-primary-50 p-4 rounded-lg"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h5 className="font-medium text-primary-900">{item.productName}</h5>
-                      <p className="text-sm text-primary-500">SKU: {item.sku}</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-sm ${itemStatusColors[item.status]}`}>
-                      {item.status === 'in_stock' ? 'En Stock' :
-                       item.status === 'low_stock' ? 'Stock Bajo' :
-                       'Sin Stock'}
-                    </span>
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-primary-600">Cantidad</p>
-                      <p className="font-medium">{item.quantity}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-primary-600">Stock Mínimo</p>
-                      <p className="font-medium">{item.minimumStock}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-primary-600">Ubicación</p>
-                      <p className="font-medium">{item.location}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-primary-600">Última Actualización</p>
-                      <p className="font-medium">
-                        {format(new Date(item.lastUpdated), 'dd/MM/yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                  {item.status === 'low_stock' && (
-                    <div className="mt-2 flex items-center text-yellow-600">
-                      <AlertTriangle className="h-4 w-4 mr-1" />
-                      <span className="text-sm">Stock bajo el mínimo requerido</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Additional Information */}
           <div>
             <h4 className="text-lg font-medium text-primary-900 mb-4">Información Adicional</h4>

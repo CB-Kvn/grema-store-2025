@@ -9,14 +9,14 @@ interface Product {
   image: string;
   description: string;
   category: string;
-  WareHouseItem:[
+  WareHouseItem?:[
     {
       id:string,
       price:number,
       discount:number,
     }
   ],
-  Images:[
+  Images?:[
     {
       url:string[],
     }

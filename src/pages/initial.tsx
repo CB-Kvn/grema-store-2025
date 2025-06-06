@@ -1562,7 +1562,7 @@ type TabType = "bestSellers" | "newArrivals";
 
 export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
   const navigate = useNavigate();
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const products = useAppSelector((state) => state.products.items);
@@ -1578,6 +1578,34 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
   const [activeTab, setActiveTab] = useState<TabType>("bestSellers");
 
+  const [visibleProducts, setVisibleProducts] = useState(4); // Número inicial de productos visibles
+  const [loadingP, setLoading] = useState(false);
+
+  // Función para cargar más productos
+  const loadMoreProducts = () => {
+    if (loading) return;
+    setLoading(true);
+    setTimeout(() => {
+      setVisibleProducts((prev) => prev + 8); // Incrementar el número de productos visibles
+      setLoading(false);
+    }, 1000); // Simular un retraso de carga
+  };
+
+  // Detectar el scroll para cargar más productos
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 100
+      ) {
+        loadMoreProducts();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
 
 
@@ -1586,31 +1614,6 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
   }, []);
 
-  const SectionTitle = ({
-    icon: Icon,
-    title,
-    subtitle,
-  }: {
-    icon: React.ElementType;
-    title: string;
-    subtitle?: string;
-  }) => (
-    <div className="flex flex-col items-center justify-center mb-12">
-      <div className="flex items-center mb-4">
-        <div className="hidden sm:block w-32 h-px bg-primary-300 mr-4" />
-        <Icon className="h-8 sm:h-10 w-8 sm:w-10 text-primary-600 mx-3" />
-        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-primary-900">
-          {title}
-        </h2>
-        <div className="hidden sm:block w-32 h-px bg-primary-300 ml-4" />
-      </div>
-      {subtitle && (
-        <p className="text-center text-primary-600 max-w-2xl mx-auto">
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -1634,11 +1637,10 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-1 rounded-full text-sm sm:text-base lg:text-lg font-medium transition-colors ${
-                    selectedCategory === category.id
-                      ? "bg-primary-600 text-white shadow-md"
-                      : "text-primary-600 hover:bg-primary-50"
-                  }`}
+                  className={`flex items-center px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-1 rounded-full text-sm sm:text-base lg:text-lg font-medium transition-colors ${selectedCategory === category.id
+                    ? "bg-primary-600 text-white shadow-md"
+                    : "text-primary-600 hover:bg-primary-50"
+                    }`}
                 >
                   {category.name}
                 </button>
@@ -1735,8 +1737,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               <button
                 onClick={() => setActiveTab("bestSellers")}
                 className={`flex items-center px-6 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === "bestSellers"
-                    ? "bg-primary-600 text-white shadow-md"
-                    : "text-primary-600 hover:bg-primary-50"
+                  ? "bg-primary-600 text-white shadow-md"
+                  : "text-primary-600 hover:bg-primary-50"
                   }`}
               >
                 <Flame className="h-4 w-4 mr-2" />
@@ -1745,8 +1747,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               <button
                 onClick={() => setActiveTab("newArrivals")}
                 className={`flex items-center px-6 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === "newArrivals"
-                    ? "bg-primary-600 text-white shadow-md"
-                    : "text-primary-600 hover:bg-primary-50"
+                  ? "bg-primary-600 text-white shadow-md"
+                  : "text-primary-600 hover:bg-primary-50"
                   }`}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
@@ -1806,9 +1808,39 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 que marcan tendencia en joyería fina.
               </p>
             </div>
-             {/* Related Products */}
-                    <RelatedProducts relatedProducts={products} type={"now"} category={products.category} />
-            
+            {/* Related Products */}
+        
+            <div className="mt-16 border-t border-primary-100 pt-12">
+              {/* Título */}
+              {/* Productos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {products.slice(0, visibleProducts).map((product) => {
+                  const price = product.WarehouseItem[0]?.price || 0;
+                  const discount = product.WarehouseItem[0]?.discount || 0;
+                  const finalPrice = discount
+                    ? price - price * (discount / 100)
+                    : price;
+                  const imageUrl =
+                    product.Images[0]?.url[0]; // Usar un placeholder si no hay imagen
+                  console.log("Product:",product, product.Images[0].url[0]);
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
+                      onClick={() => navigate(`/producto/${product.id}`)}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Indicador de carga */}
+              {loadingP && (
+                <div className="text-center mt-8">
+                  <span className="text-primary-600">Cargando más productos...</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

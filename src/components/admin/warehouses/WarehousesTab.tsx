@@ -275,12 +275,6 @@ const WarehousesTab = () => {
                     </button>
                     <button
                       className="p-1 hover:bg-primary-50 rounded"
-                      title="Configuración"
-                    >
-                      <Settings className="h-4 w-4 text-primary-600" />
-                    </button>
-                    <button
-                      className="p-1 hover:bg-primary-50 rounded"
                       title="Eliminar Almacén"
                     >
                       <Trash2 className="h-4 w-4 text-red-600" />
