@@ -7,17 +7,41 @@ import { Link, useLocation } from "react-router-dom"; // Importar useLocation
 import { useAppSelector } from "@/hooks/useAppSelector";
 import LoginModal from "../admin/login/LoginModal";
 import SearchBar from "./search-bar";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/16/solid";
+import { useAuth } from "@/hooks/useAuth";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const cartItems = useAppSelector((state) => state.cart.items);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const location = useLocation(); // Obtener la ubicación actual
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const selectTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Verificar si la URL contiene la palabra "tienda"
   const isTiendaPage = location.pathname.includes("tienda");
+
+  // Cierra el menú si se hace click fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   return (
     <>
@@ -71,13 +95,75 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                 )}
               </button>
 
-              {/* Botón de login */}
-              <button
-                className="p-2 hover:bg-primary-50 rounded-full"
-                onClick={() => setIsLoginOpen(true)}
-              >
-                <User className="w-6 h-6 text-white" />
-              </button>
+              {/* Botón solo para abrir el modal de login */}
+              {!user && (
+                <button
+                  className="p-2 hover:bg-primary-50 rounded-full"
+                  onClick={() => setIsLoginOpen(true)}
+                >
+                  <User className="w-6 h-6 text-white" />
+                </button>
+              )}
+
+              {/* Si el usuario está logueado, muestra avatar y botones de navegación */}
+               {user && (
+                <div className="flex items-center gap-2 ml-2 relative" ref={menuRef}>
+                  <span
+                    className="w-6 h-6 flex items-center justify-center text-white font-bold uppercase bg-primary-700 rounded-full cursor-pointer"
+                    onClick={() => setShowUserMenu((prev) => !prev)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Abrir menú de usuario"
+                  >
+                    {user.name ? user.name.charAt(0) : "U"}
+                  </span>
+                  <AnimatePresence>
+                    {showUserMenu && (
+                      <motion.ul
+                        initial={{ opacity: 0, scale: 0.85, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.85, y: -10 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-44 bg-white rounded shadow-lg border border-primary-200 py-2"
+                      >
+                        <li>
+                          <button
+                            className="w-full text-left px-4 py-2 hover:bg-primary-50 text-primary-700"
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              navigate("/tienda");
+                            }}
+                          >
+                            Tienda
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="w-full text-left px-4 py-2 hover:bg-primary-50 text-primary-700"
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              navigate("/admin/inventory");
+                            }}
+                          >
+                            Administrar
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="w-full text-left px-4 py-2 hover:bg-primary-50 text-primary-700"
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              navigate("/logout");
+                            }}
+                          >
+                            Salir
+                          </button>
+                        </li>
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )} 
             </div>
           </div>
         </div>

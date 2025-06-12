@@ -105,3 +105,10 @@ export interface AddressInfo {
 }
 
 export type { PurchaseOrder, PurchaseOrderItem, Supplier, Warehouse, WarehouseItem, StockMovement, Expense };
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  avatar: string;
+}

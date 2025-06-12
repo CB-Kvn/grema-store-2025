@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import LoginGoogle from "@/components/login/components/loginGoogle";
+
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -20,6 +22,7 @@ const LoginPage = () => {
   };
 
   return (
+   
     <div className="min-h-screen bg-gradient-to-br from-primary to-accent flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-card p-8 rounded-xl shadow-lg">
         {/* Header */}
@@ -130,6 +133,7 @@ const LoginPage = () => {
             </a>
           </p>
         </form>
+        <LoginGoogle></LoginGoogle>
       </div>
     </div>
   );

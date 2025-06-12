@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import api from './api';
 
 interface LoginResponse {
@@ -8,7 +9,7 @@ interface LoginResponse {
 
 export const authService = {
   login: async (email: string, password: string) => {
-    
+
     const response = await api.post<LoginResponse>('/auth/login', { email, password });
     const { token } = response.data;
     localStorage.setItem('token', token);
@@ -66,4 +67,24 @@ export const authService = {
     const response = await api.put('/auth/profile', data);
     return response.data;
   },
+
+  loginGoogle: async (credentialResponse: any) => {
+    try {
+      const tokenId = credentialResponse.credential;
+      const response = await api.post<LoginResponse>('/auth/google-login', { tokenId }, {
+        withCredentials: true,
+      });
+    } catch (error) {
+      console.error('Error during Google login:', error);
+      throw error; // Re-throw the error for further handling
+    }
+
+  },
+
+  authUser: async () => {
+    const response = await api.get('/auth/authenticate', {
+      withCredentials: true
+    });
+    return response.data;
+  }
 };

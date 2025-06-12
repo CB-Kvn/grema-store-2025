@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Mail, Lock, LogIn, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "@/services/authService";
+import LoginGoogle from "@/components/login/components/loginGoogle";
+import { useAuth } from "@/hooks/useAuth";
 
 
 interface LoginModalProps {
@@ -13,31 +15,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      // Llamada al servicio de autenticación
-      const response = await authService.login( email, password );
-
-      // Si el login es exitoso, redirige y cierra el modal
-      if (response.status === 200) {
-        navigate("/admin/inventory");
-        onClose();
-      } else {
-        setError(response.status.toString() || "Correo o contraseña incorrectos");
-      }
-    } catch (err) {
-      // Manejo de errores
-      setError("Ocurrió un error al iniciar sesión. Inténtalo de nuevo.");
-    }
-  };
 
   if (!isOpen) return null;
 
   return (
+    
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg relative">
         {/* Close Button */}
@@ -66,7 +48,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" >
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -126,7 +108,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             Iniciar sesión
           </button>
         </form>
+        <div className="mt-6">
+          <LoginGoogle onClose={onClose}/>
+        </div>
+        
       </div>
+      
     </div>
   );
 };
