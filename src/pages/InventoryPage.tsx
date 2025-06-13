@@ -1,9 +1,9 @@
-import React from 'react';
-import { 
+import React, { useEffect, useState } from 'react';
+import {
   Search, Filter, X,
   ArrowUpDown, Package, Plus, Download, Menu
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import PurchaseOrdersTab from '@/components/admin/orders/PurchaseOrdersTab';
 import WarehousesTab from '@/components/admin/warehouses/WarehousesTab';
@@ -11,14 +11,45 @@ import ProductTab from '@/components/admin/inventory/ProductTab';
 import ExpensesTab from '@/components/admin/expenses/ExpensesTab';
 import InventoryDashboard from '@/components/admin/dashboard/InventoryDashboard';
 import { useInventoryPage } from "@/hooks/useInventoryPage";
+import { authService } from '@/services/authService';
+import { UsersTable } from '@/components/admin/users/listUsers';
+import { DiscountsTable } from '@/components/admin/discount/discountTable';
+import { DiscountTab } from '@/components/admin/discount/discountTab';
+
+
+// Simulación de fetch
+async function getAllUsers() {
+  // Reemplaza por tu fetch real
+
+  const response = await authService.getAllUsers();
+  return response as []
+
+}
+
 
 const InventoryPage = () => {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useInventoryPage();
+  const [users, setUsers] = useState<any[]>([]);
+  
 
+  useEffect(() => {
+    getAllUsers().then(setUsers);
+
+  }, []);
+
+  // Aquí puedes hacer el update real a la base de datos
+  const handleDescuentoChange = (id: string, value: number) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, descuento: value } : u))
+    );
+    // Llama a tu API para guardar el descuento aquí si lo necesitas
+  };
+
+  
   return (
     <div className="min-h-screen bg-primary-50 py-4 sm:py-6 lg:py-8">
       <div className="max-w-[95%] lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-        <Card>
+        <Card >
           <CardHeader className="border-b border-primary-100 p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center space-x-2">
@@ -62,68 +93,74 @@ const InventoryPage = () => {
           )}
 
           <CardContent className="p-0">
-            <Tabs defaultValue="dashboard" className="w-full">
-              {/* Tab List */}
-              <div className="px-4 sm:px-6 pt-4">
-                <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 gap-1 p-1 h-auto sm:h-10">
-                  <TabsTrigger
-                    value="dashboard"
-                    className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
-                    data-step="10"
-                    data-intro="Dashboard: Visualiza un resumen general del inventario, métricas clave y gráficos para tomar decisiones rápidas."
-                  >
-                    Dashboard
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="inventory"
-                    className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
-                    data-step="11"
-                    data-intro="Inventario: Consulta, administra y edita todos los productos registrados en tu inventario."
-                  >
-                    Inventario
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="expenses"
-                    className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
-                    data-step="12"
-                    data-intro="Control de Gastos: Lleva el registro y control de los gastos relacionados con tu inventario."
-                  >
-                    Control de Gastos
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="warehouses"
-                    className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
-                    data-step="13"
-                    data-intro="Bodegas: Administra las bodegas y consulta la ubicación de tus productos."
-                  >
-                    Bodegas
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="orders"
-                    className="text-xs sm:text-sm md:text-base py-2 sm:py-1.5 px-2 sm:px-3 h-auto"
-                    data-step="14"
-                    data-intro="Órdenes: Gestiona las órdenes de compra y el flujo de entrada de productos al inventario."
-                  >
-                    Ordenes
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+            <Tabs defaultValue="clientes" className="w-full">
+              <TabsList className="flex w-full bg-primary-50 border-b border-primary-200 rounded-none">
+                <TabsTrigger
+                  value="inventario"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                >
+                  Informes
+                </TabsTrigger>
+                <TabsTrigger
+                  value="clientes"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                >
+                  Clientes
+                </TabsTrigger>
+                <TabsTrigger
+                  value="productos"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                >
+                  Productos
+                </TabsTrigger>
 
-              {/* Tab Content */}
-              <TabsContent value="dashboard" className="p-2 sm:p-4 lg:p-6">
-                <InventoryDashboard />
+                <TabsTrigger
+                  value="gastos"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                >
+                  Control de gastos
+                </TabsTrigger>
+                <TabsTrigger
+                  value="bodegas"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                >
+                  Bodegas
+                </TabsTrigger>
+                <TabsTrigger
+                  value="ordenes"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                >
+                  Órdenes
+                </TabsTrigger>
+                <TabsTrigger
+                  value="descuentos"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                >
+                  Descuentos
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent className='p-6' value="clientes">
+                <UsersTable users={users} onDescuentoChange={handleDescuentoChange} />
               </TabsContent>
-              <TabsContent value="inventory" className="p-2 sm:p-4 lg:p-6">
+              <TabsContent className='p-6' value="productos">
                 <ProductTab />
               </TabsContent>
-              <TabsContent value="expenses" className="p-2 sm:p-4 lg:p-6">
-                <ExpensesTab />
+              <TabsContent className='p-6' value="inventario">
+                <InventoryDashboard />
               </TabsContent>
-              <TabsContent value="warehouses" className="p-2 sm:p-4 lg:p-6">
+              <TabsContent className='p-6' value="gastos">
+                <ExpensesTab></ExpensesTab>
+              </TabsContent>
+              <TabsContent className='p-6' value="bodegas">
                 <WarehousesTab />
               </TabsContent>
-              <TabsContent value="orders" className="p-2 sm:p-4 lg:p-6">
+              <TabsContent className='p-6' value="ordenes">
                 <PurchaseOrdersTab />
+              </TabsContent>
+              <TabsContent value="descuentos">
+                <div className="bg-white rounded shadow p-6">
+                  <DiscountTab/>
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>

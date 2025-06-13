@@ -21,7 +21,8 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const location = useLocation(); // Obtener la ubicación actual
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  // const { user } = useAuth();
+  const user = {}
   const navigate = useNavigate();
   const selectTriggerRef = useRef<HTMLButtonElement>(null);
 
