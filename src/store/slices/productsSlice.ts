@@ -74,6 +74,8 @@ export interface Product {
 // Estado del slice
 export interface ProductsState {
   items: Product[];
+  isBestSeller?: Product[];
+  isNew?: Product[];
   selectedProduct: Product | null;
   itemInventory: Product | null;
   loading: boolean;
@@ -127,6 +129,12 @@ const productsSlice = createSlice({
     },
     setProducts(state, action: PayloadAction<Product[]>) {
       state.items = action.payload;
+    },
+    setLatestProducts(state, action: PayloadAction<Product[]>) {
+      state.isNew = action.payload;
+    },
+    setBestSellingProducts(state, action: PayloadAction<Product[]>) {
+      state.isBestSeller = action.payload;
     },
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
@@ -229,7 +237,9 @@ export const {
   clearItemInventory,
   selectProductBySku,
   clearSelectedProduct,
-  transferProductStock
+  transferProductStock,
+  setLatestProducts,
+  setBestSellingProducts,
 } = productsSlice.actions;
 
 // Selectors

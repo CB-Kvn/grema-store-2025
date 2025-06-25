@@ -17,18 +17,7 @@ const InventoryDashboard: React.FC = () => {
     periodOptions,
     infoCards,
     chartOptions,
-    expensesVsOrdersData,
-    ordersByCategoryData,
-    monthlyExpensesTrendData,
-    topSellingCategoriesData,
-    stockDistributionData,
-    discountsUsageData,
-    warehouseCapacityData,
-    salesByRegionData,
-    suppliersPerformanceData,
-    returnsTrendData,
-    ordersByStatusData,
-    incomeByMonthData,
+    charts
   } = useInventoryDashboard();
 
   // Lista de tarjetas de gráficos
@@ -36,118 +25,19 @@ const InventoryDashboard: React.FC = () => {
     {
       key: "expensesVsOrdersData",
       title: "Gastos vs Órdenes de Entrada",
-      render: <Bar data={expensesVsOrdersData} options={chartOptions} />,
+      render: <Line data={charts.expensesVsOrders} options={chartOptions} />,
     },
     {
-      key: "ordersByCategoryData",
-      title: "Órdenes por Categoría",
-      render: (
-        <div className="flex flex-row justify-center items-center gap-4">
-          <div className="hidden sm:block">
-            <ul className="space-y-2">
-              {ordersByCategoryData.labels.map((label, idx) => (
-                <li key={label} className="flex items-center space-x-2">
-                  <span
-                    className="inline-block w-4 h-4 rounded"
-                    style={{
-                      backgroundColor: ordersByCategoryData.datasets[0].backgroundColor[idx],
-                    }}
-                  ></span>
-                  <span className="text-sm text-primary-900">{label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div style={{ width: 220, height: 220 }}>
-            <Pie
-              data={ordersByCategoryData}
-              options={{
-                ...chartOptions,
-                plugins: {
-                  ...chartOptions.plugins,
-                  legend: { display: false },
-                },
-                maintainAspectRatio: false,
-              }}
-            />
-          </div>
-        </div>
-      ),
+      key: "expensesByCategory",
+      title: "Gastos por Categoría",
+      render: <Bar data={charts.expensesByCategory} options={chartOptions} />,
     },
     {
-      key: "monthlyExpensesTrendData",
-      title: "Tendencia de Gastos Mensuales",
-      render: <Line data={monthlyExpensesTrendData} options={chartOptions} />,
+      key: "paymentMethods",
+      title: "Gastos por Método de Pago",
+      render: <Bar data={charts.paymentMethods} options={chartOptions} />,
     },
-    {
-      key: "topSellingCategoriesData",
-      title: "Categorías Más Vendidas",
-      render: <Bar data={topSellingCategoriesData} options={{ ...chartOptions, indexAxis: "y" }} />,
-    },
-    {
-      key: "stockDistributionData",
-      title: "Distribución de Stock",
-      render: (
-        <div className="flex justify-center">
-          <div style={{ width: 220, height: 220 }}>
-            <Doughnut data={stockDistributionData} options={chartOptions} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "discountsUsageData",
-      title: "Uso de Descuentos",
-      render: (
-        <div className="flex justify-center">
-          <div style={{ width: 220, height: 220 }}>
-            <Pie data={discountsUsageData} options={chartOptions} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "warehouseCapacityData",
-      title: "Capacidad de Bodegas",
-      render: (
-        <div className="flex justify-center">
-          <div style={{ width: 220, height: 220 }}>
-            <Doughnut data={warehouseCapacityData} options={chartOptions} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "salesByRegionData",
-      title: "Ventas por Región",
-      render: <Bar data={salesByRegionData} options={chartOptions} />,
-    },
-    {
-      key: "suppliersPerformanceData",
-      title: "Desempeño de Proveedores",
-      render: <Bar data={suppliersPerformanceData} options={chartOptions} />,
-    },
-    {
-      key: "returnsTrendData",
-      title: "Tendencia de Devoluciones",
-      render: <Line data={returnsTrendData} options={chartOptions} />,
-    },
-    {
-      key: "ordersByStatusData",
-      title: "Órdenes por Estado",
-      render: (
-        <div className="flex justify-center">
-          <div style={{ width: 220, height: 220 }}>
-            <Pie data={ordersByStatusData} options={chartOptions} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "incomeByMonthData",
-      title: "Ingresos por Mes",
-      render: <Line data={incomeByMonthData} options={chartOptions} />,
-    },
+
   ];
 
   // Estado para los sliders horizontales

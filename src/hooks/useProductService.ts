@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { productService } from '@/services/productService';
 import { Product, Discount } from '@/types';
 import { useAppDispatch } from './useAppDispatch';
-import { setProducts } from '@/store/slices/productsSlice';
+import { setBestSellingProducts, setLatestProducts, setProducts } from '@/store/slices/productsSlice';
 
 export const useProductService = () => {
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,11 @@ export const useProductService = () => {
 
   const getAllProducts = async () => {
     const response = await handleRequest(() => productService.getAll());
+    const latestProducts = await handleRequest(() => productService.getLatestProducts());
+    const bestSellers = await handleRequest(() => productService.getBestSellingProducts());
     dispatch(setProducts(response)); // Despachar la acción con la respuesta
+    dispatch(setLatestProducts(latestProducts)); // Despachar la acción con la respuesta
+    dispatch(setBestSellingProducts(bestSellers)); // Despachar la acción con la respuesta
     return response;
   };
 

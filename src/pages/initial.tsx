@@ -1,27 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Flame, Sparkles } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { LogoInitial } from "@/components/initial-page/logoInitial";
 import ProductCard from "@/components/product/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { Info_Bussiness } from "@/components/initial-page/bussiness";
 
 import ContactPage from "@/components/initial-page/contact";
-import Aos from "aos";
 import "aos/dist/aos.css";
 import { Product } from "@/types";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { useProductService } from "@/hooks/useProductService";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { useAppDispatch } from "@/hooks/useAppDispatch";
-import { setProducts } from "@/store/slices/productsSlice";
-import RelatedProducts from "@/components/product/RelatedProducts";
+import { ChevronRight, ShoppingBag } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const categories = [
   { id: "all", name: "Todo" },
@@ -30,1520 +27,6 @@ const categories = [
   { id: "earrings", name: "Aretes" },
   { id: "bracelets", name: "Pulseras" },
   { id: "sets", name: "Sets" },
-];
-
-export const products: Product[] = [
-  {
-    id: 1,
-    name: "Anillo de Compromiso con Diamante 1",
-    price: 2499.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 1",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-001",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "3.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 2,
-    name: "Anillo de Compromiso con Diamante 2",
-    price: 2599.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 2",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-002",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "4.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 3,
-    name: "Anillo de Compromiso con Diamante 3",
-    price: 2699.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 3",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-003",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "4.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 4,
-    name: "Anillo de Compromiso con Diamante 4",
-    price: 2799.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 4",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-004",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "5.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 5,
-    name: "Anillo de Compromiso con Diamante 5",
-    price: 2899.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 5",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-005",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "5.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 6,
-    name: "Anillo de Compromiso con Diamante 6",
-    price: 2999.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 6",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-006",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "6.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 7,
-    name: "Anillo de Compromiso con Diamante 7",
-    price: 3099.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 7",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-007",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "6.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 8,
-    name: "Anillo de Compromiso con Diamante 8",
-    price: 3199.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 8",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-008",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "7.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 9,
-    name: "Anillo de Compromiso con Diamante 9",
-    price: 3299.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description: "Elegante anillo de oro 18k con diamante de corte brillante 9",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-009",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "7.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 10,
-    name: "Anillo de Compromiso con Diamante 10",
-    price: 3399.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 10",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-010",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "8.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 11,
-    name: "Anillo de Compromiso con Diamante 11",
-    price: 3499.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 11",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-011",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "8.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 12,
-    name: "Anillo de Compromiso con Diamante 12",
-    price: 3599.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 12",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-012",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "9.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 13,
-    name: "Anillo de Compromiso con Diamante 13",
-    price: 3699.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 13",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-013",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "9.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 14,
-    name: "Anillo de Compromiso con Diamante 14",
-    price: 3799.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 14",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-014",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "10.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 15,
-    name: "Anillo de Compromiso con Diamante 15",
-    price: 3899.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 15",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-015",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "10.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 16,
-    name: "Anillo de Compromiso con Diamante 16",
-    price: 3999.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 16",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-016",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "11.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 17,
-    name: "Anillo de Compromiso con Diamante 17",
-    price: 4099.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 17",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-017",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "11.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 18,
-    name: "Anillo de Compromiso con Diamante 18",
-    price: 4199.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 18",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-018",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "12.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 19,
-    name: "Anillo de Compromiso con Diamante 19",
-    price: 4299.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 19",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-019",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "12.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 20,
-    name: "Anillo de Compromiso con Diamante 20",
-    price: 4399.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 20",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-020",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "13.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 21,
-    name: "Anillo de Compromiso con Diamante 21",
-    price: 4499.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 21",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-021",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "13.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 22,
-    name: "Anillo de Compromiso con Diamante 22",
-    price: 4599.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 22",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-022",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "14.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 23,
-    name: "Anillo de Compromiso con Diamante 23",
-    price: 4699.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 23",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-023",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "14.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 24,
-    name: "Anillo de Compromiso con Diamante 24",
-    price: 4799.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 24",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-024",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "15.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 25,
-    name: "Anillo de Compromiso con Diamante 25",
-    price: 4899.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 25",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-025",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "15.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 26,
-    name: "Anillo de Compromiso con Diamante 26",
-    price: 4999.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 26",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-026",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "16.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 27,
-    name: "Anillo de Compromiso con Diamante 27",
-    price: 5099.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 27",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-027",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "16.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 28,
-    name: "Anillo de Compromiso con Diamante 28",
-    price: 5199.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 28",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-028",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "17.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 29,
-    name: "Anillo de Compromiso con Diamante 29",
-    price: 5299.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 29",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-029",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "17.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 30,
-    name: "Anillo de Compromiso con Diamante 30",
-    price: 5399.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 30",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-030",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "18.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 31,
-    name: "Anillo de Compromiso con Diamante 31",
-    price: 5499.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 31",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-031",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "18.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 32,
-    name: "Anillo de Compromiso con Diamante 32",
-    price: 5599.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 32",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-032",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "19.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 33,
-    name: "Anillo de Compromiso con Diamante 33",
-    price: 5699.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 33",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-033",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "19.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 34,
-    name: "Anillo de Compromiso con Diamante 34",
-    price: 5799.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 34",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-034",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "20.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 35,
-    name: "Anillo de Compromiso con Diamante 35",
-    price: 5899.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 35",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-035",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "20.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 36,
-    name: "Anillo de Compromiso con Diamante 36",
-    price: 5999.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 36",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-036",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "21.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 37,
-    name: "Anillo de Compromiso con Diamante 37",
-    price: 6099.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 37",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-037",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "21.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 38,
-    name: "Anillo de Compromiso con Diamante 38",
-    price: 6199.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 38",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-038",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "22.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 39,
-    name: "Anillo de Compromiso con Diamante 39",
-    price: 6299.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 39",
-    category: "rings",
-    isBestSeller: true,
-    isNew: false,
-    sku: "RING-DIA-039",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "22.5g",
-      pureza: "VS1",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  {
-    id: 40,
-    name: "Anillo de Compromiso con Diamante 40",
-    price: 6399.99,
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-    description:
-      "Elegante anillo de oro 18k con diamante de corte brillante 40",
-    category: "rings",
-    isBestSeller: false,
-    isNew: true,
-    sku: "RING-DIA-040",
-    details: {
-      material: "Oro 18k",
-      piedra: "Diamante",
-      peso: "23.0g",
-      pureza: "VS2",
-      color: [
-        { hex: "#FFFFFF", name: "Blanco" },
-        { hex: "#FFF9E5", name: "Marfil" },
-      ],
-      certificado: "GIA",
-      garantia: "2 años",
-      cierre: {
-        tipo: "Presión",
-        colores: [
-          { hex: "#FFD700", name: "Oro" },
-          { hex: "#FFFFFF", name: "Platino" },
-        ],
-      },
-    },
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
 ];
 
 export interface CartItem {
@@ -1555,7 +38,7 @@ export interface CartItem {
 }
 
 interface ProductInitial {
-  addToCart: (product: (typeof products)[0]) => void;
+  addToCart: (products: Product[]) => void;
 }
 
 type TabType = "bestSellers" | "newArrivals";
@@ -1566,6 +49,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const products = useAppSelector((state) => state.products.items);
+  const latest = useAppSelector((state) => state.products.isNew);
+  const bestSellers = useAppSelector((state) => state.products.isBestSeller);
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1578,45 +63,69 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
   const [activeTab, setActiveTab] = useState<TabType>("bestSellers");
 
-  const [visibleProducts, setVisibleProducts] = useState(4); // Número inicial de productos visibles
-  const [loadingP, setLoading] = useState(false);
+  const [visibleLatestProducts, setVisibleLatestProducts] = useState(4); // Mostrar 4 inicialmente
+  const [loadingP, setLoadingP] = useState(false);
 
-  // Función para cargar más productos
-  const loadMoreProducts = () => {
-    if (loading) return;
-    setLoading(true);
-    setTimeout(() => {
-      setVisibleProducts((prev) => prev + 8); // Incrementar el número de productos visibles
-      setLoading(false);
-    }, 1000); // Simular un retraso de carga
-  };
+  // Referencia al contenedor de productos relacionados
+  const relatedRef = useRef<HTMLDivElement>(null);
 
-  // Detectar el scroll para cargar más productos
+  // Cargar más productos al llegar al final de la sección
   useEffect(() => {
     const handleScroll = () => {
+      if (!relatedRef.current) return;
+      const rect = relatedRef.current.getBoundingClientRect();
       if (
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 100
+        rect.bottom <= window.innerHeight + 100 && // 100px de margen para anticipar
+        !loadingP &&
+        visibleLatestProducts < products.length
       ) {
-        loadMoreProducts();
+        setLoadingP(true);
+        setTimeout(() => {
+          setVisibleLatestProducts((prev) => Math.min(prev + 4, products.length)); // Mostrar 4 más
+          setLoadingP(false);
+        }, 1500); // Simula carga
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [loadingP, visibleLatestProducts, products.length]);
 
   useEffect(() => {
-
-
     getAllProducts();
-
-
   }, []);
 
+  // Handler para animar y navegar a la tienda
+  const [slide, setSlide] = useState(false);
+
+  const handleGoToShop = () => {
+    setSlide(true);
+    setTimeout(() => {
+      navigate("/tienda");
+    }, 400);
+  };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Botón flotante a la derecha centrado, solo visible en pantallas md+ */}
+      <AnimatePresence>
+        {!slide && (
+          <motion.button
+            key="go-to-shop-btn"
+            initial={{ x: 0, opacity: 1 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 120, opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            onClick={handleGoToShop}
+            className="hidden md:flex fixed right-8 top-1/2 z-50 -translate-y-1/2 bg-primary-700 hover:bg-primary-900 text-white rounded-full shadow-lg px-7 py-4 items-center gap-2 transition-all duration-300"
+            aria-label="Ir a la tienda"
+          >Tienda
+            <ShoppingBag className="w-6 h-6" />
+            <ChevronRight className="ml-2 w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* Navigation */}
 
       <div className="py-10">
@@ -1722,7 +231,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
       {/* Featured Collections Tabs */}
       <div
-        className="py-11 bg-primary-50 "
+        className="py-11 "
         data-aos="fade-up"
         data-aos-duration="1000"
       >
@@ -1768,33 +277,52 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 atemporales que combinan elegancia y exclusividad.
               </p>
             </div>
-            <Swiper
-              modules={[Navigation]}
-              spaceBetween={20}
-              slidesPerView={1}
-              navigation
-              pagination={{ clickable: true }}
-              breakpoints={{
-                640: {
-                  slidesPerView: 2,
-                  spaceBetween: 30,
-                },
-                1024: {
-                  slidesPerView: 4,
-                  spaceBetween: 30,
-                },
-              }}
-            >
-              {/* {bestSellers.map((product) => (
-                <SwiperSlide key={product.id}>
-                  <ProductCard
-                    product={product}
-                    onAddToCart={() => addToCart(product)}
-                    onClick={() => navigate(`/producto/${product.id}`)}
-                  />
-                </SwiperSlide>
-              ))} */}
-            </Swiper>
+            {/* Related Products */}
+            <div className="mt-16 border-t border-primary-100 pt-12" ref={relatedRef}>
+              {/* Título */}
+              {/* Productos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <AnimatePresence>
+                  {bestSellers && bestSellers.length > 0 && (
+                    <>
+                      {bestSellers.slice(0, visibleLatestProducts).map((product, idx) => {
+                        console.log(product); 
+                        const price = product.WarehouseItem?.[0]?.price || 0;
+                        const discount = product.WarehouseItem?.[0]?.discount || 0;
+                        const finalPrice = discount
+                      ? price - price * (discount / 100)
+                      : price;
+                    const imageUrl = product.Images?.[0]?.url?.[0];
+                    return (
+                      <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 40 }}
+                        transition={{ duration: 0.4, delay: idx * 0.08 }}
+                        layout
+                      >
+                        <ProductCard
+                          product={product}
+                          onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
+                          onClick={() => navigate(`/producto/${product.id}`)}
+                        />
+                      </motion.div>
+                    );
+                  })}
+
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Indicador de carga */}
+              {loadingP && (
+                <div className="text-center mt-8">
+                  <span className="text-primary-600">Cargando más productos...</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* New Arrivals Content */}
@@ -1809,29 +337,42 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               </p>
             </div>
             {/* Related Products */}
-        
-            <div className="mt-16 border-t border-primary-100 pt-12">
+            <div className="mt-16 border-t border-primary-100 pt-12" ref={relatedRef}>
               {/* Título */}
               {/* Productos */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {products.slice(0, visibleProducts).map((product) => {
-                  const price = product.WarehouseItem[0]?.price || 0;
-                  const discount = product.WarehouseItem[0]?.discount || 0;
-                  const finalPrice = discount
-                    ? price - price * (discount / 100)
-                    : price;
-                  const imageUrl =
-                    product.Images[0]?.url[0]; // Usar un placeholder si no hay imagen
-                  console.log("Product:",product, product.Images[0].url[0]);
-                  return (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
-                      onClick={() => navigate(`/producto/${product.id}`)}
-                    />
-                  );
-                })}
+                <AnimatePresence>
+                  {latest && latest.length > 0 && (
+                    <>
+                      {latest.slice(0, visibleLatestProducts).map((product, idx) => {
+                        console.log(product);
+                        const price = product.WarehouseItem?.[0]?.price || 0;
+                        const discount = product.WarehouseItem?.[0]?.discount || 0;
+                        const finalPrice = discount
+                      ? price - price * (discount / 100)
+                      : price;
+                    const imageUrl = product.Images?.[0]?.url?.[0];
+                    return (
+                      <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 40 }}
+                        transition={{ duration: 0.4, delay: idx * 0.08 }}
+                        layout
+                      >
+                        <ProductCard
+                          product={product}
+                          onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
+                          onClick={() => navigate(`/producto/${product.id}`)}
+                        />
+                      </motion.div>
+                    );
+                  })}
+
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Indicador de carga */}

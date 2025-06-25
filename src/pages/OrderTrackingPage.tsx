@@ -8,6 +8,7 @@ import {
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { selectAllOrders } from '@/store/slices/purchaseOrdersSlice';
+import { purchaseOrderService } from '@/services';
 
 const OrderTrackingPage = () => {
   const orders = useSelector(selectAllOrders);
@@ -16,9 +17,9 @@ const OrderTrackingPage = () => {
   const [error, setError] = useState('');
   const [showDetails, setShowDetails] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    const order = orders.find(o => o.orderNumber === orderNumber);
+    const order = await purchaseOrderService.getById(orderNumber)
     if (order) {
       setSearchedOrder(order);
       setError('');
@@ -246,7 +247,7 @@ const OrderTrackingPage = () => {
                       className="flex items-center justify-between py-2 border-b border-primary-100 last:border-0"
                     >
                       <div>
-                        <p className="font-medium text-primary-900">{item.productName}</p>
+                        <p className="font-medium text-primary-600">{item.product.name}</p>
                         <p className="text-sm text-primary-600">
                           Cantidad: {item.quantity} × ${item.unitPrice.toLocaleString()}
                         </p>
@@ -262,11 +263,11 @@ const OrderTrackingPage = () => {
                 <div className="mt-6 pt-6 border-t border-primary-100">
                   <div className="flex justify-between mb-2">
                     <span className="text-primary-600">Subtotal</span>
-                    <span className="font-medium">${searchedOrder.totalAmount.toLocaleString()}</span>
+                    <span className="font-medium">${searchedOrder.subtotalAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span className="text-primary-600">Envío</span>
-                    <span className="text-green-600">Gratis</span>
+                    <span className="font-medium">${searchedOrder.shippingAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-lg font-medium">
                     <span className="text-primary-900">Total</span>
@@ -275,13 +276,12 @@ const OrderTrackingPage = () => {
                 </div>
 
                 {/* Shipping Information */}
-                {searchedOrder.shippingMethod && (
+                {searchedOrder.trackingNumber && (
                   <div className="mt-6 pt-6 border-t border-primary-100">
                     <h3 className="font-medium text-primary-900 mb-4">Información de Envío</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-primary-600">Método de Envío</p>
-                        <p className="font-medium">{searchedOrder.shippingMethod}</p>
                       </div>
                       {searchedOrder.trackingNumber && (
                         <div>

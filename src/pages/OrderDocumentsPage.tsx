@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { Upload, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { selectAllOrders } from '@/store/slices/purchaseOrdersSlice';
 import { PurchaseOrder } from '@/types';
-
+import { purchaseOrderService } from '@/services';
 
 const OrderDocumentsPage = () => {
-  const orders = useSelector(selectAllOrders);
+  const { orderId: orderIdFromUrl } = useParams<{ orderId: string }>();
+  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -18,11 +18,47 @@ const OrderDocumentsPage = () => {
     file: null as File | null,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   // Filter orders based on search query
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = orders.filter(order =>
     order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Load orders on component mount
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const allOrders = await purchaseOrderService.getAll();
+        setOrders(allOrders);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      }
+    };
+    loadOrders();
+  }, []);
+
+  // Load specific order if orderId is in URL
+  useEffect(() => {
+    if (orderIdFromUrl) {
+      const loadOrder = async () => {
+        setIsLoading(true);
+        try {
+          const order = await purchaseOrderService.getById(orderIdFromUrl);
+          if (order) {
+            setSelectedOrder(order);
+            setFormData(prev => ({ ...prev, orderId: order.id }));
+            setSearchQuery(order.orderNumber);
+          }
+        } catch (error) {
+          console.error('Error loading order:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loadOrder();
+    }
+  }, [orderIdFromUrl]);
 
   const handleOrderSelect = (order: PurchaseOrder) => {
     setSelectedOrder(order);
@@ -76,20 +112,29 @@ const OrderDocumentsPage = () => {
       return;
     }
 
-    // Here you would typically upload the file to your storage service
-    // and create a document record in your database
-    console.log('Uploading document:', {
-      orderId: formData.orderId,
-      file: formData.file
-    });
+    try {
+      // Aquí iría la lógica para subir el archivo
+      console.log('Uploading document:', {
+        orderId: formData.orderId,
+        file: formData.file
+      });
 
-    // Reset form
-    setFormData({
-      orderId: '',
-      file: null
-    });
-    setSearchQuery('');
-    setSelectedOrder(null);
+      const uploadResponse: any = await purchaseOrderService.uploadReceipt(formData.orderId, formData.file);
+      const receipt = uploadResponse.filePath;
+     
+
+      // Reset form after successful upload
+
+      setSearchQuery('');
+      setSelectedOrder(null);
+
+      // Mostrar mensaje de éxito
+      alert('Comprobante subido exitosamente' + receipt);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Error al subir el comprobante');
+    }
   };
 
   // Close search results when clicking outside
@@ -104,6 +149,16 @@ const OrderDocumentsPage = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-primary-50 py-8 flex items-center justify-center">
+        <div className="text-center">
+          <p>Cargando orden...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-primary-50 py-8">
@@ -126,10 +181,11 @@ const OrderDocumentsPage = () => {
                   onChange={handleSearchChange}
                   onFocus={handleSearchFocus}
                   className={`pl-10 ${errors.orderId ? 'border-red-500' : ''}`}
+                  disabled={!!orderIdFromUrl}
                 />
               </div>
               {showResults && filteredOrders.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-primary-100">
+                <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-primary-100 max-h-60 overflow-y-auto">
                   {filteredOrders.map(order => (
                     <button
                       key={order.id}
@@ -139,11 +195,10 @@ const OrderDocumentsPage = () => {
                     >
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{order.orderNumber}</span>
-                        <span className={`text-sm px-2 py-1 rounded-full ${
-                          order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                          order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span className={`text-sm px-2 py-1 rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
                       </div>
@@ -201,7 +256,8 @@ const OrderDocumentsPage = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-primary-300"
+                disabled={!formData.orderId || !formData.file}
               >
                 Subir Comprobante
               </button>

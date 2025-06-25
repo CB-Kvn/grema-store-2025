@@ -78,7 +78,7 @@ interface AddressFormProps {
           </div>
   
           <div>
-            <Label htmlFor={`${type}FirstName`}>Nombre</Label>
+            <Label htmlFor={`${type}FirstName`}>Nombre:</Label>
             <Input
               id={`${type}FirstName`}
               required

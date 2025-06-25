@@ -1,4 +1,4 @@
-import { Phone, MapPin, Clock, Facebook, Instagram } from "lucide-react";
+import { Phone, MapPin, Clock, Instagram, Facebook } from "lucide-react";
 
 // TikTok icon component since it's not available in lucide-react
 const TikTokIcon = () => (
@@ -18,7 +18,7 @@ const TikTokIcon = () => (
 const ContactPage = () => {
   return (
     <div
-      className="min-h-screen bg-primary-50"
+      className="min-h-screen"
       data-aos="fade-up"
       data-aos-duration="1000"
     >
@@ -39,33 +39,34 @@ const ContactPage = () => {
 
       {/* Contact Info Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 -m-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <Phone className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-primary-50 p-8 rounded-lg shadow-md flex flex-col items-center justify-center h-full border border-primary-600">
+            <Phone className="h-10 w-10 text-primary-600 mb-4" />
+            <h3 className="text-xl font-semibold text-primary-900 mb-2 text-center">
               Teléfono
             </h3>
-            <p className="text-primary-600">+506 6194-1946</p>
+            <p className="text-primary-600 text-center">+506 6194-1946</p>
           </div>
 
-
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <MapPin className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">
+          <div className="bg-primary-50 p-8 rounded-lg shadow-md flex flex-col items-center justify-center h-full border border-primary-600">
+            <MapPin className="h-10 w-10 text-primary-600 mb-4" />
+            <h3 className="text-xl font-semibold text-primary-900 mb-2 text-center">
               Dirección
             </h3>
-            <p className="text-primary-600">Cóbano,Los Mangos 100 metros norte y 75 metros oeste de la Escuela Los Mangos</p>
-            <p className="text-primary-600">Puntarenas, Costa Rica</p>
+            <p className="text-primary-600 text-center">
+              Cóbano, Los Mangos 100 metros norte y 75 metros oeste de la Escuela
+              Los Mangos
+            </p>
+            <p className="text-primary-600 text-center">Puntarenas, Costa Rica</p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <Clock className="h-8 w-8 text-primary-600 mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 mb-2">
+          <div className="bg-primary-50 p-8 rounded-lg shadow-md flex flex-col items-center justify-center h-full border border-primary-600">
+            <Clock className="h-10 w-10 text-primary-600 mb-4" />
+            <h3 className="text-xl font-semibold text-primary-900 mb-2 text-center">
               Horario
             </h3>
-            <p className="text-primary-600">Lun - Sab: 9:00 am - 18:00</p>
-            <p className="text-primary-600">Dom: Cerrado</p>
+            <p className="text-primary-600 text-center">Lun - Sab: 9:00 am - 18:00</p>
+            <p className="text-primary-600 text-center">Dom: Cerrado</p>
           </div>
         </div>
       </div>
@@ -73,13 +74,13 @@ const ContactPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Map */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
+          <div className="bg-primary-50 p-8 rounded-lg shadow-md border border-primary-600">
             <h2 className="text-2xl font-serif font-bold text-primary-900 mb-6">
               Nuestro taller se encuentra en:
             </h2>
             <div className="aspect-video w-full rounded-lg overflow-hidden">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15721.650373517218!2d-84.935788!3d9.641916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f9f5a5c5e5e5e5d%3A0x5e5e5e5e5e5e5e5d!2sPaquera%2C%20Puntarenas%2C%20Costa%20Rica!5e0!3m2!1sen!2s!4v1635959562000&zoom=9"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3925.070188151864!2d-85.1186498!3d9.6820249!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zOcKwNDAnNTUuMyJOIDg1wrAwNycwNy4xIlc!5e0!3m2!1sen!2sus!4v1718923456789&zoom=17"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -91,28 +92,28 @@ const ContactPage = () => {
           </div>
 
           {/* Social Media */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
+          <div className="bg-primary-50 p-8 rounded-lg shadow-md border border-primary-600">
             <h2 className="text-2xl font-serif font-bold text-primary-900 mb-6">
               Síguenos en redes sociales
             </h2>
             <div className="grid grid-cols-1 gap-4">
               <a
                 href="#"
-                className="flex items-center p-4 rounded-lg bg-primary-50 hover:bg-primary-100 transition-colors"
+                className="flex items-center p-4 rounded-lg bg-white hover:bg-primary-100 transition-colors"
               >
                 <Facebook className="h-6 w-6 text-primary-600 mr-3" />
                 <span className="text-primary-900">Facebook</span>
               </a>
               <a
                 href="#"
-                className="flex items-center p-4 rounded-lg bg-primary-50 hover:bg-primary-100 transition-colors"
+                className="flex items-center p-4 rounded-lg bg-white hover:bg-primary-100 transition-colors"
               >
                 <Instagram className="h-6 w-6 text-primary-600 mr-3" />
                 <span className="text-primary-900">Instagram</span>
               </a>
               <a
                 href="#"
-                className="flex items-center p-4 rounded-lg bg-primary-50 hover:bg-primary-100 transition-colors"
+                className="flex items-center p-4 rounded-lg bg-white hover:bg-primary-100 transition-colors"
               >
                 <TikTokIcon />
                 <span className="text-primary-900 ml-3">TikTok</span>

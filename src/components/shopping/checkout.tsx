@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Truck, Gift, Shield, ArrowLeft, Copy, Phone, Wallet, AlertCircle } from 'lucide-react';
-
-
-import { cantones } from '@/utils/location';
+import { v4 as uuidv4 } from 'uuid';
+import { cantones, provincias } from '@/utils/location';
 import { AddressInfo, CartItem } from '@/types';
 import { Label } from '../ui/label';
 import AddressForm from './addressForm';
+import { t } from 'node_modules/framer-motion/dist/types.d-B_QPEvFK';
+import { purchaseOrderService } from '@/services/purchaseOrderService';
 
 interface CheckoutPageProps {
   cartItems: CartItem[];
@@ -45,7 +46,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   });
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [needInvoice, setNeedInvoice] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'sinpe' | 'transfer'>('sinpe');
+  const [paymentMethod, setPaymentMethod] = useState<'SINPE MOVIL' | 'TRANSFER'>('SINPE MOVIL');
 
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => {
@@ -69,7 +70,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateShipping();
+    return {
+      subtotal: calculateSubtotal(),
+      shipping: calculateShipping(),
+      total: calculateSubtotal() + calculateShipping(),
+    }
   };
 
   const handleShippingSubmit = (e: React.FormEvent) => {
@@ -92,12 +97,22 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const orderData = {
-      shippingInfo,
-      billingInfo: needInvoice ? billingInfo : shippingInfo,
+      buyerId: shippingInfo.buyerId,
+      firstName: shippingInfo.firstName,
+      lastName: shippingInfo.lastName,
+      email: shippingInfo.email,
+      phone: shippingInfo.phone,
+      orderNumber: uuidv4(),
+      dataShipping: shippingInfo.address+", "+provincias[Number(shippingInfo.provincia)-1]+" "+shippingInfo.canton+", "+shippingInfo.zipCode,
+      dataBilling: needInvoice ? (billingInfo.address+", "+provincias[Number(billingInfo.provincia)-1]+" "+billingInfo.canton+", "+billingInfo.zipCode) : shippingInfo.address+", "+provincias[Number(shippingInfo.provincia)-1]+" "+shippingInfo.canton+", "+shippingInfo.zipCode,
       paymentMethod,
-      cartItems,
-      total: calculateTotal(),
+      items: cartItems,
+      totalAmount: calculateTotal().total,
+      subtotalAmount: calculateTotal().subtotal,
+      shippingAmount: calculateTotal().shipping,
     };
+
+    purchaseOrderService.create(orderData)
     console.log('Order Data:', orderData);
     setStep('confirmation');
   };
@@ -245,9 +260,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() => setPaymentMethod('sinpe')}
+                        onClick={() => setPaymentMethod('SINPE MOVIL')}
                         className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${
-                          paymentMethod === 'sinpe' 
+                          paymentMethod === 'SINPE MOVIL' 
                             ? 'border-primary-600 bg-primary-50' 
                             : 'border-primary-200 hover:border-primary-300'
                         }`}
@@ -258,9 +273,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                       
                       <button
                         type="button"
-                        onClick={() => setPaymentMethod('transfer')}
+                        onClick={() => setPaymentMethod('TRANSFER')}
                         className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${
-                          paymentMethod === 'transfer' 
+                          paymentMethod === 'TRANSFER' 
                             ? 'border-primary-600 bg-primary-50' 
                             : 'border-primary-200 hover:border-primary-300'
                         }`}
@@ -280,7 +295,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                         </p>
                       </div>
 
-                      {paymentMethod === 'sinpe' ? (
+                      {paymentMethod === 'SINPE MOVIL' ? (
                         <div className="space-y-3">
                           <div>
                             <Label>Número SINPE Móvil</Label>

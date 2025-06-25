@@ -76,4 +76,12 @@ export const productService = {
     const response = await api.delete(`/products/image-delete/${id}`);
     return response.data;
   },
+  getLatestProducts: async () => {
+    const response = await api.get(`/products/latest`);
+    return response.data;
+  },
+  getBestSellingProducts: async () => {
+    const response = await api.get(`/products/best-sellers`);
+    return response.data;
+  },
 };
