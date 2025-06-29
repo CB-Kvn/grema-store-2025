@@ -131,7 +131,7 @@ function App() {
             <Route path="/sobre-nosotros" element={<AboutUs />} />
             <Route path="/nuestros-valores" element={<ValuesPage />} />
             <Route path="/admin/inventory" element={<InventoryPage />} />
-            <Route path="/orders/:orderId/documents" element={<OrderDocumentsPage />} />
+            <Route path="/orders/:orderIdFromUrl/documents" element={<OrderDocumentsPage />} />
             <Route path="/tracking" element={<OrderTrackingPage />}></Route>
           </Routes>
           <Networking></Networking>

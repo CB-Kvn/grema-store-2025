@@ -20,13 +20,14 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import type { PurchaseOrder, Warehouse } from '@/types';
-import { selectAllOrders } from '@/store/slices/purchaseOrdersSlice';
+import { selectAllOrders, setOrders } from '@/store/slices/purchaseOrdersSlice';
 import OrderDetailsModal from './OrderDetailsModal';
 import EditOrderModal from './EditOrderModal';
 import NewOrderModal from './NewOrderModal';
 import { warehouseService } from '@/services/warehouseService';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { setWarehouse } from '@/store/slices/warehousesSlice';
+import { purchaseOrderService } from '@/services/purchaseOrderService';
 
 ChartJS.register(
   CategoryScale,
@@ -72,13 +73,24 @@ const PurchaseOrdersTab = () => {
     setIsEditModalOpen(true);
   };
 
+  useEffect(() => {
+    const fetchWarehouse = async () => {
+      try {
+        const purchases  = await purchaseOrderService.getAll();
+        dispatch(setOrders(purchases));
+      } catch (error) {
+        console.error('Error fetching warehouse:', error);
+      }
+    };
+    fetchWarehouse();
+  }, []);     
  
   return (
     <div className="space-y-6">
-      {/* Statistics Cards */}
+      {/* Tarjetas de estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Órdenes"
+          title="Total de Órdenes"
           value={totalOrders.toString()}
           icon={<Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
         />
@@ -89,17 +101,17 @@ const PurchaseOrdersTab = () => {
         />
         <StatCard
           title="Total Gastado"
-          value={`$${totalAmount.toLocaleString()}`}
+          value={`₡${totalAmount.toLocaleString()}`}
           icon={<DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
         />
         <StatCard
           title="Promedio por Orden"
-          value={`$${averageOrderValue.toLocaleString()}`}
+          value={`₡${averageOrderValue.toLocaleString()}`}
           icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
         />
       </div>
 
-      {/* Charts */}
+      {/* Gráficas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-primary-100">
           <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-4">
@@ -108,7 +120,7 @@ const PurchaseOrdersTab = () => {
           <div className="h-48 sm:h-64">
             <Doughnut
               data={{
-                labels: ['Pendiente', 'Aprobado', 'Enviado', 'Entregado', 'Cancelado'],
+                labels: ['Pendiente', 'Aprobada', 'Enviada', 'Entregada', 'Cancelada'],
                 datasets: [{
                   data: [
                     orders.filter(o => o.status === 'pending').length,
@@ -182,14 +194,14 @@ const PurchaseOrdersTab = () => {
         </div>
       </div>
 
-      {/* Toolbar */}
+      {/* Barra de herramientas */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
             <Input
               type="text"
-              placeholder="Buscar por número de orden o proveedor..."
+              placeholder="Buscar por número de orden, nombre o correo..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -197,7 +209,7 @@ const PurchaseOrdersTab = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {/* Primary Action - Always Visible */}
+          {/* Acción principal */}
           <button 
             onClick={() => setIsNewOrderModalOpen(true)}
             className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
@@ -206,7 +218,7 @@ const PurchaseOrdersTab = () => {
             <span>Nueva Orden</span>
           </button>
           
-          {/* Secondary Actions - Hidden on Mobile */}
+          {/* Acciones secundarias */}
           <div className="hidden sm:flex items-center space-x-2">
             <button className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50">
               <Filter className="h-5 w-5 text-primary-600 mr-2" />
@@ -224,13 +236,13 @@ const PurchaseOrdersTab = () => {
         </div>
       </div>
 
-      {/* Orders Table */}
+      {/* Tabla de órdenes */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-primary-50">
               <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Orden</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Proveedor</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Cliente</th>
               <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Fecha</th>
               <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Estado</th>
               <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Pago</th>
@@ -248,11 +260,11 @@ const PurchaseOrdersTab = () => {
                   </div>
                 </td>
                 <td className="py-3 px-4">
-                  <span className="text-sm sm:text-base">{order.supplier}</span>
+                  <span className="text-sm sm:text-base">{order.firstName} {order.lastName}</span>
                 </td>
                 <td className="py-3 px-4">
                   <span className="text-sm sm:text-base">
-                    {format(new Date(order.orderDate), 'dd/MM/yyyy')}
+                    {order.orderDate ? format(new Date(order.orderDate), 'dd/MM/yyyy') : ''}
                   </span>
                 </td>
                 <td className="py-3 px-4">
@@ -269,7 +281,7 @@ const PurchaseOrdersTab = () => {
                   </span>
                 </td>
                 <td className="py-3 px-4">
-                  <span className="text-sm sm:text-base font-medium">${order.totalAmount.toLocaleString()}</span>
+                  <span className="text-sm sm:text-base font-medium">₡{order.totalAmount?.toLocaleString()}</span>
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex items-center space-x-1 sm:space-x-2">
@@ -301,7 +313,7 @@ const PurchaseOrdersTab = () => {
         </table>
       </div>
 
-      {/* Modals */}
+      {/* Modales */}
       {isDetailsModalOpen && selectedOrder && (
         <OrderDetailsModal
           order={selectedOrder}
@@ -396,20 +408,20 @@ const getPaymentStatusColor = (status: PurchaseOrder['paymentStatus']) => {
 
 const getStatusText = (status: string) => {
   const statusMap: { [key: string]: string } = {
-    pending: 'Pendiente',
-    approved: 'Aprobado',
-    shipped: 'En Tránsito',
-    delivered: 'Entregado',
-    cancelled: 'Cancelado'
+    PENDING: 'Pendiente',
+    APPROVED: 'Aprobada',
+    SHIPPED: 'Enviada',
+    DELIVERED: 'Entregada',
+    CANCELLED: 'Cancelada'
   };
   return statusMap[status] || status;
 };
 
 const getPaymentStatusText = (status: string) => {
   const statusMap: { [key: string]: string } = {
-    pending: 'Pendiente',
-    partial: 'Parcial',
-    paid: 'Pagado'
+    PENDING: 'Pendiente',
+    PARTIAL: 'Parcial',
+    PAID: 'Pagado'
   };
   return statusMap[status] || status;
 };

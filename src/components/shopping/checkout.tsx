@@ -8,6 +8,8 @@ import { Label } from '../ui/label';
 import AddressForm from './addressForm';
 import { t } from 'node_modules/framer-motion/dist/types.d-B_QPEvFK';
 import { purchaseOrderService } from '@/services/purchaseOrderService';
+import { Link } from 'react-router-dom';
+import { nanoid } from 'nanoid';
 
 interface CheckoutPageProps {
   cartItems: CartItem[];
@@ -47,6 +49,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [needInvoice, setNeedInvoice] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'SINPE MOVIL' | 'TRANSFER'>('SINPE MOVIL');
+  const [orderData, setOrderData] = useState<any>(null);
 
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => {
@@ -96,15 +99,15 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const orderData = {
+    const orderDataResponse = {
       buyerId: shippingInfo.buyerId,
       firstName: shippingInfo.firstName,
       lastName: shippingInfo.lastName,
       email: shippingInfo.email,
       phone: shippingInfo.phone,
-      orderNumber: uuidv4(),
-      dataShipping: shippingInfo.address+", "+provincias[Number(shippingInfo.provincia)-1]+" "+shippingInfo.canton+", "+shippingInfo.zipCode,
-      dataBilling: needInvoice ? (billingInfo.address+", "+provincias[Number(billingInfo.provincia)-1]+" "+billingInfo.canton+", "+billingInfo.zipCode) : shippingInfo.address+", "+provincias[Number(shippingInfo.provincia)-1]+" "+shippingInfo.canton+", "+shippingInfo.zipCode,
+      orderNumber: nanoid(8),
+      dataShipping: shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
+      dataBilling: needInvoice ? (billingInfo.address + ", " + provincias[Number(billingInfo.provincia) - 1] + " " + billingInfo.canton + ", " + billingInfo.zipCode) : shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
       paymentMethod,
       items: cartItems,
       totalAmount: calculateTotal().total,
@@ -112,8 +115,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
       shippingAmount: calculateTotal().shipping,
     };
 
-    purchaseOrderService.create(orderData)
-    console.log('Order Data:', orderData);
+    purchaseOrderService.create(orderDataResponse)
+    console.log('Order Data:', orderDataResponse);
+    setOrderData(orderDataResponse);
     setStep('confirmation');
   };
 
@@ -145,10 +149,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
               <div className="mb-8">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step === 'shipping' ? 'bg-primary-600 text-white' : 
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'shipping' ? 'bg-primary-600 text-white' :
                       step === 'billing' || step === 'payment' || step === 'confirmation' ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600'
-                    }`}>
+                      }`}>
                       1
                     </div>
                     <div className="ml-2">Envío</div>
@@ -157,10 +160,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                   {needInvoice && (
                     <>
                       <div className="flex items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          step === 'billing' ? 'bg-primary-600 text-white' :
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'billing' ? 'bg-primary-600 text-white' :
                           step === 'payment' || step === 'confirmation' ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600'
-                        }`}>
+                          }`}>
                           2
                         </div>
                         <div className="ml-2">Facturación</div>
@@ -169,19 +171,17 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                     </>
                   )}
                   <div className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step === 'payment' ? 'bg-primary-600 text-white' :
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'payment' ? 'bg-primary-600 text-white' :
                       step === 'confirmation' ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600'
-                    }`}>
+                      }`}>
                       {needInvoice ? '3' : '2'}
                     </div>
                     <div className="ml-2">Pago</div>
                   </div>
                   <div className="h-px w-12 bg-primary-200" />
                   <div className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step === 'confirmation' ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'confirmation' ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600'
+                      }`}>
                       {needInvoice ? '4' : '3'}
                     </div>
                     <div className="ml-2">Confirmación</div>
@@ -256,29 +256,27 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                 <form onSubmit={handlePaymentSubmit} className="space-y-6">
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium text-primary-900">Método de Pago</h3>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('SINPE MOVIL')}
-                        className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${
-                          paymentMethod === 'SINPE MOVIL' 
-                            ? 'border-primary-600 bg-primary-50' 
-                            : 'border-primary-200 hover:border-primary-300'
-                        }`}
+                        className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${paymentMethod === 'SINPE MOVIL'
+                          ? 'border-primary-600 bg-primary-50'
+                          : 'border-primary-200 hover:border-primary-300'
+                          }`}
                       >
                         <Phone className="h-6 w-6 text-primary-600" />
                         <span className="font-medium">SINPE Móvil</span>
                       </button>
-                      
+
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('TRANSFER')}
-                        className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${
-                          paymentMethod === 'TRANSFER' 
-                            ? 'border-primary-600 bg-primary-50' 
-                            : 'border-primary-200 hover:border-primary-300'
-                        }`}
+                        className={`p-4 border-2 rounded-lg flex flex-col items-center justify-center space-y-2 ${paymentMethod === 'TRANSFER'
+                          ? 'border-primary-600 bg-primary-50'
+                          : 'border-primary-200 hover:border-primary-300'
+                          }`}
                       >
                         <Wallet className="h-6 w-6 text-primary-600" />
                         <span className="font-medium">Transferencia Bancaria</span>
@@ -346,7 +344,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                             <Label>Cuenta Cliente</Label>
                             <div className="flex items-center mt-1">
                               <div className="flex-1 bg-white p-3 rounded-lg font-medium">
-                              15109020010099567
+                                15109020010099567
                               </div>
                               <button
                                 type="button"
@@ -361,7 +359,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                             <Label>Cuenta</Label>
                             <div className="flex items-center mt-1">
                               <div className="flex-1 bg-white p-3 rounded-lg font-medium">
-                              200-01-090-009956-8
+                                200-01-090-009956-8
                               </div>
                               <button
                                 type="button"
@@ -423,24 +421,59 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                   </div>
                   <h2 className="text-2xl font-bold text-primary-900 mb-2">¡Pedido Confirmado!</h2>
                   <p className="text-primary-600 mb-2">
-                    Gracias por tu compra. Recibirás un email con los detalles de tu pedido.
+                    Gracias por tu pedido. Recibirás un mensaje por Whatsapp con los detalles de tu pedido.
+                    Usa el siguiente link para confirmar tu pago:
                   </p>
                   {shippingInfo.buyerId && (
-                    <p className="text-primary-600 mb-2">
-                      ID de Envío: <span className="font-medium">{shippingInfo.buyerId}</span>
-                    </p>
+                    <>
+                      <p className="text-primary-600 my-6">
+                        ID de Envío: <span className="font-medium">{orderData.orderNumber}</span>
+                      </p>
+                      <div className="flex flex-col sm:flex-row justify-center gap-4 mb-2">
+                        <button
+                          onClick={() => navigate('/')}
+                          className="bg-primary-600 text-white px-6 py-2 rounded-full hover:bg-primary-700 transition-colors"
+                        >
+                          Volver a la Tienda
+                        </button>
+                        <button
+                          className="bg-primary-600 text-white px-6 py-2 rounded-full hover:bg-primary-700 transition-colors"
+                          onClick={() => navigate(`/orders/${orderData.orderNumber}/documents`)}
+                        >
+                          Enviar Comprobante
+                        </button>
+                        
+                      </div>
+                    </>
                   )}
                   {needInvoice && billingInfo.buyerId && (
-                    <p className="text-primary-600 mb-6">
-                      ID de Facturación: <span className="font-medium">{billingInfo.buyerId}</span>
-                    </p>
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 mb-2">
+                      <span className="text-primary-600 flex items-center">
+                        ID de Envío: <span className="font-medium ml-1">{orderData.orderNumber}</span>
+                      </span>
+                      <button
+                        onClick={() => navigate(`/orders/${orderData.orderNumber}/documents`)}
+                        className="bg-primary-600 text-white px-6 py-2 rounded-full hover:bg-primary-700 transition-colors"
+                      >
+                        {import.meta.env.VITE_API_URL + "/orders/" + orderData.orderNumber + "/documents"}
+                      </button>
+                      <button
+                        onClick={() => navigate('/')}
+                        className="bg-primary-600 text-white px-6 py-2 rounded-full hover:bg-primary-700 transition-colors"
+                      >
+                        Volver a la Tienda
+                      </button>
+                    </div>
                   )}
-                  <button
-                    onClick={() => navigate('/')}
-                    className="bg-primary-600 text-white px-6 py-2 rounded-full hover:bg-primary-700 transition-colors"
-                  >
-                    Volver a la Tienda
-                  </button>
+                  {/* Si no hay needInvoice ni shippingInfo.buyerId, muestra solo el botón de volver */}
+                  {!shippingInfo.buyerId && !(needInvoice && billingInfo.buyerId) && (
+                    <button
+                      onClick={() => navigate('/')}
+                      className="bg-primary-600 text-white px-6 py-2 rounded-full hover:bg-primary-700 transition-colors"
+                    >
+                      Volver a la Tienda
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -450,7 +483,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
               <h2 className="text-lg font-semibold text-primary-900">Resumen del Pedido</h2>
-              
+
               {/* Items */}
               <div className="space-y-4">
                 {cartItems.map((item) => {

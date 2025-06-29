@@ -41,6 +41,41 @@ const purchaseOrdersSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+
+    // NUEVOS REDUCERS
+    updateItemQtyDone: (
+      state,
+      action: PayloadAction<{ orderId: string; itemId: string; qtyDone: number | null }>
+    ) => {
+      const order = state.orders.find(order => order.id === action.payload.orderId);
+      if (order) {
+        const item = order.items.find(i => i.id === action.payload.itemId);
+        if (item) {
+          item.qtyDone = action.payload.qtyDone;
+        }
+      }
+    },
+    updateItemStatus: (
+      state,
+      action: PayloadAction<{ orderId: string; itemId: string; status: string }>
+    ) => {
+      const order = state.orders.find(order => order.id === action.payload.orderId);
+      if (order) {
+        const item = order.items.find(i => i.id === action.payload.itemId);
+        if (item) {
+          item.status = action.payload.status;
+        }
+      }
+    },
+    updateOrderStatus: (
+      state,
+      action: PayloadAction<{ orderId: string; status: string }>
+    ) => {
+      const order = state.orders.find(order => order.id === action.payload.orderId);
+      if (order) {
+        order.status = action.payload.status;
+      }
+    },
   },
 });
 
@@ -51,6 +86,9 @@ export const {
   setOrders,
   setLoading,
   setError,
+  updateItemQtyDone,
+  updateItemStatus,
+  updateOrderStatus,
 } = purchaseOrdersSlice.actions;
 
 export const selectAllOrders = (state: RootState) => state.purchases.orders;

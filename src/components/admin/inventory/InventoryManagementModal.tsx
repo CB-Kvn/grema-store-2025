@@ -116,7 +116,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-primary-900">Gestión de Stock</h3>
                 {/* Ocultar el botón si se alcanzó el límite */}
-                {inventory.length < warehouses.length && (
+                {inventory.length < warehouses.length &&  (
                   <button
                     type="button"
                     onClick={handleAddStock}
