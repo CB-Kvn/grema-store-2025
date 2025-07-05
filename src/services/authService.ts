@@ -74,6 +74,7 @@ export const authService = {
       const response = await api.post<LoginResponse>('/auth/google-login', { tokenId }, {
         withCredentials: true,
       });
+      return response.data; // Return the user data or token as needed
     } catch (error) {
       console.error('Error during Google login:', error);
       throw error; // Re-throw the error for further handling

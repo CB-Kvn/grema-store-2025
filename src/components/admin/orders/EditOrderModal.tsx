@@ -39,9 +39,73 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
     onClose();
   };
 
-  // Cambia handleItemChange para despachar cambios de status y qtyDone
-  const handleItemChange = async (index: number, field: keyof PurchaseOrderItem, value: any) => {
-    const newItems = [...formData.items];
+  // Nueva función unificada para cambios de item y confirmación de stock
+  const handleItemUpdate = async (
+    index: number,
+    field: keyof PurchaseOrderItem,
+    value: any,
+    confirmStock?: boolean,
+    assignedQty?: number
+  ) => {
+    let newItems = [...formData.items];
+
+    // Si es confirmación de stock ("Listo")
+    if (confirmStock && typeof assignedQty === 'number') {
+      const prevItemStatus = newItems[index].status;
+      const newItemStatus = assignedQty === newItems[index].quantity ? 'COMPLETED' : 'UNCOMPLETED';
+
+      // Actualiza status y qtyDone del item
+      newItems[index] = {
+        ...newItems[index],
+        status: newItemStatus,
+        qtyDone: assignedQty,
+      };
+
+      // Redux: solo si cambia
+      if (prevItemStatus !== newItemStatus) {
+        dispatch(updateItemStatus({
+          orderId: formData.id,
+          itemId: newItems[index].id,
+          status: newItemStatus
+        }));
+      }
+      if (newItems[index].qtyDone !== assignedQty) {
+        dispatch(updateItemQtyDone({
+          orderId: formData.id,
+          itemId: newItems[index].id,
+          qtyDone: assignedQty
+        }));
+      }
+
+      // Verifica si todos los productos están en COMPLETED
+      const allCompleted = newItems.every(i => i.status === 'COMPLETED');
+      const prevOrderStatus = formData.status;
+      let newOrderStatus = prevOrderStatus;
+      if (allCompleted && prevOrderStatus !== 'APPROVED') {
+        dispatch(updateOrderStatus({ orderId: formData.id, status: 'APPROVED' }));
+        newOrderStatus = 'APPROVED';
+      }
+
+      // Actualiza local y backend solo si hay cambios
+      const itemChanged = prevItemStatus !== newItemStatus || formData.items[index].qtyDone !== assignedQty;
+      const orderChanged = prevOrderStatus !== newOrderStatus;
+      if (itemChanged || orderChanged) {
+        let updatedOrder = { ...formData, items: newItems, status: newOrderStatus };
+        if (Array.isArray(updatedOrder.documents) && updatedOrder.documents.length === 0) {
+          const { documents, ...rest } = updatedOrder;
+          updatedOrder = rest;
+        }
+        setFormData(updatedOrder);
+        await purchaseOrderService.update(formData.id, updatedOrder);
+      } else {
+        setFormData({ ...formData, items: newItems });
+      }
+      setExpandedRow(null);
+      setConfirmModal(null);
+      return;
+    }
+
+    // Si es un cambio normal de campo
     if (field === 'quantity' || field === 'unitPrice') {
       const quantity = field === 'quantity' ? Number(value) : newItems[index].quantity;
       const unitPrice = field === 'unitPrice' ? Number(value) : newItems[index].unitPrice;
@@ -126,77 +190,77 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
   // dispatch(updateOrderStatus({ orderId: formData.id, status: 'DELIVERED' }));
 
   // Cuando confirmas el stock listo:
-  const handleStockReady = () => {
-    setConfirmModal({
-      open: true,
-      message:
-        assignedQty === item.quantity
-          ? '¿Está seguro que desea asignar el stock y marcar este producto como COMPLETADO? Esta acción no se puede deshacer.'
-          : 'No se ha asignado la cantidad completa. ¿Desea marcar este producto como INCOMPLETO?',
-      onConfirm: async () => {
-        // Estados actuales
-        const prevItemStatus = formData.items[index].status;
-        const newItemStatus = assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED';
+  // const handleStockReady = () => {
+  //   setConfirmModal({
+  //     open: true,
+  //     message:
+  //       assignedQty === item.quantity
+  //         ? '¿Está seguro que desea asignar el stock y marcar este producto como COMPLETADO? Esta acción no se puede deshacer.'
+  //         : 'No se ha asignado la cantidad completa. ¿Desea marcar este producto como INCOMPLETO?',
+  //     onConfirm: async () => {
+  //       // Estados actuales
+  //       const prevItemStatus = formData.items[index].status;
+  //       const newItemStatus = assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED';
 
-        // Actualiza status del item en el store solo si cambia
-        if (prevItemStatus !== newItemStatus) {
-          dispatch(updateItemStatus({
-            orderId: formData.id,
-            itemId: item.id,
-            status: newItemStatus
-          }));
-        }
+  //       // Actualiza status del item en el store solo si cambia
+  //       if (prevItemStatus !== newItemStatus) {
+  //         dispatch(updateItemStatus({
+  //           orderId: formData.id,
+  //           itemId: item.id,
+  //           status: newItemStatus
+  //         }));
+  //       }
 
-        // Actualiza qtyDone solo si cambia
-        if (item.qtyDone !== assignedQty) {
-          dispatch(updateItemQtyDone({
-            orderId: formData.id,
-            itemId: item.id,
-            qtyDone: assignedQty
-          }));
-        }
+  //       // Actualiza qtyDone solo si cambia
+  //       if (item.qtyDone !== assignedQty) {
+  //         dispatch(updateItemQtyDone({
+  //           orderId: formData.id,
+  //           itemId: item.id,
+  //           qtyDone: assignedQty
+  //         }));
+  //       }
 
-        handleItemChange(index, 'status', newItemStatus);
+  //       handleItemChange(index, 'status', newItemStatus);
 
-        // Verifica si todos los productos están en COMPLETED
-        const updatedItems = [...formData.items];
-        updatedItems[index] = {
-          ...updatedItems[index],
-          status: newItemStatus,
-          qtyDone: assignedQty // <-- actualiza qtyDone aquí
-        };
-        const allCompleted = updatedItems.every(i => i.status === 'COMPLETED');
-        const prevOrderStatus = formData.status;
-        let newOrderStatus = prevOrderStatus;
+  //       // Verifica si todos los productos están en COMPLETED
+  //       const updatedItems = [...formData.items];
+  //       updatedItems[index] = {
+  //         ...updatedItems[index],
+  //         status: newItemStatus,
+  //         qtyDone: assignedQty // <-- actualiza qtyDone aquí
+  //       };
+  //       const allCompleted = updatedItems.every(i => i.status === 'COMPLETED');
+  //       const prevOrderStatus = formData.status;
+  //       let newOrderStatus = prevOrderStatus;
 
-        if (allCompleted && prevOrderStatus !== 'APPROVED') {
-          dispatch(updateOrderStatus({ orderId: formData.id, status: 'APPROVED' }));
-          setFormData({ ...formData, status: 'APPROVED', items: updatedItems });
-          newOrderStatus = 'APPROVED';
-        } else {
-          setFormData({ ...formData, items: updatedItems });
-        }
+  //       if (allCompleted && prevOrderStatus !== 'APPROVED') {
+  //         dispatch(updateOrderStatus({ orderId: formData.id, status: 'APPROVED' }));
+  //         setFormData({ ...formData, status: 'APPROVED', items: updatedItems });
+  //         newOrderStatus = 'APPROVED';
+  //       } else {
+  //         setFormData({ ...formData, items: updatedItems });
+  //       }
 
-        // Solo actualiza en backend si hubo algún cambio
-        const itemChanged = prevItemStatus !== newItemStatus || item.qtyDone !== assignedQty;
-        const orderChanged = prevOrderStatus !== newOrderStatus;
+  //       // Solo actualiza en backend si hubo algún cambio
+  //       const itemChanged = prevItemStatus !== newItemStatus || item.qtyDone !== assignedQty;
+  //       const orderChanged = prevOrderStatus !== newOrderStatus;
 
-        if (itemChanged || orderChanged) {
-          let updatedOrder = { ...formData, items: updatedItems, status: newOrderStatus };
-          // Elimina documents si es array vacío
-          if (Array.isArray(updatedOrder.documents) && updatedOrder.documents.length === 0) {
-            const { documents, ...rest } = updatedOrder;
-            updatedOrder = rest;
-          }
-          setFormData(updatedOrder);
-          await purchaseOrderService.update(formData.id, updatedOrder);
-        }
+  //       if (itemChanged || orderChanged) {
+  //         let updatedOrder = { ...formData, items: updatedItems, status: newOrderStatus };
+  //         // Elimina documents si es array vacío
+  //         if (Array.isArray(updatedOrder.documents) && updatedOrder.documents.length === 0) {
+  //           const { documents, ...rest } = updatedOrder;
+  //           updatedOrder = rest;
+  //         }
+  //         setFormData(updatedOrder);
+  //         await purchaseOrderService.update(formData.id, updatedOrder);
+  //       }
 
-        setExpandedRow(null);
-        setConfirmModal(null);
-      },
-    });
-  };
+  //       setExpandedRow(null);
+  //       setConfirmModal(null);
+  //     },
+  //   });
+  // };
 
   return (
     <>
@@ -359,10 +423,11 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
 
                     console.log("Warehouses for product:", warehousesForProduct);
                     // Suma de cantidades asignadas por bodega para este item
-                    const assignedQty =
-                      typeof item.qtyDone === 'number'
-                        ? item.qtyDone
-                        : Object.values(warehouseQty[item.id] || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+                    const assignedQty = warehousesForProduct.reduce((sum, wh) => {
+                      const used = Number(warehouseQty[item.id]?.[wh.warehouse.id] ?? 0);
+                      const returned = Number(warehouseQty[item.id]?.[`returnQty_${wh.warehouse.id}`] ?? 0);
+                      return sum + (used - returned);
+                    }, 0);
 
                     // Handler para "Listo"
                     const handleStockReady = () => {
@@ -373,11 +438,25 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                             ? '¿Está seguro que desea asignar el stock y marcar este producto como COMPLETADO? Esta acción no se puede deshacer.'
                             : 'No se ha asignado la cantidad completa. ¿Desea marcar este producto como INCOMPLETO?',
                         onConfirm: async () => {
-                          // Estados actuales
-                          const prevItemStatus = formData.items[index].status;
-                          const newItemStatus = assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED';
+                          // Trabaja sobre una copia local de los items
+                          const updatedItems = formData.items.map((it, idx) =>
+                            idx === index
+                              ? {
+                                  ...it,
+                                  status: assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED',
+                                  qtyDone: assignedQty,
+                                }
+                              : it
+                          );
 
-                          // Actualiza status del item en el store solo si cambia
+                          // Calcula los estados previos y nuevos
+                          const prevItemStatus = item.status;
+                          const newItemStatus = assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED';
+                          const prevOrderStatus = formData.status;
+                          const allCompleted = updatedItems.every(i => i.status === 'COMPLETED');
+                          const newOrderStatus = allCompleted ? 'APPROVED' : prevOrderStatus;
+
+                          // Solo despacha si hay cambios
                           if (prevItemStatus !== newItemStatus) {
                             dispatch(updateItemStatus({
                               orderId: formData.id,
@@ -385,8 +464,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                               status: newItemStatus
                             }));
                           }
-
-                          // Actualiza qtyDone solo si cambia
                           if (item.qtyDone !== assignedQty) {
                             dispatch(updateItemQtyDone({
                               orderId: formData.id,
@@ -394,43 +471,18 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                               qtyDone: assignedQty
                             }));
                           }
-
-                          handleItemChange(index, 'status', newItemStatus);
-
-                          // Verifica si todos los productos están en COMPLETED
-                          const updatedItems = [...formData.items];
-                          updatedItems[index] = {
-                            ...updatedItems[index],
-                            status: newItemStatus,
-                            qtyDone: assignedQty // <-- actualiza qtyDone aquí
-                          };
-                          const allCompleted = updatedItems.every(i => i.status === 'COMPLETED');
-                          const prevOrderStatus = formData.status;
-                          let newOrderStatus = prevOrderStatus;
-
                           if (allCompleted && prevOrderStatus !== 'APPROVED') {
                             dispatch(updateOrderStatus({ orderId: formData.id, status: 'APPROVED' }));
-                            setFormData({ ...formData, status: 'APPROVED', items: updatedItems });
-                            newOrderStatus = 'APPROVED';
-                          } else {
-                            setFormData({ ...formData, items: updatedItems });
                           }
 
-                          // Solo actualiza en backend si hubo algún cambio
-                          const itemChanged = prevItemStatus !== newItemStatus || item.qtyDone !== assignedQty;
-                          const orderChanged = prevOrderStatus !== newOrderStatus;
-
-                          if (itemChanged || orderChanged) {
-                            let updatedOrder = { ...formData, items: updatedItems, status: newOrderStatus };
-                            // Elimina documents si es array vacío
-                            if (Array.isArray(updatedOrder.documents) && updatedOrder.documents.length === 0) {
-                              const { documents, ...rest } = updatedOrder;
-                              updatedOrder = rest;
-                            }
-                            setFormData(updatedOrder);
-                            // const orderChange = ordersList.find((o: PurchaseOrder) => o.id === formData.id);
-                            await purchaseOrderService.update(formData.id, updatedOrder);
+                          // Prepara el objeto para backend
+                          let updatedOrder = { ...formData, items: updatedItems, status: newOrderStatus };
+                          if (Array.isArray(updatedOrder.documents) && updatedOrder.documents.length === 0) {
+                            const { documents, ...rest } = updatedOrder;
+                            updatedOrder = rest;
                           }
+                          setFormData(updatedOrder);
+                          await purchaseOrderService.update(formData.id, updatedOrder);
 
                           setExpandedRow(null);
                           setConfirmModal(null);
@@ -483,7 +535,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                             <Input
                               type="number"
                               value={item.quantity}
-                              onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                              onChange={(e) => handleItemUpdate(index, 'quantity', e.target.value)}
                               min="1"
                               className="w-24"
                             />
@@ -502,7 +554,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                           <td className="px-4 py-3">
                             <select
                               value={item.status}
-                              onChange={(e) => handleItemChange(index, 'status', e.target.value)}
+                              onChange={(e) => handleItemUpdate(index, 'status', e.target.value)}
                               className="w-full rounded-md border border-input bg-background px-3 py-2"
                             >
                               <option value="PENDING">Pendiente</option>
@@ -530,23 +582,83 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                   {warehousesForProduct.length === 0 && (
                                     <div className="text-primary-500">No hay stock en bodegas para este producto.</div>
                                   )}
-                                  {warehousesForProduct.map((wh: any) => (
-                                    <div key={wh.warehouse.id} className="flex items-center gap-4">
-                                      <span className="min-w-[120px]">{wh.warehouse.name}:</span>
-                                      <span className="text-primary-700">Disponible: {wh.quantity}</span>
-                                      <Input
-                                        type="number"
-                                        min={0}
-                                        max={wh.quantity}
-                                        value={warehouseQty[item.id]?.[wh.warehouse.id] ?? ''}
-                                        onChange={e =>
-                                          handleWarehouseQtyChange(item.id, wh.warehouse.id, Number(e.target.value))
-                                        }
-                                        placeholder="Cantidad a usar"
-                                        className="w-32"
-                                      />
-                                    </div>
-                                  ))}
+                                  {warehousesForProduct.map((wh: any) => {
+                                    // Cantidad devuelta para esta bodega
+                                    const returnQty = Number(warehouseQty[item.id]?.[`returnQty_${wh.warehouse.id}`] ?? 0);
+                                    // Cantidad asignada para esta bodega
+                                    const usedQty = Number(warehouseQty[item.id]?.[wh.warehouse.id] ?? 0);
+                                    // Stock disponible ajustado: stock original - asignado + devuelto
+                                    const availableStock = wh.quantity - usedQty + returnQty;
+
+                                    return (
+                                      <div key={wh.warehouse.id} className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-4">
+                                          <span className="min-w-[120px]">{wh.warehouse.name}:</span>
+                                          <span className="text-primary-700">
+                                            Disponible: {availableStock}
+                                          </span>
+                                          <Input
+                                            type="number"
+                                            min={0}
+                                            max={wh.quantity}
+                                            value={ ( usedQty >= 0 ? usedQty - returnQty : 0 )}
+                                            onChange={e => {
+                                              const val = Number(e.target.value);
+                                              // Solo permite valores >= 0 y no menores que la devolución
+                                              if (val < 0) return;
+                                              // Si hay devolución, no permite asignar menos que la devolución
+                                              if (returnQty > 0 && val < returnQty) return;
+                                              handleWarehouseQtyChange(item.id, wh.warehouse.id, val);
+                                            }}
+                                            placeholder="Cantidad a usar"
+                                            className="w-32"
+                                          />
+                                        </div>
+                                        {/* NUEVO: Devolución de stock */}
+                                        <div className="flex items-center gap-2 pl-[128px]">
+                                          <input
+                                            type="checkbox"
+                                            id={`return-checkbox-${item.id}-${wh.warehouse.id}`}
+                                            checked={!!warehouseQty[item.id]?.[`return_${wh.warehouse.id}`]}
+                                            onChange={e => {
+                                              setWarehouseQty(prev => ({
+                                                ...prev,
+                                                [item.id]: {
+                                                  ...prev[item.id],
+                                                  [`return_${wh.warehouse.id}`]: e.target.checked,
+                                                  [`returnQty_${wh.warehouse.id}`]: e.target.checked
+                                                    ? prev[item.id]?.[`returnQty_${wh.warehouse.id}`] ?? 0
+                                                    : 0,
+                                                },
+                                              }));
+                                            }}
+                                          />
+                                          <label htmlFor={`return-checkbox-${item.id}-${wh.warehouse.id}`} className="text-sm">
+                                            Devolver stock
+                                          </label>
+                                          <Input
+                                            type="number"
+                                            min={0}
+                                            max={wh.quantity}
+                                            value={returnQty}
+                                            onChange={e => {
+                                              const val = Number(e.target.value);
+                                              setWarehouseQty(prev => ({
+                                                ...prev,
+                                                [item.id]: {
+                                                  ...prev[item.id],
+                                                  [`returnQty_${wh.warehouse.id}`]: val,
+                                                },
+                                              }));
+                                            }}
+                                            placeholder="Cantidad a devolver"
+                                            className="w-32"
+                                            disabled={!warehouseQty[item.id]?.[`return_${wh.warehouse.id}`]}
+                                          />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                                 <div className="mt-2 text-xs text-primary-500">
                                   * Asigna la cantidad de cada bodega para cubrir la cantidad pedida.
@@ -564,9 +676,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                   <button
                                     type="button"
                                     className={`px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700 transition ${
-                                      assignedQty > 0 ? '' : 'opacity-50 cursor-not-allowed'
+                                      assignedQty > 0 && assignedQty < item.quantity ? '' : 'opacity-50 cursor-not-allowed'
                                     }`}
-                                    disabled={assignedQty === 0}
+                                    disabled={assignedQty === 0 || assignedQty === item.quantity}
                                     onClick={handleStockReady}
                                   >
                                     Listo

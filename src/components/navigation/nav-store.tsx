@@ -1,7 +1,7 @@
 import { Store, ShoppingCart, User, Info, Menu } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/hooks/useAppSelector";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,17 +9,22 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import SearchBar from "./search-bar";
 import LoginModal from "../admin/login/LoginModal";
+import { useAuthGoogle } from "@/hooks/useAuthGoogle";
 
 export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const cartItems = useAppSelector((state) => state.cart.items);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const user = undefined; // <-- Cambia esto por tu hook de autenticación real
+  const { user, logout } = useAuthGoogle(); // <--- Usa el hook aquí
   const navigate = useNavigate();
 
   // Verifica si la URL contiene la palabra "tienda"
   const isTiendaPage = location.pathname.includes("tienda");
+
+  useEffect(() => {
+    console.log("Usuario autenticado:", user);
+  }, [user]);
 
   return (
     <>
@@ -119,15 +124,16 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                   <DropdownMenu open={showUserMenu} onOpenChange={setShowUserMenu}>
                     <DropdownMenuTrigger asChild>
                       <Avatar className="cursor-pointer">
+                        <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full" />
                         <AvatarFallback>
-                          {user.name ? user.name.charAt(0) : "U"}
+                          {user.name}
                         </AvatarFallback>
                       </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => navigate("/tienda")}>Tienda</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/admin/inventory")}>Administrar</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/logout")}>Salir</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { logout(); setShowUserMenu(false); }}>Salir</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}

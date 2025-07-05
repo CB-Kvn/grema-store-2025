@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Mail, Lock, LogIn, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { authService } from "@/services/authService";
 import LoginGoogle from "@/components/login/components/loginGoogle";
-import { useAuth } from "@/hooks/useAuth";
+
 
 
 interface LoginModalProps {
