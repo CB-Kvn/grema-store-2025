@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { productService } from '@/services/productService';
+import { warehouseService } from '@/services/warehouseService'; // <-- Importa el servicio de warehouse
 import { Product, Discount } from '@/types';
 import { useAppDispatch } from './useAppDispatch';
 import { setBestSellingProducts, setLatestProducts, setProducts } from '@/store/slices/productsSlice';
@@ -28,9 +29,9 @@ export const useProductService = () => {
     const response = await handleRequest(() => productService.getAll());
     const latestProducts = await handleRequest(() => productService.getLatestProducts());
     const bestSellers = await handleRequest(() => productService.getBestSellingProducts());
-    dispatch(setProducts(response)); // Despachar la acción con la respuesta
-    dispatch(setLatestProducts(latestProducts)); // Despachar la acción con la respuesta
-    dispatch(setBestSellingProducts(bestSellers)); // Despachar la acción con la respuesta
+    dispatch(setProducts(response));
+    dispatch(setLatestProducts(latestProducts));
+    dispatch(setBestSellingProducts(bestSellers));
     return response;
   };
 
@@ -62,6 +63,28 @@ export const useProductService = () => {
     return handleRequest(() => productService.transferStock(id, data));
   };
 
+  const getPendingQuantities = async (id: number) => {
+    return handleRequest(() => productService.getPendingQuantities(id));
+  };
+
+  // --- NUEVO: Agregar stock a una bodega ---
+  const addStock = async (
+    warehouseId: string,
+    productId: number,
+    data: { quantity: number; location: string; price: number }
+  ) => {
+    return handleRequest(() => warehouseService.addStock(warehouseId, productId, data));
+  };
+
+  // --- NUEVO: Remover stock de una bodega ---
+  const removeStock = async (
+    warehouseId: string,
+    productId: number,
+    quantity: number
+  ) => {
+    return handleRequest(() => warehouseService.removeStock(warehouseId, productId, quantity));
+  };
+
   return {
     loading,
     error,
@@ -74,5 +97,8 @@ export const useProductService = () => {
     updateInventory,
     updateDiscount,
     transferStock,
+    getPendingQuantities,
+    addStock,      // <-- Exporta addStock
+    removeStock    // <-- Exporta removeStock
   };
 };

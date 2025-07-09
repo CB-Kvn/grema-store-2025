@@ -9,14 +9,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import SearchBar from "./search-bar";
 import LoginModal from "../admin/login/LoginModal";
-import { useAuthGoogle } from "@/hooks/useAuthGoogle";
+import { useAuthGoogleContext } from "@/context/ContextAuth";
 
 export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const cartItems = useAppSelector((state) => state.cart.items);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { user, logout } = useAuthGoogle(); // <--- Usa el hook aquí
+  const [showFallback, setShowFallback] = useState(false);
+  const { user, logout } = useAuthGoogleContext(); // <--- Usa el hook aquí
   const navigate = useNavigate();
 
   // Verifica si la URL contiene la palabra "tienda"
@@ -73,10 +74,13 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                     >
                       <Info className="mr-2 h-5 w-5 text-primary-600" /> Sobre Nosotros
                     </Button>
+                    {/* --- Sheet lateral (menú hamburguesa) --- */}
                     <Button
                       variant="ghost"
                       className="justify-start w-full"
                       onClick={() => navigate("/admin/inventory")}
+                      // Solo muestra si es admin
+                      style={{ display: user?.typeUser === "ADMIN" ? "flex" : "none" }}
                     >
                       <User className="mr-2 h-5 w-5 text-primary-600" /> Administración
                     </Button>
@@ -94,9 +98,11 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                 <Button variant="ghost" onClick={() => navigate("/sobre-nosotros")}>
                   <Info className="mr-2 h-5 w-5 text-primary-600" /> Sobre Nosotros
                 </Button>
-                <Button variant="ghost" onClick={() => navigate("/admin/inventory")}>
-                  <User className="mr-2 h-5 w-5 text-primary-600" /> Administración
-                </Button>
+                {user?.typeUser === "ADMIN" && (
+                  <Button variant="ghost" onClick={() => navigate("/admin/inventory")}>
+                    <User className="mr-2 h-5 w-5 text-primary-600" /> Administración
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -124,15 +130,27 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                   <DropdownMenu open={showUserMenu} onOpenChange={setShowUserMenu}>
                     <DropdownMenuTrigger asChild>
                       <Avatar className="cursor-pointer">
-                        <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full" />
-                        <AvatarFallback>
-                          {user.name}
-                        </AvatarFallback>
+                        {!showFallback && (
+                          <img
+                            src={user.picture}
+                            alt={user.name}
+                            className="w-8 h-8 rounded-full"
+                            onError={() => setShowFallback(true)}
+                          />
+                        )}
+                        {showFallback && (
+                          <AvatarFallback>
+                            {user.name ? user.name.charAt(0) : "U"}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                     </DropdownMenuTrigger>
+                    {/* --- Menú de usuario (Dropdown) --- */}
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => navigate("/tienda")}>Tienda</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/admin/inventory")}>Administrar</DropdownMenuItem>
+                      {user?.typeUser === "ADMIN" && (
+                        <DropdownMenuItem onClick={() => navigate("/admin/inventory")}>Administrar</DropdownMenuItem>
+                      )}
                       <DropdownMenuItem onClick={() => { logout(); setShowUserMenu(false); }}>Salir</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

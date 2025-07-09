@@ -279,21 +279,22 @@ export function useProductForm(product: ProductFormType, onSubmit: (product: Pro
   };
 
   const generateUniqueSku = () => {
-    // Toma 3 letras de la categoría
-    const cat = (formData.category || '').substring(0, 3).toUpperCase();
+    // Prefijo fijo
+    const prefix = "GRE-INV-";
 
-    // Toma 3 letras de cada piedra (si hay)
-    let piedras = '';
+    // Primeras 3 letras de la primera piedra (si hay)
+    let piedraPart = "";
     if (Array.isArray(piedra) && piedra.length > 0) {
-      piedras = piedra
-        .map((nombre: string) => (nombre || '').substring(0, 3).toUpperCase())
-        .join('');
+      piedraPart = (piedra[0] || "").substring(0, 3).toUpperCase();
     }
 
-    // 3 números aleatorios
-    const rand = Math.floor(100 + Math.random() * 900); // Siempre 3 dígitos
+    // Primeras 3 letras del primer color (si hay)
+    let colorPart = "";
+    if (Array.isArray(colores) && colores.length > 0) {
+      colorPart = (colores[0]?.name || "").substring(0, 3).toUpperCase();
+    }
 
-    return `${cat}${piedras}${rand}`;
+    return `${prefix}${piedraPart}-${colorPart}`;
   };
 
   return {

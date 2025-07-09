@@ -35,7 +35,7 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity }) => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
-  const { getProductById } = useProductService();
+  const { getProductById, getPendingQuantities } = useProductService();
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [mainSwiper, setMainSwiper] = useState<any>(null); // Nuevo: referencia al Swiper principal
   const [quantity, setQuantity] = useState(1);
@@ -43,24 +43,41 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   const [giftMessage, setGiftMessage] = useState("");
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [activeProductId, setActiveProductId] = useState(Number(id)); // Estado para el producto activo
+  const [pendingQuantities, setPendingQuantities] = useState(0);
   const productCartShop = useAppSelector((state) => state.cart.items);
   const products = useAppSelector((state) => state.products.items);
   const product = products.find((p) => p.id === activeProductId); // Producto activo basado en el estado
 
+  // --- NUEVO: Sumatoria de stock total en WarehouseItem ---
+  const totalStock = Array.isArray(product?.WarehouseItem)
+    ? product.WarehouseItem.reduce((sum, item) => sum + (item.quantity || 0), 0)
+    : 0;
+
+  // --- NUEVO: Stock disponible (total en stock menos pendientes) ---
+  const availableStock = totalStock - pendingQuantities;
+
+  const pendingQuantitiesSearch = async () => {
+    const dsg = await getPendingQuantities(Number(id));
+    setPendingQuantities(dsg.pendingQuantity ?? 0);
+  }
+  const fetchData = async () => {
+    try {
+      const productData = await getProductById(Number(id));
+
+      dispatch(setProducts([productData]));
+      // <-- Guarda el valor pendiente en el estado
+    } catch (error) {
+      console.error("Error al cargar el producto:", error);
+    }
+  };
+
+
   useEffect(() => {
     if (!products || products.length === 0) {
-      const fetchData = async () => {
-        try {
-          const productData = await getProductById(Number(id));
-          dispatch(setProducts([productData]));
-        } catch (error) {
-          console.error("Error al cargar el producto:", error);
-        }
-      };
-
       fetchData();
     }
-  }, [products, id, dispatch, getProductById]);
+    pendingQuantitiesSearch()
+  }, []);
 
   if (!product) {
     return (
@@ -223,7 +240,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                       minimumFractionDigits: 2,
                     }).format(
                       relatedProduct.WarehouseItem[0]?.price /
-                        (1 - relatedProduct.WarehouseItem[0]?.discount / 100)
+                      (1 - relatedProduct.WarehouseItem[0]?.discount / 100)
                     )}
                   </span>
                 )}
@@ -295,16 +312,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
             <Swiper
               //@ts-ignore
               onSwiper={setThumbsSwiper}
-              spaceBetween={10}
+              spaceBetween={16}
               slidesPerView={Math.min(product.Images[0]?.url.length || 1, 4)}
               modules={[Navigation, Thumbs]}
-              className="h-20 sm:h-24"
+              className="h-32 sm:h-36" // <-- Aumenta el alto del Swiper
             >
               {product.Images[0]?.url.map((image, index) => (
                 <SwiperSlide key={index}>
                   <div
                     className="flex items-center justify-center cursor-pointer"
-                    style={{ width: "80px", height: "80px" }}
+                    style={{ width: "120px", height: "120px" }} // <-- Aumenta el tamaño del contenedor
                     onClick={() => {
                       if (mainSwiper) {
                         mainSwiper.slideTo(index);
@@ -315,7 +332,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                       src={image}
                       alt={`${product.name} - Miniatura ${index + 1}`}
                       className="object-cover rounded-lg"
-                      style={{ width: "70px", height: "70px" }}
+                      style={{ width: "110px", height: "110px" }} // <-- Aumenta el tamaño de la imagen
                     />
                   </div>
                 </SwiperSlide>
@@ -333,6 +350,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 <Barcode className="h-4 w-4 mr-2" />
                 <span className="text-xl">SKU: {product.sku}</span>
               </div>
+              {/* --- NUEVO: Mostrar stock total --- */}
+              <div className="flex items-center mt-2 text-primary-600">
+                <Package className="h-4 w-4 mr-2" />
+                <span className="text-lg font-semibold text-primary-900">
+                  Stock total: {availableStock < 0 ? 0 : availableStock}
+                </span>
+              </div>
               <p className="text-primary-600 mt-4 leading-relaxed">
                 {product.description}
               </p>
@@ -344,9 +368,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                       currency: "CRC",
                       maximumFractionDigits: 2,
                       minimumFractionDigits: 2,
-                    }).format(product.WarehouseItem[0].price)}
+                    }).format(product.WarehouseItem?.[0]?.price ?? 0)}
                   </span>
-                  {product.WarehouseItem[0].discount > 0 && (
+                  {product.WarehouseItem?.[0]?.discount > 0 && (
                     <span className="ml-2 text-lg line-through text-primary-400">
                       {new Intl.NumberFormat("es-CR", {
                         style: "currency",
@@ -354,7 +378,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                         maximumFractionDigits: 2,
                         minimumFractionDigits: 2,
                       }).format(
-                        product.WarehouseItem[0].price / (1 - product.WarehouseItem[0].discount / 100)
+                        (product.WarehouseItem?.[0]?.price ?? 0) /
+                        (1 - (product.WarehouseItem?.[0]?.discount ?? 0) / 100)
                       )}
                     </span>
                   )}

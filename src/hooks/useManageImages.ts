@@ -19,7 +19,13 @@ export function useProductImageState() {
   const dispatch = useAppDispatch();
   const itemInventory = useAppSelector((state: RootState) => state.products.itemInventory);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const images = itemInventory?.Images[0].url || [];
+  const images =
+    itemInventory &&
+      Array.isArray(itemInventory.Images) &&
+      itemInventory.Images[0] &&
+      Array.isArray(itemInventory.Images[0].url)
+      ? itemInventory.Images[0].url
+      : [];
 
   // Maneja la selección de archivos y sube cada uno
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,17 +46,33 @@ export function useProductImageState() {
 
     const filepaths = await productService.uploadImages(files) as any[];
 
-
-
-    const imagePaths = JSON.parse(itemInventory.filepaths[0].url)
+    let imagePaths: any[] = [];
+    if (
+      itemInventory &&
+      itemInventory.filepaths &&
+      itemInventory.filepaths[0] &&
+      itemInventory.filepaths[0].url
+    ) {
+      if (typeof itemInventory.filepaths[0].url === "string") {
+        try {
+          imagePaths = JSON.parse(itemInventory.filepaths[0].url);
+        } catch {
+          imagePaths = [];
+        }
+      } else if (Array.isArray(itemInventory.filepaths[0].url)) {
+        imagePaths = [...itemInventory.filepaths[0].url];
+      }
+    }
     filepaths.forEach((file: any) => {
       imagePaths.push(file.filePath)
     })
 
+    console.log(itemInventory)
+
     dispatch(updateImagesToProductFilePath({ productId: itemInventory.id, filepaths: imagePaths }));
     dispatch(updateImagesToItemInventoryFilePath(imagePaths));
     console.log("filepaths", imagePaths);
-    const urls = await productService.updateImage(itemInventory.filepaths[0].id, imagePaths, true, itemInventory.filepaths[0].productId) as any[];
+    const urls = await productService.updateImage(itemInventory.filepaths && itemInventory.filepaths[0] && itemInventory.filepaths[0].id ? itemInventory.filepaths[0].id : null, imagePaths, true, itemInventory.id || "") as any[];
     console.log("urls", urls);
     dispatch(updateImagesToProduct({ productId: itemInventory.id, images: urls }));
     dispatch(updateImagesToItemInventory(urls));
@@ -76,7 +98,7 @@ export function useProductImageState() {
         filepaths = itemInventory.filepaths[0].url;
       }
       console.log("filepaths", filepaths);
-      const updatedImagesInventoryFilepaths  = filepaths.filter((img: any) => !img.includes(path));
+      const updatedImagesInventoryFilepaths = filepaths.filter((img: any) => !img.includes(path));
 
       const updatedImages = itemInventory.Images[0].url.filter((img: any) => !img.includes(url));
       console.log("updatedImagesInventoryFilepaths", updatedImagesInventoryFilepaths);

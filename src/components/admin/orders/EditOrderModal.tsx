@@ -12,6 +12,7 @@ import { warehouseService } from '@/services/warehouseService';
 import { purchaseOrderService } from '@/services/purchaseOrderService';
 import { Dialog, DialogContent, DialogHeader, DialogFooter } from '../../ui/dialog';
 import { useAppSelector } from '@/hooks/useAppSelector';
+import { useProductService } from '@/hooks/useProductService'; // Agrega este import
 
 interface EditOrderModalProps {
   order: PurchaseOrder;
@@ -32,6 +33,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
     message: string;
     onConfirm: () => void;
   } | null>(null);
+  const { addStock, removeStock } = useProductService(); // Usa el hook
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -438,6 +440,18 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                             ? '¿Está seguro que desea asignar el stock y marcar este producto como COMPLETADO? Esta acción no se puede deshacer.'
                             : 'No se ha asignado la cantidad completa. ¿Desea marcar este producto como INCOMPLETO?',
                         onConfirm: async () => {
+                          // Por cada bodega, remueve el stock asignado
+                          for (const wh of warehousesForProduct) {
+                            const usedQty = Number(warehouseQty[item.id]?.[wh.warehouse.id] ?? 0);
+                            if (usedQty > 0) {
+                              await removeStock(
+                                wh.warehouse.id,
+                                item.productId,
+                                usedQty
+                              );
+                            }
+                          }
+
                           // Trabaja sobre una copia local de los items
                           const updatedItems = formData.items.map((it, idx) =>
                             idx === index
@@ -632,6 +646,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                                 },
                                               }));
                                             }}
+                                            disabled={item.status === "PENDING" || assignedQty === 0}
                                           />
                                           <label htmlFor={`return-checkbox-${item.id}-${wh.warehouse.id}`} className="text-sm">
                                             Devolver stock
@@ -653,8 +668,61 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                             }}
                                             placeholder="Cantidad a devolver"
                                             className="w-32"
-                                            disabled={!warehouseQty[item.id]?.[`return_${wh.warehouse.id}`]}
+                                            disabled={
+                                              !warehouseQty[item.id]?.[`return_${wh.warehouse.id}`] ||
+                                              item.status === "PENDING" ||
+                                              assignedQty === 0 // <-- No permite devolver si el total asignado ya es 0
+                                            }
                                           />
+                                          {/* Botones de acción para devolución */}
+                                          {returnQty > 0 && (
+                                            <>
+                                              <button
+                                                type="button"
+                                                className="ml-2 p-1 rounded bg-primary-100 hover:bg-primary-200 text-primary-700 border border-primary-300"
+                                                title="Confirmar devolución"
+                                                onClick={async () => {
+                                                  // ADD STOCK: Devolver a la bodega
+                                                  await addStock(
+                                                    wh.warehouse.id,
+                                                    item.productId,
+                                                    {
+                                                      quantity: returnQty,
+                                                      location: wh.location,
+                                                      price: item.unitPrice
+                                                    }
+                                                  );
+                                                  setWarehouseQty(prev => ({
+                                                    ...prev,
+                                                    [item.id]: {
+                                                      ...prev[item.id],
+                                                      [`returnQty_${wh.warehouse.id}`]: 0,
+                                                      [`return_${wh.warehouse.id}`]: false,
+                                                    },
+                                                  }));
+                                                }}
+                                              >
+                                                <span role="img" aria-label="check">✔️</span>
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="ml-1 p-1 rounded bg-red-100 hover:bg-red-200 text-red-700 border border-red-300"
+                                                title="Cancelar devolución"
+                                                onClick={() => {
+                                                  setWarehouseQty(prev => ({
+                                                    ...prev,
+                                                    [item.id]: {
+                                                      ...prev[item.id],
+                                                      [`returnQty_${wh.warehouse.id}`]: 0,
+                                                      [`return_${wh.warehouse.id}`]: false,
+                                                    },
+                                                  }));
+                                                }}
+                                              >
+                                                <span role="img" aria-label="cancel">✖️</span>
+                                              </button>
+                                            </>
+                                          )}
                                         </div>
                                       </div>
                                     );

@@ -84,4 +84,8 @@ export const productService = {
     const response = await api.get(`/products/best-sellers`);
     return response.data;
   },
+  getPendingQuantities: async (id: number) => {
+    const response = await api.get(`/products/${id}/pending-quantity`);
+    return response.data;
+  },
 };

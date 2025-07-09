@@ -7,6 +7,7 @@ import { store } from './store/index.ts';
 import { TooltipProvider } from './components/ui/tooltip.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { motion } from 'framer-motion';
+import { AuthProvider } from './context/ContextAuth.tsx';
 
 // Componente de fondo confeti animado (líneas más gruesas)
 function ConfettiBackground() {
@@ -61,18 +62,41 @@ function ConfettiBackground() {
   );
 }
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/workers/signAlive.js')
+      .then(registration => {
+        // Espera a que el service worker esté listo y envía la URL
+        if (registration.active) {
+          registration.active.postMessage({
+            type: 'SET_API_URL',
+            url: import.meta.env.VITE_API_URL + '/health', // O process.env.REACT_APP_API_URL + '/health'
+          });
+        } else if (registration.installing) {
+          registration.installing.addEventListener('statechange', (event: any) => {
+            if (event.target.state === 'activated') {
+              registration.active?.postMessage({
+                type: 'SET_API_URL',
+                url: import.meta.env.VITE_API_URL + '/health',
+              });
+            }
+          });
+        }
+      });
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
 
     <GoogleOAuthProvider clientId="298483544989-79j1970tm0q2i8jjrn1rq4r7mrkptpgg.apps.googleusercontent.com" >
+      <AuthProvider>
       <Provider store={store}>
         <TooltipProvider>
-
           <ConfettiBackground />
-
           <App />
         </TooltipProvider>
-
       </Provider>
+      </AuthProvider>
     </GoogleOAuthProvider>
 
 );

@@ -142,28 +142,70 @@ const productsSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
-    updateImagesToProduct(state, action: PayloadAction<{ productId: number; images: string[] }>) {
-      const { productId, images } = action.payload;
+    updateImagesToProduct(state, action: PayloadAction<{ productId: number; images: string[]; id?: number }>) {
+      const { productId, images, id } = action.payload;
       const product = state.items.find((item) => item.id === productId);
-      if (product && product.Images && product.Images[0]) {
-        product.Images[0].url = images;
+      if (product) {
+        if (!product.Images) product.Images = [];
+        if (!product.Images[0]) {
+          product.Images[0] = {
+            id: images.id ?? productId, // Usa el id recibido o el productId como fallback
+            url: images.urls,
+            state: true,
+            productId: productId,
+          };
+        } else {
+          product.Images[0].url = images;
+        }
       }
     },
-    updateImagesToItemInventory(state, action: PayloadAction<string[]>) {
-      if (state.itemInventory && state.itemInventory.Images && state.itemInventory.Images[0]) {
-        state.itemInventory.Images[0].url = action.payload;
+    updateImagesToItemInventory(state, action: PayloadAction<string[] & { id?: number}>) {
+      const id = (action.payload as any).id;
+      if (state.itemInventory) {
+        if (!state.itemInventory.Images) state.itemInventory.Images = [];
+        if (!state.itemInventory.Images[0]) {
+          state.itemInventory.Images[0] = {
+            id: id ?? state.itemInventory.id,
+            url: action.payload.urls,
+            state: true,
+            productId: state.itemInventory.id,
+          };
+        } else {
+          state.itemInventory.Images[0].url = action.payload.images;
+        }
       }
     },
-    updateImagesToProductFilePath(state, action: PayloadAction<{ productId: number; filepaths: string[] }>) {
-      const { productId, filepaths } = action.payload;
+    updateImagesToProductFilePath(state, action: PayloadAction<{ productId: number; filepaths: string[]; id?: number }>) {
+      const { productId, filepaths, id } = action.payload;
       const product = state.items.find((item) => item.id === productId);
-      if (product && product.filepaths && product.filepaths[0]) {
-        product.filepaths[0].url = JSON.stringify(filepaths);
+      if (product) {
+        if (!product.filepaths) product.filepaths = [];
+        if (!product.filepaths[0]) {
+          product.filepaths[0] = {
+            id: id ?? productId,
+            url: JSON.stringify(filepaths),
+            state: true,
+            productId: productId,
+          };
+        } else {
+          product.filepaths[0].url = JSON.stringify(filepaths);
+        }
       }
     },
-    updateImagesToItemInventoryFilePath(state, action: PayloadAction<string[]>) {
-      if (state.itemInventory && state.itemInventory.filepaths && state.itemInventory.filepaths[0]) {
-        state.itemInventory.filepaths[0].url = JSON.stringify(action.payload);
+    updateImagesToItemInventoryFilePath(state, action: PayloadAction<string[] & { id?: number }>) {
+      const id = (action.payload as any).id;
+      if (state.itemInventory) {
+        if (!state.itemInventory.filepaths) state.itemInventory.filepaths = [];
+        if (!state.itemInventory.filepaths[0]) {
+          state.itemInventory.filepaths[0] = {
+            id: id ?? state.itemInventory.id,
+            url: JSON.stringify(action.payload),
+            state: true,
+            productId: state.itemInventory.id,
+          };
+        } else {
+          state.itemInventory.filepaths[0].url = JSON.stringify(action.payload);
+        }
       }
     },
     clearItemInventory(state) {
