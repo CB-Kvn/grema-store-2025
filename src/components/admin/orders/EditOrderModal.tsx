@@ -429,9 +429,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                       const used = Number(warehouseQty[item.id]?.[wh.warehouse.id] ?? 0);
                       const returned = Number(warehouseQty[item.id]?.[`returnQty_${wh.warehouse.id}`] ?? 0);
                       return sum + (used - returned);
-                    }, 0);
+                    }, item.qtyDone || 0);
 
-                    // Handler para "Listo"
+                    // Handler para "Listo" 
                     const handleStockReady = () => {
                       setConfirmModal({
                         open: true,
@@ -452,12 +452,22 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                             }
                           }
 
+                          // Determina el nuevo estado según assignedQty
+                          let newItemStatus = '';
+                          if (assignedQty === 0) {
+                            newItemStatus = 'PENDING';
+                          } else if (assignedQty === item.quantity) {
+                            newItemStatus = 'COMPLETED';
+                          } else {
+                            newItemStatus = 'UNCOMPLETED';
+                          }
+
                           // Trabaja sobre una copia local de los items
                           const updatedItems = formData.items.map((it, idx) =>
                             idx === index
                               ? {
                                   ...it,
-                                  status: assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED',
+                                  status: newItemStatus,
                                   qtyDone: assignedQty,
                                 }
                               : it
@@ -465,7 +475,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
 
                           // Calcula los estados previos y nuevos
                           const prevItemStatus = item.status;
-                          const newItemStatus = assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED';
                           const prevOrderStatus = formData.status;
                           const allCompleted = updatedItems.every(i => i.status === 'COMPLETED');
                           const newOrderStatus = allCompleted ? 'APPROVED' : prevOrderStatus;
@@ -497,6 +506,17 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                           }
                           setFormData(updatedOrder);
                           await purchaseOrderService.update(formData.id, updatedOrder);
+
+                          // --- LIMPIA ASIGNADOS Y DEVOLUCIONES ---
+                          setWarehouseQty(prev => {
+                            const newState = { ...prev };
+                            if (newState[item.id]) {
+                              Object.keys(newState[item.id]).forEach(key => {
+                                newState[item.id][key] = 0;
+                              });
+                            }
+                            return newState;
+                          });
 
                           setExpandedRow(null);
                           setConfirmModal(null);
@@ -700,6 +720,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                                       [`return_${wh.warehouse.id}`]: false,
                                                     },
                                                   }));
+                                                  // Ejecuta la lógica del botón "Listo"
+                                                  handleStockReady();
                                                 }}
                                               >
                                                 <span role="img" aria-label="check">✔️</span>

@@ -27,9 +27,6 @@ const NewExpenseModal: React.FC<NewExpenseModalProps> = ({ onClose, onExpenseCre
     fileInputRef,
     handleDateChange,
     handleFileChange,
-    handleAmountChange,
-    handleSubtotalChange,
-    handleTaxesChange,
     handleSubmit,
   } = useNewExpenseModal(onExpenseCreated);
 

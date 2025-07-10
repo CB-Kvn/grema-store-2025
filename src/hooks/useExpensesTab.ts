@@ -164,11 +164,9 @@ export function useExpensesTab() {
   };
 
   // Función para ver recibo
-  const handleViewReceipt = async (receiptUrl: string) => {
-    try {
-      await expenseService.downloadFile(receiptUrl);
-    } catch (error) {
-      console.error('Error en la solicitud:', error);
+  const handleViewReceipt = (receiptUrl: string) => {
+    if (receiptUrl) {
+      window.open(receiptUrl, '_blank');
     }
   };
 

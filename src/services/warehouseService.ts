@@ -43,7 +43,7 @@ export const warehouseService = {
   },
 
   removeStock: async (warehouseId: string, productId: number, quantity: number) => {
-    const response = await api.post(`/warehouses/${warehouseId}/stock/${productId}/remove`, { quantity });
+    const response = await api.post(`/warehouses/remove/${warehouseId}/stock/${productId}`, { quantity });
     return response.data;
   },
 

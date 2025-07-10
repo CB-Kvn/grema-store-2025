@@ -152,14 +152,17 @@ export function useNewExpenseModal(onExpenseCreated?: (newExpense: Expense) => v
       let receiptUrl = formData.receipt;
       if (selectedFile) {
         const uploadResponse = await expenseService.uploadReceipt(formData.id, selectedFile);
-        receiptUrl = uploadResponse.filePath;
+        receiptUrl = uploadResponse.url;
       }
 
       const expenseToCreate = {
-        ...formData,
-        receipt: receiptUrl,
-        userId: "admin",
-      };
+      ...formData,
+      amount: Number(formData.amount),
+      subtotal: Number(formData.subtotal),
+      taxes: Number(formData.taxes),
+      receipt: receiptUrl,
+      userId: "admin",
+    };
 
       const createdExpense = await expenseService.create(expenseToCreate);
 
