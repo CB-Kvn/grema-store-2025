@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Truck, Calendar, DollarSign, FileText, User, Mail, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 import type { PurchaseOrder } from '@/types';
+import { motion } from 'framer-motion';
 
 interface OrderDetailsModalProps {
   order: PurchaseOrder;
@@ -25,7 +26,7 @@ const paymentStatusColors = {
 const getStatusText = (status: string) => {
   const statusMap: { [key: string]: string } = {
     pending: 'Pendiente',
-    approved: 'Aprobada',
+    approved: 'Completa', // <-- Cambiado aquí
     shipped: 'Enviada',
     delivered: 'Entregada',
     cancelled: 'Cancelada'
@@ -51,8 +52,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose })
         onClick={onClose}
       />
 
-      {/* Modal Content */}
-      <div className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto">
+      {/* Modal Content con animación */}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'tween', duration: 0.4 }}
+        className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto"
+      >
         <div className="sticky top-0 bg-white border-b border-primary-100 p-4 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-primary-900">
             Detalles de la Orden
@@ -225,7 +232,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose })
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

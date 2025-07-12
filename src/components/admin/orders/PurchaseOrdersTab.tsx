@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { 
-  Package, Search, Filter, Plus, ArrowUpDown, Download, 
-  Truck, DollarSign, FileText, 
-   Edit, Trash2, Eye,
+import {
+  Package, Search, Filter, Plus, ArrowUpDown, Download,
+  Truck, DollarSign, FileText,
+  Edit, Trash2, Eye,
   CheckCircle2, XCircle, Clock, AlertCircle
 } from 'lucide-react';
 import {
@@ -28,6 +28,7 @@ import { warehouseService } from '@/services/warehouseService';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { setWarehouse } from '@/store/slices/warehousesSlice';
 import { purchaseOrderService } from '@/services/purchaseOrderService';
+import { AnimatePresence } from 'framer-motion';
 
 ChartJS.register(
   CategoryScale,
@@ -51,7 +52,7 @@ const PurchaseOrdersTab = () => {
 
   // Filter orders
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
+    const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.supplier.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
@@ -76,16 +77,17 @@ const PurchaseOrdersTab = () => {
   useEffect(() => {
     const fetchWarehouse = async () => {
       try {
-        const purchases  = await purchaseOrderService.getAll();
+        const purchases = await purchaseOrderService.getAll();
         dispatch(setOrders(purchases));
       } catch (error) {
         console.error('Error fetching warehouse:', error);
       }
     };
     fetchWarehouse();
-  }, []);     
- 
+  }, []);
+
   return (
+    <>
     <div className="space-y-6">
       {/* Tarjetas de estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -210,14 +212,14 @@ const PurchaseOrdersTab = () => {
         </div>
         <div className="flex flex-wrap gap-2">
           {/* Acción principal */}
-          <button 
+          <button
             onClick={() => setIsNewOrderModalOpen(true)}
             className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
             <Plus className="h-5 w-5 mr-2" />
             <span>Nueva Orden</span>
           </button>
-          
+
           {/* Acciones secundarias */}
           <div className="hidden sm:flex items-center space-x-2">
             <button className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50">
@@ -285,21 +287,21 @@ const PurchaseOrdersTab = () => {
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex items-center space-x-1 sm:space-x-2">
-                    <button 
+                    <button
                       onClick={() => handleViewDetails(order)}
                       className="p-1 hover:bg-primary-50 rounded"
                       title="Ver Detalles"
                     >
                       <Eye className="h-4 w-4 text-primary-600" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleEdit(order)}
                       className="p-1 hover:bg-primary-50 rounded"
                       title="Editar Orden"
                     >
                       <Edit className="h-4 w-4 text-primary-600" />
                     </button>
-                    <button 
+                    <button
                       className="p-1 hover:bg-primary-50 rounded"
                       title="Eliminar Orden"
                     >
@@ -313,33 +315,44 @@ const PurchaseOrdersTab = () => {
         </table>
       </div>
 
-      {/* Modales */}
-      {isDetailsModalOpen && selectedOrder && (
-        <OrderDetailsModal
-          order={selectedOrder}
-          onClose={() => {
-            setIsDetailsModalOpen(false);
-            setSelectedOrder(null);
-          }}
-        />
-      )}
+    
 
-      {isEditModalOpen && selectedOrder && (
-        <EditOrderModal
-          order={selectedOrder}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedOrder(null);
-          }}
-        />
-      )}
-
-      {isNewOrderModalOpen && (
-        <NewOrderModal
-          onClose={() => setIsNewOrderModalOpen(false)}
-        />
-      )}
     </div>
+      {/* Modales */}
+      <AnimatePresence>
+        {isDetailsModalOpen && selectedOrder && (
+          <OrderDetailsModal
+            order={selectedOrder}
+            onClose={() => {
+              setIsDetailsModalOpen(false);
+              setSelectedOrder(null);
+            }}
+          />
+        )}
+
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isEditModalOpen && selectedOrder && (
+          <EditOrderModal
+            order={selectedOrder}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedOrder(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isNewOrderModalOpen && (
+          <NewOrderModal
+            onClose={() => setIsNewOrderModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+    
   );
 };
 
@@ -409,7 +422,7 @@ const getPaymentStatusColor = (status: PurchaseOrder['paymentStatus']) => {
 const getStatusText = (status: string) => {
   const statusMap: { [key: string]: string } = {
     PENDING: 'Pendiente',
-    APPROVED: 'Aprobada',
+    APPROVED: 'Completa', // <-- Cambiado aquí
     SHIPPED: 'Enviada',
     DELIVERED: 'Entregada',
     CANCELLED: 'Cancelada'

@@ -13,6 +13,7 @@ import { purchaseOrderService } from '@/services/purchaseOrderService';
 import { Dialog, DialogContent, DialogHeader, DialogFooter } from '../../ui/dialog';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useProductService } from '@/hooks/useProductService'; // Agrega este import
+import { motion } from 'framer-motion';
 
 interface EditOrderModalProps {
   order: PurchaseOrder;
@@ -188,82 +189,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
     }));
   };
 
-  // Ejemplo de uso de updateOrderStatus:
-  // dispatch(updateOrderStatus({ orderId: formData.id, status: 'DELIVERED' }));
-
-  // Cuando confirmas el stock listo:
-  // const handleStockReady = () => {
-  //   setConfirmModal({
-  //     open: true,
-  //     message:
-  //       assignedQty === item.quantity
-  //         ? '¿Está seguro que desea asignar el stock y marcar este producto como COMPLETADO? Esta acción no se puede deshacer.'
-  //         : 'No se ha asignado la cantidad completa. ¿Desea marcar este producto como INCOMPLETO?',
-  //     onConfirm: async () => {
-  //       // Estados actuales
-  //       const prevItemStatus = formData.items[index].status;
-  //       const newItemStatus = assignedQty === item.quantity ? 'COMPLETED' : 'UNCOMPLETED';
-
-  //       // Actualiza status del item en el store solo si cambia
-  //       if (prevItemStatus !== newItemStatus) {
-  //         dispatch(updateItemStatus({
-  //           orderId: formData.id,
-  //           itemId: item.id,
-  //           status: newItemStatus
-  //         }));
-  //       }
-
-  //       // Actualiza qtyDone solo si cambia
-  //       if (item.qtyDone !== assignedQty) {
-  //         dispatch(updateItemQtyDone({
-  //           orderId: formData.id,
-  //           itemId: item.id,
-  //           qtyDone: assignedQty
-  //         }));
-  //       }
-
-  //       handleItemChange(index, 'status', newItemStatus);
-
-  //       // Verifica si todos los productos están en COMPLETED
-  //       const updatedItems = [...formData.items];
-  //       updatedItems[index] = {
-  //         ...updatedItems[index],
-  //         status: newItemStatus,
-  //         qtyDone: assignedQty // <-- actualiza qtyDone aquí
-  //       };
-  //       const allCompleted = updatedItems.every(i => i.status === 'COMPLETED');
-  //       const prevOrderStatus = formData.status;
-  //       let newOrderStatus = prevOrderStatus;
-
-  //       if (allCompleted && prevOrderStatus !== 'APPROVED') {
-  //         dispatch(updateOrderStatus({ orderId: formData.id, status: 'APPROVED' }));
-  //         setFormData({ ...formData, status: 'APPROVED', items: updatedItems });
-  //         newOrderStatus = 'APPROVED';
-  //       } else {
-  //         setFormData({ ...formData, items: updatedItems });
-  //       }
-
-  //       // Solo actualiza en backend si hubo algún cambio
-  //       const itemChanged = prevItemStatus !== newItemStatus || item.qtyDone !== assignedQty;
-  //       const orderChanged = prevOrderStatus !== newOrderStatus;
-
-  //       if (itemChanged || orderChanged) {
-  //         let updatedOrder = { ...formData, items: updatedItems, status: newOrderStatus };
-  //         // Elimina documents si es array vacío
-  //         if (Array.isArray(updatedOrder.documents) && updatedOrder.documents.length === 0) {
-  //           const { documents, ...rest } = updatedOrder;
-  //           updatedOrder = rest;
-  //         }
-  //         setFormData(updatedOrder);
-  //         await purchaseOrderService.update(formData.id, updatedOrder);
-  //       }
-
-  //       setExpandedRow(null);
-  //       setConfirmModal(null);
-  //     },
-  //   });
-  // };
-
   return (
     <>
       {/* Modal Backdrop */}
@@ -272,8 +197,14 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
         onClick={onClose}
       />
 
-      {/* Modal Content */}
-      <div className="fixed inset-y-0 right-0 w-full md:w-[1100px] bg-white shadow-xl z-50 overflow-y-auto">
+      {/* Modal Content con animación */}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'tween', duration: 0.4 }}
+        className="fixed inset-y-0 right-0 w-full md:w-[1100px] bg-white shadow-xl z-50 overflow-y-auto"
+      >
         <div className="sticky top-0 bg-white border-b border-primary-100 p-4 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-primary-900">
             Editar Orden
@@ -413,7 +344,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                     <th className="px-4 py-3 text-left">Precio Unitario</th>
                     <th className="px-4 py-3 text-left">Total</th>
                     <th className="px-4 py-3 text-left">Estado</th>
-                    <th className="px-4 py-3 text-left">Stock</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -586,30 +516,26 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                             <span className="font-medium">₡{item.totalPrice.toLocaleString()}</span>
                           </td>
                           <td className="px-4 py-3">
-                            <select
-                              value={item.status}
-                              onChange={(e) => handleItemUpdate(index, 'status', e.target.value)}
-                              className="w-full rounded-md border border-input bg-background px-3 py-2"
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs sm:text-sm ${
+                                item.status === 'COMPLETED'
+                                  ? 'bg-green-100 text-green-700'
+                                  : item.status === 'UNCOMPLETED'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-primary-100 text-primary-700'
+                              }`}
                             >
-                              <option value="PENDING">Pendiente</option>
-                              <option value="COMPLETED">Completado</option>
-                              <option value="UNCOMPLETED">Incompleto</option>
-                            </select>
-                          </td>
-                          <td className="px-4 py-3">
-                            <button
-                              type="button"
-                              className="p-1 hover:bg-primary-50 rounded text-primary-600"
-                              title="Gestionar Stock"
-                              disabled
-                            >
-                              <BoxIcon className="h-4 w-4" />
-                            </button>
+                              {item.status === 'COMPLETED'
+                                ? 'Completado'
+                                : item.status === 'UNCOMPLETED'
+                                ? 'Incompleto'
+                                : 'Pendiente'}
+                            </span>
                           </td>
                         </tr>
                         {expandedRow === item.id && (
                           <tr>
-                            <td colSpan={8} className="bg-primary-50 px-6 py-4">
+                            <td colSpan={7} className="bg-primary-50 px-6 py-4">
                               <div>
                                 <div className="font-semibold mb-2">Stock en Bodegas</div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -766,9 +692,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                   <button
                                     type="button"
                                     className={`px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700 transition ${
-                                      assignedQty > 0 && assignedQty < item.quantity ? '' : 'opacity-50 cursor-not-allowed'
+                                      assignedQty > item.quantity ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
-                                    disabled={assignedQty === 0 || assignedQty === item.quantity}
+                                    disabled={assignedQty > item.quantity}
                                     onClick={handleStockReady}
                                   >
                                     Listo
@@ -877,7 +803,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
 
       {/* Stock Distribution Modal */}
       {showStockModal && selectedItem && (
