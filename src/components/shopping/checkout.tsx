@@ -105,7 +105,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
       lastName: shippingInfo.lastName,
       email: shippingInfo.email,
       phone: shippingInfo.phone,
-      orderNumber: nanoid(8),
+      id: `PO-${new Date().getFullYear()}-${uuidv4().replace(/-/g, '').substring(0, 6).toUpperCase()}`,
+      orderNumber: `PO-${new Date().getFullYear()}-${uuidv4().replace(/-/g, '').substring(0, 6).toUpperCase()}`,
       dataShipping: shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
       dataBilling: needInvoice ? (billingInfo.address + ", " + provincias[Number(billingInfo.provincia) - 1] + " " + billingInfo.canton + ", " + billingInfo.zipCode) : shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
       paymentMethod,
@@ -442,7 +443,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                         >
                           Enviar Comprobante
                         </button>
-                        
+
                       </div>
                     </>
                   )}

@@ -9,9 +9,7 @@ import CartDrawer from "./components/shopping/cart";
 import CheckoutPage from "./components/shopping/checkout";
 import { ShopPage } from "./components/store/storePage";
 import { useAppDispatch } from "./hooks/useAppDispatch";
-
 import { useAppSelector } from "./hooks/useAppSelector";
-import { HistoryUs } from "./pages/history";
 import { ValuesPage } from "./pages/values";
 import { Menu_Bar } from "./components/navigation/nav-store";
 import { Networking } from "./components/socials/networking";

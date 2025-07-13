@@ -2,51 +2,104 @@
 import { useEffect, useState } from "react";
 import { DiscountForm } from "./discountForm";
 import { DiscountsTable } from "./discountTable";
-
+import { discountService } from "@/services";
+import { Discount } from "@/types";
 
 export function DiscountTab() {
- const [discounts, setDiscounts] = useState<any[]>([]);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
 
- // Simulación de fetch
-async function getAllDiscounts() {
-  // Reemplaza por tu fetch real
-  return [
-    {
-      id: 1,
-      type: "PERCENTAGE",
-      value: 10,
-      startDate: "2024-06-12T00:00:00Z",
-      endDate: "2024-07-12T00:00:00Z",
-      isActive: true,
-      minQuantity: 1,
-      maxQuantity: 10,
-      items: [1, 2, 3],
-    },
-    // ...otros descuentos
-  ];
-}
-
-const handleSaveDiscount = (discount: any) => {
-    setDiscounts((prev) =>
-      prev.map((d) => (d.id === discount.id ? discount : d))
-    );
-    // Aquí puedes llamar a tu API para guardar el descuento
+  // Cargar descuentos
+  const loadDiscounts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await discountService.getAll();
+      setDiscounts(data as Discount[]);
+    } catch (err) {
+      setError('Error al cargar los descuentos');
+      console.error('Error loading discounts:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
- useEffect(() => {
+  // Agregar nuevo descuento
+  const handleAddDiscount = async (discountData: Omit<Discount, 'id'>) => {
+    try {
+      if (editingDiscount) {
+        // Actualizar descuento existente
+        const updatedDiscount = await discountService.update(editingDiscount.id.toString(), discountData);
+        setDiscounts(prev => 
+          prev.map(d => d.id === editingDiscount.id ? updatedDiscount as Discount : d)
+        );
+        setEditingDiscount(null);
+      } else {
+        // Crear nuevo descuento
+        const newDiscount = await discountService.create(discountData);
+        setDiscounts(prev => [...prev, newDiscount as Discount]);
+      }
+    } catch (err) {
+      setError(editingDiscount ? 'Error al actualizar el descuento' : 'Error al crear el descuento');
+      console.error('Error saving discount:', err);
+    }
+  };
 
-     getAllDiscounts().then(setDiscounts);
-   }, []);
+  // Iniciar edición de descuento
+  const handleEditDiscount = (discount: Discount) => {
+    setEditingDiscount(discount);
+  };
+
+  // Cancelar edición
+  const handleCancelEdit = () => {
+    setEditingDiscount(null);
+  };
+
+  // Eliminar descuento
+  const handleDeleteDiscount = async (id: number) => {
+    try {
+      await discountService.delete(id.toString());
+      setDiscounts(prev => prev.filter(d => d.id !== id));
+    } catch (err) {
+      setError('Error al eliminar el descuento');
+      console.error('Error deleting discount:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadDiscounts();
+  }, []);
 
   return (
-  <>
-  <div className="bg-white rounded shadow p-6">
-    <DiscountForm onAdd={nuevo => setDiscounts(prev => [
-      ...prev,
-      { ...nuevo, id: prev.length ? Math.max(...prev.map(d => d.id)) + 1 : 1 }
-    ])} />
-    <DiscountsTable discounts={discounts} onSave={handleSaveDiscount} />
-  </div>
-  </>
+    <>
+      <div className="bg-white rounded shadow p-6">
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
+        
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Cargando descuentos...</p>
+          </div>
+        ) : (
+          <>
+            <DiscountForm 
+              onAdd={handleAddDiscount}
+              editingDiscount={editingDiscount}
+              onCancelEdit={handleCancelEdit}
+            />
+            <DiscountsTable 
+              discounts={discounts} 
+              onEdit={handleEditDiscount}
+              onDelete={handleDeleteDiscount}
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 }

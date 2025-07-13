@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { X, Plus, Trash2, Package, BoxIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
-import type { PurchaseOrder, PurchaseOrderItem } from '@/types';
-import { updateOrder, updateItemQtyDone, updateItemStatus, updateOrderStatus } from '@/store/slices/purchaseOrdersSlice';
+import type { PurchaseOrder } from '@/types';
+import type { Item } from '@/types/purchaseOrder';
+import { updateOrder, updateItemQtyDone, updateItemStatus, updateOrderStatus, updateOrderAsync } from '@/store/slices/purchaseOrdersSlice';
 import StockDistributionModal from '../inventory/StockDistributionModal';
 import { warehouseService } from '@/services/warehouseService';
 import { purchaseOrderService } from '@/services/purchaseOrderService';
@@ -21,10 +22,10 @@ interface EditOrderModalProps {
 }
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   // const ordersList = useAppSelector((state: any) => state.purchaseOrders.orders);
   const [formData, setFormData] = useState<PurchaseOrder>(order);
-  const [selectedItem, setSelectedItem] = useState<PurchaseOrderItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [showStockModal, setShowStockModal] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [itemsWarehouse, setItemsWarehouse] = useState<[]>([]);
@@ -36,16 +37,20 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
   } | null>(null);
   const { addStock, removeStock } = useProductService(); // Usa el hook
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(updateOrder(formData));
-    onClose();
+    try {
+      await dispatch(updateOrderAsync({ id: formData.id, data: formData }));
+      onClose();
+    } catch (error) {
+      console.error('Error updating order:', error);
+    }
   };
 
   // Nueva función unificada para cambios de item y confirmación de stock
   const handleItemUpdate = async (
     index: number,
-    field: keyof PurchaseOrderItem,
+    field: keyof Item,
     value: any,
     confirmStock?: boolean,
     assignedQty?: number
@@ -143,13 +148,14 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
   };
 
   const addItem = () => {
-    const newItem: PurchaseOrderItem = {
+    const newItem: Item = {
       id: uuidv4(),
+      orderId: formData.id,
       productId: 0,
-      product: undefined,
       quantity: 1,
       unitPrice: 0,
       totalPrice: 0,
+      qtyDone: null,
       isGift: false,
       isBestSeller: false,
       isNew: false,
@@ -274,7 +280,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                 <Input
                   type="date"
                   id="orderDate"
-                  value={formData.orderDate?.slice(0, 10) || ''}
+                  value={formData.orderDate ? (typeof formData.orderDate === 'string' ? formData.orderDate.slice(0, 10) : formData.orderDate.toISOString().slice(0, 10)) : ''}
                   disabled
                 />
               </div>
@@ -283,7 +289,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                 <Input
                   type="date"
                   id="expectedDeliveryDate"
-                  value={formData.expectedDeliveryDate?.slice(0, 10) || ''}
+                  value={formData.expectedDeliveryDate ? (typeof formData.expectedDeliveryDate === 'string' ? formData.expectedDeliveryDate.slice(0, 10) : formData.expectedDeliveryDate.toISOString().slice(0, 10)) : ''}
                   disabled
                 />
               </div>
@@ -750,7 +756,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                 <Input
                   id="trackingNumber"
                   value={formData.trackingNumber || ''}
-                  onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value || null })}
                 />
               </div>
               <div>
@@ -758,7 +764,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                 <Input
                   type="date"
                   id="actualDeliveryDate"
-                  value={formData.actualDeliveryDate?.slice(0, 10) || ''}
+                  value={formData.actualDeliveryDate ? (typeof formData.actualDeliveryDate === 'string' ? formData.actualDeliveryDate.slice(0, 10) : formData.actualDeliveryDate.toISOString().slice(0, 10)) : ''}
                   onChange={(e) => setFormData({ ...formData, actualDeliveryDate: e.target.value })}
                 />
               </div>

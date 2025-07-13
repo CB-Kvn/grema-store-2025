@@ -1,17 +1,18 @@
-import type { PurchaseOrder, PurchaseOrderItem } from './purchaseOrder';
+import type { PurchaseOrder } from './purchaseOrder';
 import type { Supplier } from './supplier';
 import type { Warehouse, WarehouseItem, StockMovement } from './warehouse';
 import type { Expense } from './expense';
 
 export interface Discount {
   id: number;
-  type: 'PERCENTAGE' | 'FIXED_AMOUNT' | 'BUY_X_GET_Y';
+  type: 'PERCENTAGE' | 'FIXED' | 'BUY_X_GET_Y';
   value: number;
   startDate: string;
   endDate?: string;
   isActive: boolean;
   minQuantity?: number;
   maxQuantity?: number;
+  items?: number[]; // IDs de productos relacionados
 }
 
 export interface Product {
@@ -51,7 +52,7 @@ export interface Product {
 
 }
 
-export interface CartItem extends Pick<Product, 'id' | 'name' | 'price' | 'image'> {
+export interface CartItem extends Pick<Product, 'id' | 'name' | 'price' | 'Images'> {
   quantity: number;
   isGift: boolean;
   giftMessage?: string;
@@ -104,7 +105,7 @@ export interface AddressInfo {
   canton: string;
 }
 
-export type { PurchaseOrder, PurchaseOrderItem, Supplier, Warehouse, WarehouseItem, StockMovement, Expense };
+export type { PurchaseOrder, Supplier, Warehouse, WarehouseItem, StockMovement, Expense };
 
 export interface AuthUser {
   id: string;

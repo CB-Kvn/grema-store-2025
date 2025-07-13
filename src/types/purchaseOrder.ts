@@ -7,12 +7,12 @@ export interface Item {
     quantity:     number;
     unitPrice:    number;
     totalPrice:   number;
-    qtyDone:      null;
+    qtyDone:      number | null;
     isGift:       boolean;
     isBestSeller: boolean;
     isNew:        boolean;
     status:       string;
-    product:      Product;
+    product?:     Product;
 }
 
 export interface PurchaseOrder {
@@ -26,20 +26,20 @@ export interface PurchaseOrder {
     dataShipping:         string;
     dataBilling:          string;
     status:               string;
-    orderDate:            Date;
-    expectedDeliveryDate: Date;
-    actualDeliveryDate:   Date;
+    orderDate:            Date | string;
+    expectedDeliveryDate: Date | string | null;
+    actualDeliveryDate:   Date | string | null;
     subtotalAmount:       number;
     totalAmount:          number;
     shippingAmount:       number;
     paymentMethod:        string;
     paymentStatus:        string;
-    trackingNumber:       null;
-    notes:                null;
+    trackingNumber:       string | null;
+    notes:                string | null;
     createdAt:            Date;
     updatedAt:            Date;
     items:                Item[];
-    documents:            any[];
+    documents?:           any[];
 }
 
 export interface Product {
