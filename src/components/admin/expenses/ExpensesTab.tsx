@@ -11,6 +11,9 @@ import {
   X,
   Edit,
   Trash2,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
 } from "lucide-react";
 import { Line, Pie, Bar } from "react-chartjs-2";
 import {
@@ -59,8 +62,9 @@ const ExpensesTab: React.FC = () => {
     handleDeleteExpense,
   } = useExpensesTab();
 
-  const [editingExpense, setEditingExpense] = React.useState<Expense | null>(null);
-  const [expenseToDelete, setExpenseToDelete] = React.useState<Expense | null>(null);
+  const [editingExpense, setEditingExpense] = React.useState<any>(null);
+  const [expenseToDelete, setExpenseToDelete] = React.useState<any>(null);
+  const [showDashboard, setShowDashboard] = React.useState(false);
 
   // Stat Card Component
   const StatCard = ({
@@ -87,27 +91,92 @@ const ExpensesTab: React.FC = () => {
 
   return (
     <>
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          title="Total Gastos"
-          value={`₡${filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0).toFixed(2)}`}
-          icon={<Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Promedio por Gasto"
-          value={`₡${(
-            filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0) /
-              filteredExpenses.length || 0
-          ).toFixed(2)}`}
-          icon={<Receipt className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Total Registros"
-          value={filteredExpenses.length.toString()}
-          icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-        />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-900">
+            Gastos y Compras
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Gestiona y supervisa todos los gastos y compras
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowDashboard(!showDashboard)}
+            className="flex items-center px-3 py-2 bg-primary-50 text-primary-600 rounded-lg border border-primary-200 hover:bg-primary-100"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            {showDashboard ? 'Ocultar Dashboard' : 'Información'}
+            {showDashboard ? (
+              <ChevronUp className="h-4 w-4 ml-2" />
+            ) : (
+              <ChevronDown className="h-4 w-4 ml-2" />
+            )}
+          </button>
+          <button
+            onClick={() => setIsNewExpenseModalOpen(true)}
+            className="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Gasto
+          </button>
+        </div>
       </div>
+
+      {/* Dashboard Section - Collapsible */}
+      {showDashboard && (
+        <div className="space-y-6 mb-6">
+          {/* Estadísticas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              title="Total Gastos"
+              value={`₡${filteredExpenses.reduce((sum: number, expense: any) => sum + expense.amount, 0).toFixed(2)}`}
+              icon={<Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
+            />
+            <StatCard
+              title="Promedio por Gasto"
+              value={`₡${(
+                filteredExpenses.reduce((sum: number, expense: any) => sum + expense.amount, 0) /
+                  filteredExpenses.length || 0
+              ).toFixed(2)}`}
+              icon={<Receipt className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
+            />
+            <StatCard
+              title="Total Registros"
+              value={filteredExpenses.length.toString()}
+              icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
+            />
+          </div>
+
+          {/* Gráficos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-md border border-primary-100">
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Gastos por Fecha</h3>
+              <div className="h-64">
+                <Line data={chartData} options={chartOptions} />
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md border border-primary-100">
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Monto por Categoría</h3>
+              <div className="h-64 flex justify-center items-center">
+                <div style={{ width: 220, height: 220 }}>
+                  <Pie data={categoryChartData} options={{ maintainAspectRatio: false }} />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md border border-primary-100">
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Monto por Tipo de Pago</h3>
+              <div className="h-64">
+                <Bar data={paymentChartData} options={{ 
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } } 
+                }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Selector de Período y Búsqueda */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -134,20 +203,6 @@ const ExpensesTab: React.FC = () => {
             <option value="thisYear">Este Año</option>
             <option value="all">Todos</option>
           </select>
-          <button
-            onClick={() => setIsNewExpenseModalOpen(true)}
-            className="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            <Plus className="h-5 w-5 text-white mr-2" />
-            Nuevo Gasto
-          </button>
-          <button
-            onClick={() => setIsChartModalOpen(true)}
-            className="flex items-center px-3 py-2 bg-primary-50 text-primary-600 rounded-lg border border-primary-200 hover:bg-primary-100"
-          >
-            <BarChart2 className="h-5 w-5 text-primary-600 mr-2" />
-            Ver Gráficos
-          </button>
         </div>
       </div>
 
@@ -166,7 +221,7 @@ const ExpensesTab: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-primary-100">
-            {filteredExpenses.map((expense) => (
+            {filteredExpenses.map((expense: any) => (
               <tr key={expense.id}>
                 <td className="px-4 py-3 whitespace-nowrap">{new Date(expense.date).toLocaleDateString()}</td>
                 <td className="px-4 py-3">{expense.description}</td>
@@ -277,7 +332,7 @@ const ExpensesTab: React.FC = () => {
         <EditExpenseModal
           expense={editingExpense}
           onClose={() => setEditingExpense(null)}
-          onExpenseUpdated={(updated) => {
+          onExpenseUpdated={(updated: any) => {
             // Aquí actualiza el gasto en tu store o backend
             setEditingExpense(null);
           }}

@@ -43,8 +43,9 @@ export const fetchOrderById = createAsyncThunk(
 
 export const createOrder = createAsyncThunk(
   'purchaseOrders/createOrder',
-  async (orderData: CreateOrderData, { rejectWithValue }) => {
+  async (orderData: any, { rejectWithValue }) => {
     try {
+      debugger
       const order = await purchaseOrderService.create(orderData);
       return order;
     } catch (error: any) {

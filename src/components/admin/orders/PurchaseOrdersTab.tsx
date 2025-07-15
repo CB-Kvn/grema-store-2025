@@ -51,6 +51,50 @@ ChartJS.register(
   ArcElement
 );
 
+// Helper functions for charts
+const getMonthlyLabels = () => {
+  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const currentMonth = new Date().getMonth();
+  const labels = [];
+  
+  // Show last 6 months including current month
+  for (let i = 5; i >= 0; i--) {
+    const monthIndex = (currentMonth - i + 12) % 12;
+    labels.push(months[monthIndex]);
+  }
+  
+  return labels;
+};
+
+const getMonthlyData = (orders: PurchaseOrder[]) => {
+  const currentDate = new Date();
+  const monthlyData = [];
+  
+  // Calculate for last 6 months
+  for (let i = 5; i >= 0; i--) {
+    const targetMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+    const monthOrders = orders.filter(order => {
+      if (!order.orderDate) return false;
+      const orderDate = new Date(order.orderDate);
+      return orderDate.getMonth() === targetMonth.getMonth() && 
+             orderDate.getFullYear() === targetMonth.getFullYear();
+    });
+    
+    const monthTotal = monthOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    monthlyData.push(monthTotal);
+  }
+  
+  return monthlyData;
+};
+
+const getPaymentStatusData = (orders: PurchaseOrder[]) => {
+  return [
+    orders.filter(o => o.paymentStatus === 'PENDING').length,
+    orders.filter(o => o.paymentStatus === 'PARTIAL').length,
+    orders.filter(o => o.paymentStatus === 'PAID').length,
+  ];
+};
+
 const PurchaseOrdersTab = () => {
   const dispatch = useAppDispatch();
   const orders = useSelector(selectAllOrders);
@@ -115,6 +159,9 @@ const PurchaseOrdersTab = () => {
   const pendingOrders = orders.filter(order => order.status === 'PENDING').length;
   const totalAmount = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
   const averageOrderValue = totalOrders > 0 ? totalAmount / totalOrders : 0;
+  const documentsUploaded = orders.reduce((sum, order) => sum + (order.documents?.length || 0), 0);
+  const paidOrders = orders.filter(order => order.paymentStatus === 'PAID').length;
+  const totalItems = orders.reduce((sum, order) => sum + (order.items?.length || 0), 0);
 
   const handleViewDetails = (order: PurchaseOrder) => {
     setSelectedOrder(order);
@@ -248,7 +295,7 @@ const PurchaseOrdersTab = () => {
         {showDashboard && (
           <div className="space-y-6">
             {/* Tarjetas de estadísticas */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6">
               <Card className="border-primary-200 hover:shadow-md transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-primary-700">
@@ -261,7 +308,7 @@ const PurchaseOrdersTab = () => {
                 <CardContent>
                   <div className="text-2xl font-bold text-primary-900">{totalOrders}</div>
                   <p className="text-xs text-muted-foreground">
-                    +12% desde el mes pasado
+                    {totalOrders > 0 ? 'Órdenes registradas' : 'No hay órdenes'}
                   </p>
                 </CardContent>
               </Card>
@@ -278,7 +325,24 @@ const PurchaseOrdersTab = () => {
                 <CardContent>
                   <div className="text-2xl font-bold text-primary-900">{pendingOrders}</div>
                   <p className="text-xs text-muted-foreground">
-                    {totalOrders > 0 ? ((pendingOrders / totalOrders) * 100).toFixed(1) : 0}% del total
+                    {totalOrders > 0 ? `${((pendingOrders / totalOrders) * 100).toFixed(1)}% del total` : 'No hay órdenes pendientes'}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-primary-200 hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-primary-700">
+                    Órdenes Pagadas
+                  </CardTitle>
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-primary-900">{paidOrders}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {totalOrders > 0 ? `${((paidOrders / totalOrders) * 100).toFixed(1)}% del total` : 'No hay órdenes pagadas'}
                   </p>
                 </CardContent>
               </Card>
@@ -288,8 +352,8 @@ const PurchaseOrdersTab = () => {
                   <CardTitle className="text-sm font-medium text-primary-700">
                     Total Gastado
                   </CardTitle>
-                  <div className="bg-green-100 p-2 rounded-full">
-                    <DollarSign className="h-4 w-4 text-green-600" />
+                  <div className="bg-blue-100 p-2 rounded-full">
+                    <DollarSign className="h-4 w-4 text-blue-600" />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -297,7 +361,7 @@ const PurchaseOrdersTab = () => {
                     ₡{totalAmount.toLocaleString()}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    +8% desde el mes pasado
+                    Suma total de órdenes
                   </p>
                 </CardContent>
               </Card>
@@ -307,8 +371,8 @@ const PurchaseOrdersTab = () => {
                   <CardTitle className="text-sm font-medium text-primary-700">
                     Promedio por Orden
                   </CardTitle>
-                  <div className="bg-blue-100 p-2 rounded-full">
-                    <FileText className="h-4 w-4 text-blue-600" />
+                  <div className="bg-purple-100 p-2 rounded-full">
+                    <FileText className="h-4 w-4 text-purple-600" />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -320,10 +384,27 @@ const PurchaseOrdersTab = () => {
                   </p>
                 </CardContent>
               </Card>
+
+              <Card className="border-primary-200 hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-primary-700">
+                    Comprobantes
+                  </CardTitle>
+                  <div className="bg-indigo-100 p-2 rounded-full">
+                    <FileText className="h-4 w-4 text-indigo-600" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-primary-900">{documentsUploaded}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Documentos subidos
+                  </p>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Gráficas */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               <Card className="border-primary-200">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-primary-900">
@@ -334,7 +415,7 @@ const PurchaseOrdersTab = () => {
                   <div className="h-64">
                     <Doughnut
                       data={{
-                        labels: ['Pendiente', 'Aprobada', 'Enviada', 'Entregada', 'Cancelada'],
+                        labels: ['Pendiente', 'Completada', 'Enviada', 'Entregada', 'Cancelada'],
                         datasets: [{
                           data: [
                             orders.filter(o => o.status === 'PENDING').length,
@@ -344,13 +425,20 @@ const PurchaseOrdersTab = () => {
                             orders.filter(o => o.status === 'CANCELLED').length,
                           ],
                           backgroundColor: [
-                            'hsl(var(--chart-1))',
-                            'hsl(var(--chart-2))',
-                            'hsl(var(--chart-3))',
-                            'hsl(var(--chart-4))',
-                            'hsl(var(--chart-5))',
+                            '#FEF3C7', // Pastel Yellow for Pending
+                            '#DBEAFE', // Pastel Blue for Approved
+                            '#E0E7FF', // Pastel Purple for Shipped
+                            '#D1FAE5', // Pastel Green for Delivered
+                            '#FEE2E2', // Pastel Red for Cancelled
                           ],
-                          borderWidth: 0,
+                          borderColor: [
+                            '#F59E0B', // Yellow border
+                            '#3B82F6', // Blue border
+                            '#8B5CF6', // Purple border
+                            '#10B981', // Green border
+                            '#EF4444', // Red border
+                          ],
+                          borderWidth: 1,
                         }],
                       }}
                       options={{
@@ -366,6 +454,70 @@ const PurchaseOrdersTab = () => {
                               }
                             }
                           },
+                          tooltip: {
+                            callbacks: {
+                              label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                              }
+                            }
+                          }
+                        },
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-primary-200">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-primary-900">
+                    Estado de Pagos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <Doughnut
+                      data={{
+                        labels: ['Pendiente', 'Parcial', 'Pagado'],
+                        datasets: [{
+                          data: getPaymentStatusData(orders),
+                          backgroundColor: [
+                            '#FEF3C7', // Pastel Yellow for Pending
+                            '#FBBF24', // Pastel Orange for Partial
+                            '#D1FAE5', // Pastel Green for Paid
+                          ],
+                          borderColor: [
+                            '#F59E0B', // Yellow border
+                            '#F97316', // Orange border
+                            '#10B981', // Green border
+                          ],
+                          borderWidth: 1,
+                        }],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom',
+                            labels: {
+                              padding: 20,
+                              font: {
+                                size: 12
+                              }
+                            }
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                              }
+                            }
+                          }
                         },
                       }}
                     />
@@ -383,11 +535,13 @@ const PurchaseOrdersTab = () => {
                   <div className="h-64">
                     <Bar
                       data={{
-                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                        labels: getMonthlyLabels(),
                         datasets: [{
                           label: 'Monto de Órdenes',
-                          data: [12000, 19000, 15000, 25000, 22000, 30000],
-                          backgroundColor: 'hsl(var(--primary))',
+                          data: getMonthlyData(orders),
+                          backgroundColor: '#C7D2FE', // Pastel Blue
+                          borderColor: '#6366F1', // Indigo border
+                          borderWidth: 1,
                           borderRadius: 4,
                         }],
                       }}
@@ -398,6 +552,13 @@ const PurchaseOrdersTab = () => {
                           legend: {
                             display: false,
                           },
+                          tooltip: {
+                            callbacks: {
+                              label: function(context) {
+                                return `Total: ₡${context.parsed.y.toLocaleString()}`;
+                              }
+                            }
+                          }
                         },
                         scales: {
                           y: {
@@ -407,6 +568,9 @@ const PurchaseOrdersTab = () => {
                             },
                             ticks: {
                               color: 'hsl(var(--muted-foreground))',
+                              callback: function(value) {
+                                return `₡${Number(value).toLocaleString()}`;
+                              }
                             }
                           },
                           x: {

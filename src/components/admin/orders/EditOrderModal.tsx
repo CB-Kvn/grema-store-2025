@@ -24,7 +24,11 @@ interface EditOrderModalProps {
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
   const dispatch = useAppDispatch();
   // const ordersList = useAppSelector((state: any) => state.purchaseOrders.orders);
-  const [formData, setFormData] = useState<PurchaseOrder>(order);
+  const [formData, setFormData] = useState<PurchaseOrder>({
+    ...order,
+    items: order.items || [],
+    documents: order.documents || []
+  });
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [showStockModal, setShowStockModal] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -35,7 +39,45 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
     message: string;
     onConfirm: () => void;
   } | null>(null);
+  const [uploadingFile, setUploadingFile] = useState<{ [docId: string]: boolean }>({});
+  const [selectedFiles, setSelectedFiles] = useState<{ [docId: string]: File | null }>({});
   const { addStock, removeStock } = useProductService(); // Usa el hook
+
+  // Función para manejar la actualización de documentos
+  const handleDocumentUpdate = async (updatedDocuments: any[]) => {
+    try {
+      const orderToUpdate = { ...formData, documents: updatedDocuments };
+
+      // Elimina documents si es un array vacío antes de actualizar
+      if (Array.isArray(orderToUpdate.documents) && orderToUpdate.documents.length === 0) {
+        const { documents, ...rest } = orderToUpdate;
+        await purchaseOrderService.update(formData.id, rest);
+      } else {
+        await purchaseOrderService.update(formData.id, orderToUpdate);
+      }
+
+      // No actualizar formData aquí ya que se hace en el onChange
+    } catch (error) {
+      console.error('Error updating document:', error);
+    }
+  };
+
+  // Función para manejar la actualización de documentos y estado de pago
+  const handleDocumentAndPaymentUpdate = async (updatedDocuments: any[], newPaymentStatus: string) => {
+    try {
+      const orderToUpdate = { ...formData, documents: updatedDocuments, paymentStatus: newPaymentStatus };
+
+      // Elimina documents si es un array vacío antes de actualizar
+      if (Array.isArray(orderToUpdate.documents) && orderToUpdate.documents.length === 0) {
+        const { documents, ...rest } = orderToUpdate;
+        await purchaseOrderService.update(formData.id, rest);
+      } else {
+        await purchaseOrderService.update(formData.id, orderToUpdate);
+      }
+    } catch (error) {
+      console.error('Error updating document and payment status:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,41 +189,12 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
     await purchaseOrderService.update(formData.id, orderToUpdate);
   };
 
-  const addItem = () => {
-    const newItem: Item = {
-      id: uuidv4(),
-      orderId: formData.id,
-      productId: 0,
-      quantity: 1,
-      unitPrice: 0,
-      totalPrice: 0,
-      qtyDone: null,
-      isGift: false,
-      isBestSeller: false,
-      isNew: false,
-      status: 'PENDING',
-    };
-    setFormData({
-      ...formData,
-      items: [...formData.items, newItem],
-    });
-  };
 
-  const removeItem = (index: number) => {
-    const newItems = formData.items.filter((_, i) => i !== index);
-    const totalAmount = newItems.reduce((sum, item) => sum + item.totalPrice, 0);
-    setFormData({ ...formData, items: newItems, totalAmount });
-  };
-
-  const handleStockDistribution = (distribution: any[]) => {
-    setShowStockModal(false);
-    setSelectedItem(null);
-  };
 
   const handleExpandRow = async (itemId: string) => {
     const response = await warehouseService.getByIdProducts(Number(itemId));
     setItemsWarehouse(response)
-    
+
   };
 
   const handleWarehouseQtyChange = (itemId: string, warehouseId: number, value: number) => {
@@ -195,10 +208,57 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
     }));
   };
 
+  // Función para manejar la subida de archivo y actualización del documento
+  const handleFileUploadAndUpdate = async (docId: string, file: File, docIndex: number) => {
+    try {
+      setUploadingFile(prev => ({ ...prev, [docId]: true }));
+
+      // Primero subir el archivo usando uploadFileReceipt
+      const uploadResponse = await purchaseOrderService.uploadFileReceipt(file);
+
+      // Luego actualizar el documento con la nueva información
+      const updateData = {
+        title: formData.documents?.[docIndex]?.title || `Comprobante actualizado - ${formData.orderNumber}`,
+        status: formData.documents?.[docIndex]?.status || 'PENDING', url: uploadResponse.url,
+        mimeType: uploadResponse.fileType,
+        size: uploadResponse.size
+      };
+      debugger;
+      await purchaseOrderService.updateDocument(formData.id, updateData);
+
+      // Actualizar el documento en el estado local con la nueva URL
+      const updatedDocuments = [...(formData.documents || [])];
+      updatedDocuments[docIndex] = {
+        ...updatedDocuments[docIndex],
+        url: uploadResponse.url,
+        mimeType: uploadResponse.fileType,
+        size: uploadResponse.size
+      };
+
+      setFormData({ ...formData, documents: updatedDocuments });
+      setSelectedFiles(prev => ({ ...prev, [docId]: null }));
+
+      // Limpiar el input de archivo
+      const fileInput = document.getElementById(`fileInput-${docId}`) as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
+      // Actualizar en el store de Redux
+      dispatch(updateOrder({ ...formData, documents: updatedDocuments }));
+
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      // Aquí podrías mostrar un mensaje de error al usuario
+    } finally {
+      setUploadingFile(prev => ({ ...prev, [docId]: false }));
+    }
+  };
+
   return (
     <>
       {/* Modal Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 z-40"
         onClick={onClose}
       />
@@ -309,20 +369,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                   <option value="CANCELLED">Cancelada</option>
                 </select>
               </div>
-              <div>
-                <Label htmlFor="paymentStatus">Estado de Pago</Label>
-                <select
-                  id="paymentStatus"
-                  value={formData.paymentStatus}
-                  onChange={(e) => setFormData({ ...formData, paymentStatus: e.target.value as PurchaseOrder['paymentStatus'] })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  required
-                >
-                  <option value="PENDING">Pendiente</option>
-                  <option value="COMPLETED">Parcial</option>
-                  <option value="UNCOMPLETED">Pagado</option>
-                </select>
-              </div>
+
               <div>
                 <Label htmlFor="paymentMethod">Método de Pago</Label>
                 <Input
@@ -353,8 +400,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {formData.items.map((item, index) => {
-                   
+                  {formData.items && formData.items.map((item, index) => {
+
                     const warehousesForProduct = itemsWarehouse.filter(
                       (iw: any) => iw.productId === item.productId
                     );
@@ -402,10 +449,10 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                           const updatedItems = formData.items.map((it, idx) =>
                             idx === index
                               ? {
-                                  ...it,
-                                  status: newItemStatus,
-                                  qtyDone: assignedQty,
-                                }
+                                ...it,
+                                status: newItemStatus,
+                                qtyDone: assignedQty,
+                              }
                               : it
                           );
 
@@ -523,19 +570,18 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                           </td>
                           <td className="px-4 py-3">
                             <span
-                              className={`px-2 py-1 rounded-full text-xs sm:text-sm ${
-                                item.status === 'COMPLETED'
-                                  ? 'bg-green-100 text-green-700'
-                                  : item.status === 'UNCOMPLETED'
+                              className={`px-2 py-1 rounded-full text-xs sm:text-sm ${item.status === 'COMPLETED'
+                                ? 'bg-green-100 text-green-700'
+                                : item.status === 'UNCOMPLETED'
                                   ? 'bg-yellow-100 text-yellow-700'
                                   : 'bg-primary-100 text-primary-700'
-                              }`}
+                                }`}
                             >
                               {item.status === 'COMPLETED'
                                 ? 'Completado'
                                 : item.status === 'UNCOMPLETED'
-                                ? 'Incompleto'
-                                : 'Pendiente'}
+                                  ? 'Incompleto'
+                                  : 'Pendiente'}
                             </span>
                           </td>
                         </tr>
@@ -567,7 +613,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                             type="number"
                                             min={0}
                                             max={wh.quantity}
-                                            value={ ( usedQty >= 0 ? usedQty - returnQty : 0 )}
+                                            value={(usedQty >= 0 ? usedQty - returnQty : 0)}
                                             onChange={e => {
                                               const val = Number(e.target.value);
                                               // Solo permite valores >= 0 y no menores que la devolución
@@ -697,9 +743,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                                   </span>
                                   <button
                                     type="button"
-                                    className={`px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700 transition ${
-                                      assignedQty > item.quantity ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
+                                    className={`px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700 transition ${assignedQty > item.quantity ? 'opacity-50 cursor-not-allowed' : ''
+                                      }`}
                                     disabled={assignedQty > item.quantity}
                                     onClick={handleStockReady}
                                   >
@@ -715,6 +760,176 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Documentos */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-primary-900">Comprobantes</h3>
+            <div className="bg-primary-50 rounded-lg p-4">
+              {formData.documents && formData.documents.length > 0 ? (
+                <div className="space-y-4">
+                  {formData.documents.map((doc, index) => (
+                    <div key={doc.id} className="bg-white rounded-lg p-4 border border-primary-200 shadow-sm">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <Label htmlFor={`docTitle-${index}`}>Título del Comprobante</Label>
+                          <Input
+                            id={`docTitle-${index}`}
+                            value={doc.title}
+                            onChange={async (e) => {
+                              const updatedDocuments = [...(formData.documents || [])];
+                              updatedDocuments[index] = { ...doc, title: e.target.value };
+                              await handleDocumentUpdate(updatedDocuments);
+                            }}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <div>
+                            <Label htmlFor="paymentStatus">Estado de Pago</Label>
+                            <select
+                              id="paymentStatus"
+                              value={formData.paymentStatus}
+                              onChange={(e) => setFormData({ ...formData, paymentStatus: e.target.value as PurchaseOrder['paymentStatus'] })}
+                              className="w-full rounded-md border border-input bg-background px-3 py-2"
+                              required
+                            >
+                              <option value="PENDING">Pendiente</option>
+                              <option value="COMPLETED">Parcial</option>
+                              <option value="UNCOMPLETED">Pagado</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <Label htmlFor={`docType-${index}`}>Tipo</Label>
+                          <select
+                            id={`docType-${index}`}
+                            value={doc.type}
+                            onChange={async (e) => {
+                              const updatedDocuments = [...(formData.documents || [])];
+                              updatedDocuments[index] = { ...doc, type: e.target.value };
+                              await handleDocumentUpdate(updatedDocuments);
+                            }}
+                            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2"
+                          >
+                            <option value="RECEIPT">Comprobante</option>
+                            <option value="INVOICE">Factura</option>
+                            <option value="CONTRACT">Contrato</option>
+                            <option value="OTHER">Otro</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label>Fecha de Subida</Label>
+                          <div className="mt-1 text-sm text-primary-600 py-2">
+                            {new Date(doc.uploadedAt).toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Tamaño</Label>
+                          <div className="mt-1 text-sm text-primary-600 py-2">
+                            {(doc.size / 1024).toFixed(1)} KB
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => window.open(doc.url, '_blank')}
+                          className="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm flex items-center justify-center gap-2"
+                        >
+                          <span role="img" aria-label="view">👁️</span>
+                          Ver Comprobante
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setConfirmModal({
+                              open: true,
+                              message: `¿Está seguro que desea eliminar el comprobante "${doc.title}"? Esta acción no se puede deshacer.`,
+                              onConfirm: async () => {
+                                const updatedDocuments = (formData.documents || []).filter((_, i) => i !== index);
+                                await handleDocumentUpdate(updatedDocuments);
+                                setConfirmModal(null);
+                              }
+                            });
+                          }}
+                          className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm flex items-center justify-center gap-2"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Eliminar
+                        </button>
+                      </div>
+
+                      {/* Sección de actualización de archivo */}
+                      <div className="mt-4 border-t pt-4">
+                        <Label htmlFor={`fileInput-${doc.id}`}>Actualizar Comprobante</Label>
+                        <div className="flex items-center gap-2 mt-2">
+                          <input
+                            id={`fileInput-${doc.id}`}
+                            type="file"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                await handleFileUploadAndUpdate(doc.id, file, index);
+                              }
+                            }}
+                            className="hidden"
+                            disabled={uploadingFile[doc.id]}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const fileInput = document.getElementById(`fileInput-${doc.id}`) as HTMLInputElement;
+                              if (fileInput) {
+                                fileInput.click();
+                              }
+                            }}
+                            disabled={uploadingFile[doc.id]}
+                            className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {uploadingFile[doc.id] ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                Subiendo...
+                              </>
+                            ) : (
+                              <>
+                                <Package className="h-4 w-4" />
+                                Subir Nuevo Archivo
+                              </>
+                            )}
+                          </button>
+                          {selectedFiles[doc.id] && (
+                            <span className="text-sm text-green-700">
+                              {selectedFiles[doc.id]?.name}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Formatos permitidos: PDF, DOC, DOCX, JPG, JPEG, PNG
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">📄</div>
+                  <p className="text-primary-600">No hay comprobantes subidos para esta orden</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -813,7 +1028,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
 
       {/* Stock Distribution Modal */}
       {showStockModal && selectedItem && (
-<></>
+        <></>
       )}
 
       {/* Confirm Modal */}

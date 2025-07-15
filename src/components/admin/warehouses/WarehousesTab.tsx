@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Warehouse as WarehouseIcon, Search, Filter, Plus, ArrowUpDown,
   Download, Upload, AlertTriangle, CheckCircle2,
-  Settings, Eye, Edit, Trash2, BarChart3
+  Settings, Eye, Edit, Trash2, BarChart3, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
@@ -33,6 +33,8 @@ ChartJS.register(
 );
 
 const WarehousesTab = () => {
+  const [showDashboard, setShowDashboard] = useState(false);
+  
   const {
     warehouses,
     searchQuery,
@@ -54,98 +56,163 @@ const WarehousesTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Almacenes"
-          value={warehouses.length.toString()}
-          icon={<WarehouseIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Ocupación Promedio"
-          value={`${averageOccupancy.toFixed(1)}%`}
-          icon={<BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Productos Bajo Stock"
-          value={lowStockItems.toString()}
-          icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Almacenes Activos"
-          value={warehouses.filter(w => w.status === 'active').length.toString()}
-          icon={<CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
-        />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-900">
+            Gestión de Almacenes
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Administra inventarios y controla el estado de todos los almacenes
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowDashboard(!showDashboard)}
+            className="flex items-center px-3 py-2 bg-primary-50 text-primary-600 rounded-lg border border-primary-200 hover:bg-primary-100"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            {showDashboard ? 'Ocultar Dashboard' : 'Información'}
+            {showDashboard ? (
+              <ChevronUp className="h-4 w-4 ml-2" />
+            ) : (
+              <ChevronDown className="h-4 w-4 ml-2" />
+            )}
+          </button>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Almacén
+          </button>
+        </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-primary-100">
-          <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-4">
-            Ocupación por Almacén
-          </h3>
-          <div className="h-48 sm:h-64">
-            <Bar
-              data={{
-                labels: warehouses.map(w => w.name),
-                datasets: [{
-                  label: 'Ocupación',
-                  data: warehouses.map(w => (w.currentOccupancy / w.capacity) * 100),
-                  backgroundColor: '#60A5FA',
-                }]
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                      callback: value => `${value}%`,
+      {/* Dashboard Section - Collapsible */}
+      {showDashboard && (
+        <div className="space-y-6">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              title="Total Almacenes"
+              value={warehouses.length.toString()}
+              icon={<WarehouseIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
+            />
+            <StatCard
+              title="Ocupación Promedio"
+              value={`${averageOccupancy.toFixed(1)}%`}
+              icon={<BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
+            />
+            <StatCard
+              title="Productos Bajo Stock"
+              value={lowStockItems.toString()}
+              icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
+            />
+            <StatCard
+              title="Almacenes Activos"
+              value={warehouses.filter(w => w.status === 'ACTIVE').length.toString()}
+              icon={<CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
+            />
+          </div>
+
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-primary-100">
+              <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-4">
+                Ocupación por Almacén
+              </h3>
+              <div className="h-48 sm:h-64">
+                <Bar
+                  data={{
+                    labels: warehouses.map(w => w.name),
+                    datasets: [{
+                      label: 'Ocupación',
+                      data: warehouses.map(w => (w.currentOccupancy / w.capacity) * 100),
+                      backgroundColor: '#C7D2FE', // Pastel Blue
+                      borderColor: '#6366F1', // Indigo border
+                      borderWidth: 1,
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
                     },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                          callback: value => `${value}%`,
+                        },
+                      },
+                    },
+                  }}
+                />
+              </div>
+            </div>
 
-        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-primary-100">
-          <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-4">
-            Estado de Almacenes
-          </h3>
-          <div className="h-48 sm:h-64">
-            <Doughnut
-              data={{
-                labels: ['Activo', 'Inactivo', 'Mantenimiento'],
-                datasets: [{
-                  data: [
-                    warehouses.filter(w => w.status === 'active').length,
-                    warehouses.filter(w => w.status === 'inactive').length,
-                    warehouses.filter(w => w.status === 'maintenance').length,
-                  ],
-                  backgroundColor: ['#34D399', '#9CA3AF', '#FCD34D'],
-                }],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'bottom',
-                  },
-                },
-              }}
-            />
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-primary-100">
+              <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-4">
+                Estado de Almacenes
+              </h3>
+              <div className="h-48 sm:h-64">
+                <Doughnut
+                  data={{
+                    labels: ['Activo', 'Inactivo', 'Mantenimiento'],
+                    datasets: [{
+                      data: [
+                        warehouses.filter(w => w.status === 'ACTIVE').length,
+                        warehouses.filter(w => w.status === 'INACTIVE').length,
+                        warehouses.filter(w => w.status === 'MAINTENANCE').length,
+                      ],
+                      backgroundColor: [
+                        '#D1FAE5', // Pastel Green for Active
+                        '#F3F4F6', // Light Gray for Inactive
+                        '#FEF3C7', // Pastel Yellow for Maintenance
+                      ],
+                      borderColor: [
+                        '#10B981', // Green border
+                        '#6B7280', // Gray border
+                        '#F59E0B', // Yellow border
+                      ],
+                      borderWidth: 1,
+                    }],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'bottom',
+                        labels: {
+                          padding: 20,
+                          font: {
+                            size: 12
+                          }
+                        }
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                          }
+                        }
+                      }
+                    },
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -162,13 +229,6 @@ const WarehousesTab = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            <span>Nuevo Almacén</span>
-          </button>
           <div className="hidden sm:flex items-center space-x-2">
             <button className="flex items-center px-3 py-2 bg-white border border-primary-200 rounded-lg hover:bg-primary-50">
               <Filter className="h-5 w-5 text-primary-600 mr-2" />
@@ -225,12 +285,12 @@ const WarehousesTab = () => {
                   <p className="text-xs sm:text-sm text-primary-500">{warehouse.email}</p>
                 </td>
                 <td className="py-3 px-4">
-                  <span className={`px-2 py-1 rounded-full text-xs sm:text-sm ${warehouse.status === 'active' ? 'bg-green-100 text-green-800' :
-                      warehouse.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800' :
+                  <span className={`px-2 py-1 rounded-full text-xs sm:text-sm ${warehouse.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                      warehouse.status === 'MAINTENANCE' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-gray-100 text-gray-800'
                     }`}>
-                    {warehouse.status === 'active' ? 'Activo' :
-                      warehouse.status === 'maintenance' ? 'Mantenimiento' :
+                    {warehouse.status === 'ACTIVE' ? 'Activo' :
+                      warehouse.status === 'MAINTENANCE' ? 'Mantenimiento' :
                         'Inactivo'}
                   </span>
                 </td>

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
 import { 
   X, 
@@ -27,12 +28,14 @@ import {
   Upload,
   Eye,
   Trash2,
-  Receipt
+  Receipt,
+  File
 } from 'lucide-react';
 import type { PurchaseOrder, Product } from '@/types';
 import type { Item } from '@/types/purchaseOrder';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
-import { createOrder } from '@/store/slices/purchaseOrdersSlice';
+import { createOrder, updateOrder } from '@/store/slices/purchaseOrdersSlice';
+import { purchaseOrderService } from '@/services/purchaseOrderService';
 import ProductSelectModal from './ProductSelectModal';
 import OrderAddressForm from './OrderAddressForm'; // Asegúrate de tener este import
 import { Checkbox } from '@/components/ui/checkbox';
@@ -101,6 +104,14 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null);
 
+  // Helper function to generate file hash
+  const generateFileHash = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
   const handleItemChange = (index: number, field: keyof Item, value: any) => {
     const newItems = [...formData.items];
     newItems[index] = {
@@ -124,9 +135,9 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
   const handlePaymentProofUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Verificar que sea una imagen
-      if (!file.type.startsWith('image/')) {
-        alert('Por favor selecciona un archivo de imagen válido');
+      // Verificar que sea una imagen o PDF
+      if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+        alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, GIF) o PDF');
         return;
       }
       
@@ -138,12 +149,17 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
       
       setPaymentProof(file);
       
-      // Crear preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPaymentProofPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Crear preview solo para imágenes
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setPaymentProofPreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Para PDFs, no hay preview visual
+        setPaymentProofPreview(null);
+      }
     }
   };
 
@@ -176,7 +192,7 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
       // Generar un nuevo ID único para la orden
       const orderToCreate = {
         ...formData,
-        id: uuidv4(),
+        id: formData.orderNumber,
         totalAmount,
         dataShipping,
         dataBilling,
@@ -192,8 +208,42 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
       if (formData.documents && formData.documents.length > 0) {
         orderToCreate.documents = formData.documents;
       }
-      
+      debugger
+      // Crear la orden primero
       await dispatch(createOrder(orderToCreate));
+      
+      // Si hay comprobante de pago, subir el archivo primero y luego crear el documento
+      if (paymentProof) {
+        try {
+          // Primero subir el archivo usando la ruta /uploadReceipt
+          const uploadResponse = await purchaseOrderService.uploadFileReceipt(paymentProof);
+          debugger
+          // Luego crear el documento con la URL devuelta
+
+          
+          const documentData = {
+            type: 'RECEIPT' as const,
+            title: `Comprobante de pago - ${orderToCreate.orderNumber}`,
+            url: uploadResponse.url ,// El servicio addDocument maneja el archivo
+            hash: await generateFileHash(paymentProof), // Generar hash del archivo
+            mimeType: uploadResponse.fileType,
+            size: uploadResponse.size 
+          };
+          
+          const addedDocument = await purchaseOrderService.addDocument(orderToCreate.id, documentData);
+          
+          // Actualizar el estado de Redux con el documento agregado
+          const updatedOrder = {
+            ...orderToCreate,
+            documents: [...(orderToCreate.documents || []), addedDocument]
+          };
+          dispatch(updateOrder(updatedOrder));
+        } catch (docError) {
+          console.error('Error uploading payment proof:', docError);
+          // No bloquear el cierre del modal si falla el upload del documento
+        }
+      }
+      
       onClose();
     } catch (error) {
       console.error('Error creating order:', error);
@@ -394,48 +444,61 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
                           <Package className="h-3 w-3 sm:h-4 sm:w-4 text-primary-500" />
                           Estado
                         </Label>
-                        <Input
-                          id="status"
-                          value={
-                            formData.status === 'PENDING'
-                              ? 'Pendiente'
-                              : formData.status === 'APPROVED'
-                                ? 'Completa'
-                                : formData.status === 'SHIPPED'
-                                  ? 'Enviada'
-                                  : formData.status === 'DELIVERED'
-                                    ? 'Entregada'
-                                    : formData.status === 'CANCELLED'
-                                      ? 'Cancelada'
-                                      : formData.status
-                          }
-                          disabled
-                          className="bg-primary-50 border-primary-300 text-sm sm:text-base"
-                        />
+                        <Select
+                          value={formData.status}
+                          onValueChange={(value) => setFormData({ ...formData, status: value as PurchaseOrder['status'] })}
+                        >
+                          <SelectTrigger className="border-primary-300 focus:border-primary-500 focus:ring-primary-500 text-sm sm:text-base">
+                            <SelectValue placeholder="Seleccionar estado" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PENDING">Pendiente</SelectItem>
+                            <SelectItem value="APPROVED">Completada</SelectItem>
+                            <SelectItem value="SHIPPED">Enviada</SelectItem>
+                            <SelectItem value="DELIVERED">Entregada</SelectItem>
+                            <SelectItem value="CANCELLED">Cancelada</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="paymentStatus" className="flex items-center gap-2 text-sm font-medium text-primary-700 mb-2">
                           <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-primary-500" />
                           Estado de Pago
                         </Label>
-                        <Input
-                          id="paymentStatus"
+                        <Select
                           value={formData.paymentStatus}
-                          onChange={e => setFormData({ ...formData, paymentStatus: e.target.value as PurchaseOrder['paymentStatus'] })}
-                          className="border-primary-300 focus:border-primary-500 focus:ring-primary-500 text-sm sm:text-base"
-                        />
+                          onValueChange={(value) => setFormData({ ...formData, paymentStatus: value as PurchaseOrder['paymentStatus'] })}
+                        >
+                          <SelectTrigger className="border-primary-300 focus:border-primary-500 focus:ring-primary-500 text-sm sm:text-base">
+                            <SelectValue placeholder="Seleccionar estado de pago" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PENDING">Pendiente</SelectItem>
+                            <SelectItem value="PARTIAL">Parcial</SelectItem>
+                            <SelectItem value="PAID">Pagado</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="paymentMethod" className="flex items-center gap-2 text-sm font-medium text-primary-700 mb-2">
                           <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-primary-500" />
                           Método de Pago
                         </Label>
-                        <Input
-                          id="paymentMethod"
+                        <Select
                           value={formData.paymentMethod || ''}
-                          onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
-                          className="border-primary-300 focus:border-primary-500 focus:ring-primary-500 text-sm sm:text-base"
-                        />
+                          onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
+                        >
+                          <SelectTrigger className="border-primary-300 focus:border-primary-500 focus:ring-primary-500 text-sm sm:text-base">
+                            <SelectValue placeholder="Seleccionar método de pago" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CASH">Efectivo</SelectItem>
+                            <SelectItem value="DEBIT">Débito</SelectItem>
+                            <SelectItem value="CREDIT">Crédito</SelectItem>
+                            <SelectItem value="SINPE MOVIL">SINPE Móvil</SelectItem>
+                            <SelectItem value="TRANSFER">Transferencia</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </CardContent>
@@ -462,7 +525,7 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
                           <input
                             id="paymentProof"
                             type="file"
-                            accept="image/*"
+                            accept="image/*,.pdf"
                             onChange={handlePaymentProofUpload}
                             className="hidden"
                           />
@@ -476,13 +539,13 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
                             Seleccionar Archivo
                           </Button>
                           <span className="text-xs sm:text-sm text-muted-foreground">
-                            Formatos: JPG, PNG, GIF (máx. 5MB)
+                            Formatos: JPG, PNG, GIF, PDF (máx. 5MB)
                           </span>
                         </div>
                       </div>
                       
                       {/* Vista previa del comprobante */}
-                      {paymentProofPreview && (
+                      {paymentProof && (
                         <div className="border-2 border-dashed border-primary-300 rounded-lg p-3 sm:p-4 bg-primary-50">
                           <div className="flex items-center justify-between mb-3">
                             <h4 className="text-xs sm:text-sm font-medium text-primary-900">Vista Previa del Comprobante</h4>
@@ -497,27 +560,42 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
                             </Button>
                           </div>
                           <div className="relative">
-                            <img
-                              src={paymentProofPreview}
-                              alt="Comprobante de pago"
-                              className="max-w-full h-auto max-h-48 sm:max-h-64 rounded-lg shadow-sm border border-primary-200"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setImageModal({ open: true, url: paymentProofPreview })}
-                              className="absolute top-2 right-2 bg-black/20 hover:bg-black/40 text-white h-6 w-6 sm:h-8 sm:w-8"
-                            >
-                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                            </Button>
+                            {paymentProof.type === 'application/pdf' ? (
+                              // Vista previa para PDF
+                              <div className="flex items-center justify-center p-8 bg-white rounded-lg border border-primary-200">
+                                <div className="text-center">
+                                  <File className="h-12 w-12 sm:h-16 sm:w-16 text-red-500 mx-auto mb-2" />
+                                  <p className="text-sm font-medium text-primary-900">Archivo PDF</p>
+                                  <p className="text-xs text-muted-foreground">{paymentProof.name}</p>
+                                </div>
+                              </div>
+                            ) : (
+                              // Vista previa para imágenes
+                              paymentProofPreview && (
+                                <>
+                                  <img
+                                    src={paymentProofPreview}
+                                    alt="Comprobante de pago"
+                                    className="max-w-full h-auto max-h-48 sm:max-h-64 rounded-lg shadow-sm border border-primary-200"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setImageModal({ open: true, url: paymentProofPreview })}
+                                    className="absolute top-2 right-2 bg-black/20 hover:bg-black/40 text-white h-6 w-6 sm:h-8 sm:w-8"
+                                  >
+                                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                                  </Button>
+                                </>
+                              )
+                            )}
                           </div>
-                          {paymentProof && (
-                            <div className="mt-3 text-xs text-muted-foreground">
-                              <p>Archivo: {paymentProof.name}</p>
-                              <p>Tamaño: {(paymentProof.size / 1024 / 1024).toFixed(2)} MB</p>
-                            </div>
-                          )}
+                          <div className="mt-3 text-xs text-muted-foreground">
+                            <p>Archivo: {paymentProof.name}</p>
+                            <p>Tamaño: {(paymentProof.size / 1024 / 1024).toFixed(2)} MB</p>
+                            <p>Tipo: {paymentProof.type}</p>
+                          </div>
                         </div>
                       )}
                     </div>
