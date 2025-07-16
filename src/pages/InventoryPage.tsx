@@ -37,14 +37,6 @@ const InventoryPage = () => {
 
   }, []);
 
-  // Aquí puedes hacer el update real a la base de datos
-  const handleDescuentoChange = (id: string, value: number) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, descuento: value } : u))
-    );
-    // Llama a tu API para guardar el descuento aquí si lo necesitas
-  };
-
   
   return (
     <div className="min-h-screen bg-primary-50/70 backdrop-blur-sm py-4 sm:py-6 lg:py-8">
@@ -140,7 +132,7 @@ const InventoryPage = () => {
                 </TabsTrigger>
               </TabsList>
               <TabsContent className='p-6' value="clientes">
-                <UsersTable users={users} onDescuentoChange={handleDescuentoChange} />
+                <UsersTable users={users} />
               </TabsContent>
               <TabsContent className='p-6' value="productos">
                 <ProductTab />

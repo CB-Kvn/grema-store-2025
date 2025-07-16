@@ -26,6 +26,8 @@ import { useProductService } from "@/hooks/useProductService";
 import { setProducts } from "@/store/slices/productsSlice";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import RelatedProducts from "./RelatedProducts";
+import { ProductSEO } from "./ProductSEO";
+import { useSEOAnalytics } from "@/hooks/useSEOAnalytics";
 
 interface ProductDetailProps {
   addToCart: (product: (typeof products)[0] & { quantity: number }) => void;
@@ -254,6 +256,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
 
   return (
     <div className="min-h-screen bg-white">
+      {/* SEO Component */}
+      {product && (
+        <ProductSEO
+          product={product}
+          category={product.category}
+        />
+      )}
+      
       {/* Navigation Bar */}
       <div className="bg-white shadow-sm py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

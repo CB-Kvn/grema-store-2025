@@ -9,6 +9,8 @@ import "swiper/css/pagination";
 import ProductCard from "@/components/product/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { Info_Bussiness } from "@/components/login/initial-page/bussiness";
+import { SEOHead, useStructuredData } from "@/components/common/SEOHead";
+import { getPageSEOData } from "@/utils/seo";
 
 import ContactPage from "@/components/login/initial-page/contact";
 import "aos/dist/aos.css";
@@ -45,16 +47,18 @@ type TabType = "bestSellers" | "newArrivals";
 
 export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
   const navigate = useNavigate();
+  const { generateOrganizationSchema, generateWebsiteSchema } = useStructuredData();
+  const seoData = getPageSEOData('home');
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const products = useAppSelector((state) => state.products.items);
   const latest = useAppSelector((state) => state.products.isNew);
   const bestSellers = useAppSelector((state) => state.products.isBestSeller);
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = products.filter((product: any) => {
     const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === "all" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -107,6 +111,17 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* SEO Head */}
+      <SEOHead
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        canonicalUrl={seoData.canonicalUrl}
+        ogImage={seoData.ogImage}
+        type={seoData.type}
+        jsonLd={[generateOrganizationSchema(), generateWebsiteSchema()]}
+      />
+      
       {/* Botón flotante a la derecha centrado, solo visible en pantallas md+ */}
       <AnimatePresence>
         {!slide && (

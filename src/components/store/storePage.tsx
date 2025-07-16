@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppSelector } from "@/hooks/useAppSelector";
-import { Product } from "@/interfaces/products";
+import { Product, Category } from "@/types";
 import { selectAllProducts } from "@/store/slices/productsSlice";
+import { SEOHead } from "@/components/common/SEOHead";
+import { getPageSEOData } from "@/utils/seo";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { CategorySEO } from "./CategorySEO";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -20,7 +24,6 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ProductCard from "../product/ProductCard";
-import { products } from "@/pages/initial";
 
 type SortOption =
   | "featured"
@@ -99,12 +102,14 @@ function getColorGroup(hex: string): string | null {
 }
 
 interface ShopPageProps {
-  addToCart: (product: (typeof products)[0]) => void;
+  addToCart: (product: Product) => void;
 }
 
 export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const navigate = useNavigate();
   const productos = useAppSelector(selectAllProducts);
+  const seoData = getPageSEOData('store');
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -118,6 +123,12 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     isBestSeller: false,
     colors: [], // Ahora es grupo de color
   });
+
+  // Breadcrumbs para la tienda
+  const breadcrumbItems = [
+    { name: 'Inicio', url: '/' },
+    { name: 'Tienda', url: '/tienda', isActive: true }
+  ];
 
   // Extraer categorías y materiales únicos de los productos
   const categories = Array.from(new Set(productos.map((p) => p.category)));
@@ -140,7 +151,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
         .flatMap((p) =>
           Array.isArray(p.details?.color) ? p.details.color : []
         )
-        .map((c) => getColorGroup(c.hex))
+        .map((c) => getColorGroup(c.hex || ''))
         .filter(Boolean)
     )
   );
@@ -149,11 +160,11 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const filteredProducts = productos
     .filter((product) => {
       const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+        (product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (product.description || '').toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory =
         filters.categories.length === 0 ||
-        filters.categories.includes(product.category);
+        filters.categories.includes(product.category || '');
       const matchesMaterial =
         filters.materials.length === 0 ||
         (Array.isArray(product.details?.material) 
@@ -162,15 +173,15 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
           ? filters.materials.includes(product.details.material)
           : false);
       const matchesPrice =
-        product.WarehouseItem?.[0]?.price >= filters.priceRange[0] &&
-        product.WarehouseItem?.[0]?.price <= filters.priceRange[1];
+        (product.price || 0) >= filters.priceRange[0] &&
+        (product.price || 0) <= filters.priceRange[1];
       const matchesNew = !filters.isNew || product.isNew;
       const matchesBestSeller = !filters.isBestSeller || product.isBestSeller;
       const matchesColor =
         filters.colors.length === 0 ||
-        (Array.isArray(product.details.color) &&
+        (Array.isArray(product.details?.color) &&
           product.details.color.some((c) =>
-            filters.colors.includes(getColorGroup(c.hex) || "")
+            filters.colors.includes(getColorGroup(c.hex || '') || "")
           ));
 
       return (
@@ -186,13 +197,13 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     .sort((a, b) => {
       switch (sortBy) {
         case "price-asc":
-          return (a.WarehouseItem?.[0]?.price || 0) - (b.WarehouseItem?.[0]?.price || 0);
+          return (a.price || 0) - (b.price || 0);
         case "price-desc":
-          return (b.WarehouseItem?.[0]?.price || 0) - (a.WarehouseItem?.[0]?.price || 0);
+          return (b.price || 0) - (a.price || 0);
         case "name-asc":
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
         case "name-desc":
-          return b.name.localeCompare(a.name);
+          return (b.name || '').localeCompare(a.name || '');
         default:
           return 0;
       }
@@ -337,17 +348,17 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
             <label key={category} className="flex items-center">
               <input
                 type="checkbox"
-                checked={filters.categories.includes(category)}
+                checked={filters.categories.includes(category || '')}
                 onChange={(e) => {
                   const newCategories = e.target.checked
-                    ? [...filters.categories, category]
+                    ? [...filters.categories, category || '']
                     : filters.categories.filter((c) => c !== category);
                   handleFilterChange("categories", newCategories);
                 }}
                 className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
               />
               <span className="ml-2 text-primary-700 capitalize">
-                {category.replace("-", " ")}
+                {(category || '').replace("-", " ")}
               </span>
             </label>
           ))}
@@ -446,17 +457,16 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   );
 
   const ProductListView = ({ product }: { product: Product }) => {
-    const warehouseItem = product.WarehouseItem?.[0];
-    const price = warehouseItem?.price || 0;
-    const discountedPrice = warehouseItem?.discount
-      ? price * (1 - warehouseItem.discount / 100)
+    const price = product.price || 0;
+    const discountedPrice = product.discount
+      ? price * (1 - (product.discount.value || 0) / 100)
       : price;
 
     return (
       <div className="bg-white rounded-lg shadow-md p-4 flex gap-6">
         <div className="w-48 h-48">
           <img
-            src={product.Images?.[0]?.url?.[0] || "https://via.placeholder.com/150"}
+            src={product.Images || "https://via.placeholder.com/150"}
             alt={product.name}
             className="w-full h-full object-cover rounded-md"
           />
@@ -471,7 +481,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
               <span className="text-2xl font-bold text-primary-900">
                 ₡{discountedPrice.toLocaleString()}
               </span>
-              {warehouseItem?.discount && (
+              {product.discount && (
                 <span className="ml-2 text-sm line-through text-primary-400">
                   ₡{price.toLocaleString()}
                 </span>
@@ -495,10 +505,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
             </div>
             <div className="flex items-center text-primary-600">
               <Star className="h-4 w-4 mr-1" />
-              <span className="text-sm">
-                {Array.isArray(product.details.material) 
-                  ? product.details.material.join(", ") 
-                  : product.details.material || "N/A"}
+              <span className="text-sm">                {Array.isArray(product.details?.material)
+                  ? product.details.material.join(", ")
+                  : product.details?.material || "N/A"}
               </span>
             </div>
           </div>
@@ -513,22 +522,38 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     );
   };
 
+  // Determinar la categoría actual para SEO
+  const currentCategory = filters.categories.length === 1 ? filters.categories[0] : 'all';
+  
   return (
     <div className="min-h-screen bg-white">
+      {/* SEO Head */}
+      <SEOHead
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        canonicalUrl={seoData.canonicalUrl}
+        ogImage={seoData.ogImage}
+        type={seoData.type}
+      />
+
+      {/* Category SEO específico */}
+      <CategorySEO
+        category={currentCategory as Category}
+        productCount={filteredProducts.length}
+        subcategories={categories.filter(Boolean) as string[]}
+      />
+
       {/* Header */}
 
       {/* Navigation Bar */}
       <nav className="bg-white shadow-sm py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumbs */}
+          <Breadcrumbs items={breadcrumbItems} className="my-2" />
+          
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex items-center">
-              <Link
-                to="/"
-                className="flex items-center text-primary-600 hover:text-primary-700"
-              >
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                <span>Volver</span>
-              </Link>
             </div>
             <div className="flex items-center gap-4">
               <button
@@ -697,7 +722,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
                       key={product.id}
                       product={product}
                       onAddToCart={() => addToCart(product)}
-                      onClick={() => navigate(`/producto/${product.id}`)}
+                      onClick={() => { navigate(`/producto/${product.id}`); return null; }}
                     />
                   ))}
                 </div>

@@ -1,0 +1,150 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useAppSelector } from './useAppSelector';
+import { 
+  calculateDiscountedAmount, 
+  calculateItemDiscounts,
+  formatDiscountResult, 
+  CartItem, 
+  CartItemWithDiscount,
+  DiscountCalculationResult 
+} from '@/utils/discountCalculator';
+
+interface UseDiscountCalculatorReturn {
+  calculationResult: DiscountCalculationResult;
+  itemsWithDiscounts: CartItemWithDiscount[];
+  formattedResult: any;
+  isLoading: boolean;
+  error: string | null;
+  recalculate: () => Promise<void>;
+  hasDiscounts: boolean;
+  totalSavings: number;
+}
+
+export const useDiscountCalculator = (cartItems: CartItem[]): UseDiscountCalculatorReturn => {
+  const [calculationResult, setCalculationResult] = useState<DiscountCalculationResult>({
+    originalAmount: 0,
+    discountAmount: 0,
+    finalAmount: 0,
+    appliedDiscounts: [],
+    selectedDiscount: null
+  });
+  
+  const [itemsWithDiscounts, setItemsWithDiscounts] = useState<CartItemWithDiscount[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const user = useAppSelector(state => state.user.currentUser);
+
+  const calculateDiscounts = useCallback(async () => {
+    if (!cartItems || cartItems.length === 0) {
+      setCalculationResult({
+        originalAmount: 0,
+        discountAmount: 0,
+        finalAmount: 0,
+        appliedDiscounts: [],
+        selectedDiscount: null
+      });
+      setItemsWithDiscounts([]);
+      return;
+    }
+
+    // Si no hay usuario o no tiene descuentos, calcular solo el total original
+    const userDiscountIds = user?.discounts || [];
+    if (userDiscountIds.length === 0) {
+      const originalAmount = cartItems.reduce((total, item) => total + (item.product.price || 0) * item.quantity, 0);
+      const baseResult = {
+        originalAmount,
+        discountAmount: 0,
+        finalAmount: originalAmount,
+        appliedDiscounts: [],
+        selectedDiscount: null
+      };
+      setCalculationResult(baseResult);
+      setItemsWithDiscounts(cartItems.map(item => ({ ...item, appliedDiscount: undefined })));
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Calcular descuentos por item individualmente
+      const itemsWithDiscountInfo = await calculateItemDiscounts(cartItems, userDiscountIds);
+      
+      // Calcular totales globales basados en los descuentos individuales
+      const originalAmount = itemsWithDiscountInfo.reduce(
+        (total, item) => total + (item.product.price || 0) * item.quantity,
+        0
+      );
+      
+      const totalDiscountAmount = itemsWithDiscountInfo.reduce(
+        (total, item) => total + (item.appliedDiscount?.discountApplied || 0),
+        0
+      );
+      
+      const finalAmount = originalAmount - totalDiscountAmount;
+      
+      // Crear resumen de descuentos aplicados
+      const appliedDiscounts = itemsWithDiscountInfo
+        .filter(item => item.appliedDiscount)
+        .map(item => ({
+          discountId: item.appliedDiscount!.discountId,
+          type: item.appliedDiscount!.type,
+          value: item.appliedDiscount!.value,
+          discountApplied: item.appliedDiscount!.discountApplied
+        }));
+      
+      // Determinar el descuento principal (el que más ahorro genera)
+      const selectedDiscount = appliedDiscounts.length > 0 
+        ? appliedDiscounts.reduce((best, current) => 
+            current.discountApplied > best.discountApplied ? current : best
+          )
+        : null;
+      
+      const result = {
+        originalAmount,
+        discountAmount: totalDiscountAmount,
+        finalAmount,
+        appliedDiscounts,
+        selectedDiscount
+      };
+      
+      setCalculationResult(result);
+      setItemsWithDiscounts(itemsWithDiscountInfo);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al calcular descuentos');
+      console.error('Error calculating discounts:', err);
+      
+      // En caso de error, mostrar solo el total original
+      const originalAmount = cartItems.reduce((total, item) => total + (item.product.price || 0) * item.quantity, 0);
+      setCalculationResult({
+        originalAmount,
+        discountAmount: 0,
+        finalAmount: originalAmount,
+        appliedDiscounts: [],
+        selectedDiscount: null
+      });
+      setItemsWithDiscounts(cartItems.map(item => ({ ...item, appliedDiscount: undefined })));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cartItems, user?.discounts]);
+
+  // Recalcular cuando cambien los items del carrito o el usuario
+  useEffect(() => {
+    calculateDiscounts();
+  }, [calculateDiscounts]);
+
+  const formattedResult = formatDiscountResult(calculationResult);
+
+  return {
+    calculationResult,
+    itemsWithDiscounts,
+    formattedResult,
+    isLoading,
+    error,
+    recalculate: calculateDiscounts,
+    hasDiscounts: calculationResult.selectedDiscount !== null,
+    totalSavings: calculationResult.discountAmount
+  };
+};

@@ -8,6 +8,7 @@ import { TooltipProvider } from './components/ui/tooltip.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { motion } from 'framer-motion';
 import { AuthProvider } from './context/ContextAuth.tsx';
+import { HelmetProvider } from 'react-helmet-async';
 
 // Componente de fondo confeti animado (líneas más gruesas)
 function ConfettiBackground() {
@@ -87,7 +88,7 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById('root')!).render(
-
+  <HelmetProvider>
     <GoogleOAuthProvider clientId="298483544989-79j1970tm0q2i8jjrn1rq4r7mrkptpgg.apps.googleusercontent.com" >
       <AuthProvider>
       <Provider store={store}>
@@ -98,5 +99,5 @@ createRoot(document.getElementById('root')!).render(
       </Provider>
       </AuthProvider>
     </GoogleOAuthProvider>
-
+  </HelmetProvider>
 );

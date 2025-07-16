@@ -1,22 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Truck, Gift, Shield, ArrowLeft, Copy, Phone, Wallet, AlertCircle } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { cantones, provincias } from '@/utils/location';
-import { AddressInfo, CartItem } from '@/types';
+import { AddressInfo } from '@/types';
 import { Label } from '../ui/label';
 import AddressForm from './addressForm';
-import { t } from 'node_modules/framer-motion/dist/types.d-B_QPEvFK';
 import { purchaseOrderService } from '@/services/purchaseOrderService';
-import { Link } from 'react-router-dom';
-import { nanoid } from 'nanoid';
+import { CartItem as DiscountCartItem } from '@/utils/discountCalculator';
+import { useDiscountCalculator } from '@/hooks/useDiscountCalculator';
+import { useAppSelector } from '@/hooks/useAppSelector';
+
+// Tipo para representar la estructura real de los datos del carrito
+interface RealCartItem {
+  product: {
+    id: number;
+    name: string;
+    description: string;
+    category: string;
+    sku: string;
+    details: any;
+    createdAt: string;
+    updatedAt: string;
+    available: boolean;
+    WarehouseItem: Array<{
+      id: string;
+      productId: number;
+      warehouseId: string;
+      quantity: number;
+      minimumStock: number;
+      location: string;
+      price: number;
+      cost: number;
+      status: string;
+      lastUpdated: string;
+    }>;
+    Images: Array<{
+      id: number;
+      url: string[];
+      state: boolean;
+      productId: number;
+    }>;
+    filepaths: any[];
+  };
+  quantity: number;
+  isGift: boolean;
+}
 
 interface CheckoutPageProps {
-  cartItems: CartItem[];
+  cartItems: RealCartItem[];
 }
 
 const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const navigate = useNavigate();
+  const user = useAppSelector(state => state.user.currentUser);
   const [step, setStep] = useState<'shipping' | 'billing' | 'payment' | 'confirmation'>('shipping');
   const [shippingInfo, setShippingInfo] = useState<AddressInfo>({
     buyerId: '',
@@ -51,17 +88,27 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const [paymentMethod, setPaymentMethod] = useState<'SINPE MOVIL' | 'TRANSFER'>('SINPE MOVIL');
   const [orderData, setOrderData] = useState<any>(null);
 
-  const calculateSubtotal = () => {
-    return cartItems.reduce((sum, item) => {
-      const warehouseItem = item.product.WarehouseItem?.[0];
-      if (!warehouseItem) return sum; // Ignorar si no hay WarehouseItem
-      const itemTotal = warehouseItem.price * item.quantity;
-      const discount = warehouseItem.discount
-        ? itemTotal * (warehouseItem.discount / 100)
-        : 0;
-      return sum + (itemTotal - discount);
-    }, 0);
-  };
+  // Convertir CartItem actual a DiscountCartItem usando useMemo para evitar re-renders
+  const discountCartItems: DiscountCartItem[] = useMemo(() => 
+    cartItems.map(item => ({
+      product: {
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.WarehouseItem?.[0]?.price || 0,
+        Images: item.product.Images?.[0]?.url?.[0] || '',
+        // Agregar propiedades adicionales del producto si están disponibles
+      },
+      quantity: item.quantity
+    })), [cartItems]);
+
+  // Usar el hook de descuentos
+  const { 
+    calculationResult, 
+    itemsWithDiscounts,
+    hasDiscounts, 
+    isLoading: discountLoading,
+    error: discountError
+  } = useDiscountCalculator(discountCartItems);
 
   const calculateShipping = () => {
     if (!shippingInfo.provincia || !shippingInfo.canton) return 0;
@@ -73,11 +120,16 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   };
 
   const calculateTotal = () => {
+    const subtotalWithUserDiscounts = calculationResult.finalAmount; // Subtotal con descuentos del usuario
+    const shipping = calculateShipping();
+    
     return {
-      subtotal: calculateSubtotal(),
-      shipping: calculateShipping(),
-      total: calculateSubtotal() + calculateShipping(),
-    }
+      subtotal: calculationResult.originalAmount, // Subtotal original
+      subtotalWithDiscounts: subtotalWithUserDiscounts, // Subtotal con descuentos del usuario
+      shipping: shipping,
+      total: subtotalWithUserDiscounts + shipping, // Total final
+      userDiscounts: calculationResult.discountAmount // Descuentos del usuario
+    };
   };
 
   const handleShippingSubmit = (e: React.FormEvent) => {
@@ -99,21 +151,58 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const totals = calculateTotal();
+    const orderNumber = `PO-${new Date().getFullYear()}-${uuidv4().replace(/-/g, '').substring(0, 6).toUpperCase()}`;
+    
+    // Convertir CartItem a Item
+    const orderItems = cartItems.map(item => {
+      const itemTotal = (item.product.WarehouseItem?.[0]?.price || 0) * item.quantity;
+      const discount = 0; // Los descuentos individuales de producto no están en esta estructura
+      const finalPrice = itemTotal - discount;
+      
+      return {
+        id: uuidv4(),
+        orderId: orderNumber,
+        productId: item.product.id || 0,
+        quantity: item.quantity,
+        unitPrice: item.product.WarehouseItem?.[0]?.price || 0,
+        totalPrice: finalPrice,
+        qtyDone: null,
+        isGift: item.isGift || false,
+        isBestSeller: false,
+        isNew: false,
+        status: 'PENDING'
+      };
+    });
+    
     const orderDataResponse = {
       buyerId: shippingInfo.buyerId,
       firstName: shippingInfo.firstName,
       lastName: shippingInfo.lastName,
       email: shippingInfo.email,
       phone: shippingInfo.phone,
-      id: `PO-${new Date().getFullYear()}-${uuidv4().replace(/-/g, '').substring(0, 6).toUpperCase()}`,
-      orderNumber: `PO-${new Date().getFullYear()}-${uuidv4().replace(/-/g, '').substring(0, 6).toUpperCase()}`,
+      id: orderNumber,
+      orderNumber: orderNumber,
       dataShipping: shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
       dataBilling: needInvoice ? (billingInfo.address + ", " + provincias[Number(billingInfo.provincia) - 1] + " " + billingInfo.canton + ", " + billingInfo.zipCode) : shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
       paymentMethod,
-      items: cartItems,
-      totalAmount: calculateTotal().total,
-      subtotalAmount: calculateTotal().subtotal,
-      shippingAmount: calculateTotal().shipping,
+      items: orderItems,
+      totalAmount: totals.total,
+      subtotalAmount: totals.subtotal,
+      subtotalWithDiscounts: totals.subtotalWithDiscounts,
+      userDiscounts: totals.userDiscounts,
+      shippingAmount: totals.shipping,
+      // Agregar información de descuentos aplicados
+      appliedDiscounts: calculationResult.appliedDiscounts,
+      status: 'PENDING',
+      paymentStatus: 'PENDING',
+      orderDate: new Date().toISOString(),
+      expectedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 días después
+      actualDeliveryDate: null,
+      trackingNumber: null,
+      notes: hasDiscounts && calculationResult.selectedDiscount ? 
+        `Descuento aplicado: ${calculationResult.selectedDiscount.type} - ${calculationResult.selectedDiscount.value}${calculationResult.selectedDiscount.type === 'PERCENTAGE' ? '%' : ''}` : 
+        null
     };
 
     purchaseOrderService.create(orderDataResponse)
@@ -125,6 +214,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
+
+  useEffect(() => {
+    console.log(cartItems)
+  },[])
 
   return (
     <div className="min-h-screen bg-primary-50">
@@ -487,18 +580,16 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
               {/* Items */}
               <div className="space-y-4">
-                {cartItems.map((item) => {
-                  const warehouseItem = item.product.WarehouseItem?.[0];
-                  const imageUrl =
-                    item.product.Images?.[0]?.url?.[0] || 'https://via.placeholder.com/150';
-                  const itemTotal = warehouseItem ? warehouseItem.price * item.quantity : 0;
-                  const discount = warehouseItem
-                    ? itemTotal * (warehouseItem.discount || 0) / 100
-                    : 0;
-                  const finalPrice = itemTotal - discount;
+                {itemsWithDiscounts.map((item, index) => {
+                  // Usar los datos originales del cartItem para las imágenes
+                  const originalCartItem = cartItems[index];
+                  const imageUrl = originalCartItem?.product.Images?.[0]?.url?.[0] || 'https://via.placeholder.com/150';
+                  const originalPrice = (item.product.price || 0) * item.quantity;
+                  const finalPrice = item.appliedDiscount?.finalPrice || originalPrice;
+                  const discount = item.appliedDiscount?.discountApplied || 0;
 
                   return (
-                    <div key={item.product.id} className="flex items-start space-x-4">
+                    <div key={`${item.product.id}-${index}`} className="flex items-start space-x-4">
                       <img
                         src={imageUrl}
                         alt={item.product.name || 'Producto'}
@@ -509,13 +600,36 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                           {item.product.name || 'Producto sin nombre'}
                         </h3>
                         <p className="text-sm text-primary-500">Cantidad: {item.quantity}</p>
+                        
+                        {/* Mostrar información de descuento aplicado */}
+                        {item.appliedDiscount ? (
+                          <div className="mt-1">
+                            <p className="text-xs text-green-600">
+                              {item.appliedDiscount.type === 'PERCENTAGE' && `${item.appliedDiscount.value}% de descuento (-₡${item.appliedDiscount.discountApplied.toLocaleString()})`}
+                              {item.appliedDiscount.type === 'FIXED' && `Descuento fijo (-₡${item.appliedDiscount.discountApplied.toLocaleString()})`}
+                              {item.appliedDiscount.type === 'BUY_X_GET_Y' && `Promoción especial (-₡${item.appliedDiscount.discountApplied.toLocaleString()})`}
+                              {!['PERCENTAGE', 'FIXED', 'BUY_X_GET_Y'].includes(item.appliedDiscount.type) && `Descuento ${item.appliedDiscount.type} (-₡${item.appliedDiscount.discountApplied.toLocaleString()})`}
+                            </p>
+                            {/* Mostrar mensaje de optimización para BUY_X_GET_Y */}
+                            {item.appliedDiscount.message && (
+                              <p className="text-xs text-orange-600 mt-1">
+                                {item.appliedDiscount.message}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="mt-1">
+                            <p className="text-xs text-gray-500">Sin descuento aplicado</p>
+                          </div>
+                        )}
+                        
                         <div className="flex items-baseline mt-1">
                           <span className="text-sm font-medium text-primary-900">
                             ₡{finalPrice.toLocaleString()}
                           </span>
                           {discount > 0 && (
                             <span className="ml-2 text-xs line-through text-primary-400">
-                              ₡{itemTotal.toLocaleString()}
+                              ₡{originalPrice.toLocaleString()}
                             </span>
                           )}
                         </div>
@@ -525,14 +639,53 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                 })}
               </div>
 
-              {/* Totals */}
+              {/* Componente DiscountSummary como alternativa - solo si hay usuario */}
+              {/* {user && (
+                <div className="border-t border-primary-100 pt-4">
+                  <h3 className="text-sm font-medium text-primary-900 mb-2">Resumen de Descuentos</h3>
+                  <DiscountSummary cartItems={discountCartItems} className="border-0 p-0 shadow-none" />
+                </div>
+              )} */}
+
+              {/* Totals con sistema de descuentos */}
               <div className="border-t border-primary-100 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-primary-600">Subtotal</span>
+                  <span className="text-primary-600">
+                    {user ? 'Subtotal (sin descuentos de usuario)' : 'Subtotal'}
+                  </span>
                   <span className="text-primary-900">
-                    ₡{calculateSubtotal().toLocaleString()}
+                    ₡{calculationResult.originalAmount.toLocaleString()}
                   </span>
                 </div>
+                
+                {/* Mostrar descuentos del usuario si existen */}
+                {user && hasDiscounts && calculationResult.selectedDiscount && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600">Descuento aplicado</span>
+                      <span className="text-green-600 font-medium">
+                        -₡{calculationResult.discountAmount.toLocaleString()}
+                      </span>
+                    </div>
+                    {/* <div className="flex justify-between text-xs text-green-600 pl-4">
+                      <span>
+                        • {calculationResult.selectedDiscount.type === 'PERCENTAGE' ? `${calculationResult.selectedDiscount.value}% desc.` : 
+                          calculationResult.selectedDiscount.type === 'FIXED' ? 'Desc. fijo' : 'Promoción especial'}
+                      </span>
+                      <span>-₡{calculationResult.selectedDiscount.discountApplied.toLocaleString()}</span>
+                    </div> */}
+                  </div>
+                )}
+                
+                {user && hasDiscounts && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-primary-600">Subtotal con descuentos</span>
+                    <span className="text-primary-900">
+                      ₡{calculationResult.finalAmount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+                
                 <div className="flex justify-between text-sm">
                   <span className="text-primary-600">Envío</span>
                   <span
@@ -545,12 +698,37 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                       : 'Por calcular'}
                   </span>
                 </div>
-                <div className="flex justify-between text-lg font-semibold">
-                  <span className="text-primary-900">Total</span>
+                
+                <div className="flex justify-between text-lg font-semibold border-t border-primary-100 pt-2">
+                  <span className="text-primary-900">Total Final</span>
                   <span className="text-primary-900">
-                    ₡{calculateTotal().total.toLocaleString()}
+                    ₡{(calculationResult.finalAmount + calculateShipping()).toLocaleString()}
                   </span>
                 </div>
+                
+                {/* Mostrar información adicional si hay descuentos */}
+                {user && hasDiscounts && (
+                  <div className="bg-green-50 p-3 rounded-lg mt-2">
+                    <p className="text-sm text-green-700 font-medium">
+                      ¡Felicidades! Ahorras ₡{calculationResult.discountAmount.toLocaleString()} 
+                      ({((calculationResult.discountAmount / calculationResult.originalAmount) * 100).toFixed(1)}%)
+                    </p>
+                  </div>
+                )}
+                
+                {/* Mostrar estado de carga de descuentos solo si el usuario tiene descuentos */}
+                {discountLoading && (user?.discounts?.length || 0) > 0 && (
+                  <div className="text-center text-sm text-primary-600">
+                    Calculando descuentos...
+                  </div>
+                )}
+                
+                {/* Mostrar error de descuentos */}
+                {discountError && (
+                  <div className="text-center text-sm text-red-600 bg-red-50 p-2 rounded">
+                    Error: {discountError}
+                  </div>
+                )}
               </div>
 
               {/* Benefits */}

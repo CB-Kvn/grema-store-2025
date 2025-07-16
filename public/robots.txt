@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /login/
+Disallow: /carrito/
+Disallow: /checkout/
+Disallow: /perfil/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://gremastore.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
