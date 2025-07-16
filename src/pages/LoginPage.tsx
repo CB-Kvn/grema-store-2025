@@ -32,7 +32,7 @@ const LoginPage = () => {
             Iniciar sesión
           </h2>
           <p className="mt-2 text-sm text-muted-foreground font-sans">
-            Ingresa tus credenciales para acceder
+            Ingresa tus 
           </p>
         </div>
 

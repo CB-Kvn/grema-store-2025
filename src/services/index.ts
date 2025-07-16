@@ -5,3 +5,4 @@ export * from './warehouseService';
 export * from './purchaseOrderService';
 export * from './expenseService';
 export * from './discountService';
+export * from './userService';

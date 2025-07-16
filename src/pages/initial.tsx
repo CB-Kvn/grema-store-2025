@@ -8,9 +8,9 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import ProductCard from "@/components/product/ProductCard";
 import { useNavigate } from "react-router-dom";
-import { Info_Bussiness } from "@/components/initial-page/bussiness";
+import { Info_Bussiness } from "@/components/login/initial-page/bussiness";
 
-import ContactPage from "@/components/initial-page/contact";
+import ContactPage from "@/components/login/initial-page/contact";
 import "aos/dist/aos.css";
 import { Product } from "@/types";
 import { useAppSelector } from "@/hooks/useAppSelector";

@@ -25,6 +25,8 @@ export interface WarehouseItem {
   lastUpdated: string;
   warehouseId?: string;
   status: 'in_stock' | 'low_stock' | 'out_of_stock';
+  price?: number;
+  cost?: number;
 }
 
 export interface StockMovement {

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { setWarehouseItems, clearItems, updateItemQuantity, transferStock } from "@/store/slices/warehousesSlice";
+import { updateProductPriceAndCost } from "@/store/slices/productsSlice";
 import { productService } from "@/services/productService";
 import { z } from "zod";
-import type { Discount, WarehouseItem, Warehouse, Product } from "@/types";
+import type { WarehouseItem, Warehouse, Product } from "@/types";
 import { useAlert } from "@/context/AlertContext";
 import { useAppDispatch } from "./useAppDispatch";
 import { setProducts, transferProductStock } from "@/store/slices/productsSlice";
@@ -15,8 +16,8 @@ import { warehouseService } from "@/services/warehouseService";
 export const InventoryItemSchema = z.object({
   quantity: z.number().min(0, "La cantidad debe ser mayor o igual a 0").optional(),
   location: z.string().optional(),
-  price: z.string().optional(),
-  productionCost: z.string().optional(),
+  price: z.number().optional(),
+  cost: z.number().optional(),
 });
 
 /**
@@ -30,19 +31,6 @@ export const InventorySchema = z.array(InventoryItemSchema);
 export const TransferSchema = z.object({
   target: z.string().min(1, "Debes seleccionar una bodega destino"),
   quantity: z.number().min(1, "La cantidad debe ser mayor a 0"),
-});
-
-/**
- * Esquema para descuento (opcional, puedes expandirlo según tus reglas)
- */
-export const DiscountSchema = z.object({
-  type: z.enum(["PERCENTAGE", "FIXED_AMOUNT", "BUY_X_GET_Y"]),
-  value: z.number().min(0, "El valor debe ser mayor o igual a 0"),
-  startDate: z.string().min(1, "La fecha de inicio es obligatoria"),
-  endDate: z.string().optional(),
-  isActive: z.boolean(),
-  minQuantity: z.number().optional(),
-  maxQuantity: z.number().optional(),
 });
 
 /**
@@ -61,7 +49,7 @@ export function useInventoryManagementModal({
 }: {
   product: Product;
   onClose: () => void;
-  onSave: (data: { inventory: any; discount: Discount }) => void;
+  onSave: (data: { inventory: any }) => void;
 }) {
   const dispatch = useAppDispatch();
 
@@ -76,24 +64,60 @@ export function useInventoryManagementModal({
     }));
   });
 
-  const [activeTab, setActiveTab] = useState<'inventory' | 'discount' | 'distribution'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'distribution'>('inventory');
   const [inventory, setInventory] = useState<{ quantity: number; location: string; price?: string; productionCost?: string }[]>([]);
   const warehouseItems = useAppSelector((state) => state.warehouses.warehousesItems);
-  const [discount, setDiscount] = useState<Partial<Discount>>({
-    type: 'PERCENTAGE',
-    value: 0,
-    startDate: new Date().toISOString().split('T')[0],
-    isActive: true,
-  });
   const { showAlert } = useAlert();
   const [transferStates, setTransferStates] = useState<{ [warehouseId: string]: { target: string; quantity: number } }>({});
   const [addQuantities, setAddQuantities] = useState<{ [index: number]: number }>({});
+  
+  // Estados para precio y costo
+  const [productPrice, setProductPrice] = useState<number>(Number(product.price) || 0);
+  const [productCost, setProductCost] = useState<number>(Number(product.cost) || 0);
 
   // --- Efectos ---
   useEffect(() => {
-    setInventory(JSON.parse(JSON.stringify(warehouseItems.stock || [])));
-    setDiscount(JSON.parse(JSON.stringify(warehouseItems.discount || {})));
+    const stocks = JSON.parse(JSON.stringify(warehouseItems.stock || []));
+    setInventory(stocks);
+    
+    // Cargar precio y costo del primer stock disponible
+    if (stocks.length > 0) {
+      const firstStock = stocks[0];
+      if (firstStock.price !== undefined) {
+        setProductPrice(Number(firstStock.price) || 0);
+      }
+      if (firstStock.productionCost !== undefined) {
+        setProductCost(Number(firstStock.productionCost) || 0);
+      }
+    }
   }, [warehouseItems]);
+
+  // También cargar precio y costo desde el Redux store si está disponible
+  const productInStore = useAppSelector(state => 
+    state.products.items.find((p: any) => p.id === product.id)
+  );
+  
+  useEffect(() => {
+    if (productInStore?.WarehouseItem && productInStore.WarehouseItem.length > 0) {
+      const firstWarehouseItem = productInStore.WarehouseItem[0];
+      if (firstWarehouseItem.price !== undefined && firstWarehouseItem.price !== 0) {
+        setProductPrice(Number(firstWarehouseItem.price) || 0);
+      }
+      if (firstWarehouseItem.cost !== undefined && firstWarehouseItem.cost !== null) {
+        setProductCost(Number(firstWarehouseItem.cost) || 0);
+      }
+    }
+  }, [productInStore]);
+
+  // Cargar precio y costo del producto
+  useEffect(() => {
+    if (product.price !== undefined) {
+      setProductPrice(Number(product.price) || 0);
+    }
+    if (product.cost !== undefined) {
+      setProductCost(Number(product.cost) || 0);
+    }
+  }, [product]);
 
   useEffect(() => {
     return () => {
@@ -101,10 +125,38 @@ export function useInventoryManagementModal({
     };
   }, [dispatch]);
 
+  // --- Handlers de precio y costo ---
+  const handleUpdatePriceAndCost = async () => {
+    try {
+      if (!product.id) {
+        showAlert('Error: ID del producto no encontrado.', 'error');
+        return;
+      }
+
+      // Usar el nuevo endpoint para actualizar precio y costo
+      await warehouseService.updatePriceAndCost(product.id, {
+        price: productPrice,
+        cost: productCost,
+      });
+
+      // Actualizar el estado local del reducer
+      dispatch(updateProductPriceAndCost({
+        productId: product.id,
+        price: productPrice,
+        cost: productCost
+      }));
+      
+      showAlert('Precio y costo actualizados correctamente.', 'success');
+    } catch (error) {
+      console.error('Error al actualizar precio y costo:', error);
+      showAlert('Error al actualizar precio y costo.', 'error');
+    }
+  };
+
   // --- Handlers de inventario ---
 
   /**
-   * Guardar cambios de inventario y descuento.
+   * Guardar cambios de inventario.
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,23 +168,15 @@ export function useInventoryManagementModal({
       return;
     }
 
-    // Validar descuento
-    const discountResult = DiscountSchema.safeParse(discount);
-    if (!discountResult.success) {
-      showAlert(discountResult.error.errors[0].message, "error");
-      return;
-    }
-
     dispatch(
       setWarehouseItems({
         stock: inventory as WarehouseItem[],
-        discount: discount as Discount,
+        discount: {},
       })
     );
 
     onSave({
       inventory,
-      discount: discount as Discount,
     });
 
     onClose();
@@ -154,7 +198,7 @@ export function useInventoryManagementModal({
     }
 
     console.log('Adding new stock');
-    const newStock = { quantity: 0, location: '', price: '', productionCost: '' };
+    const newStock = { quantity: 0, location: '', price: productPrice, cost: productCost };
     console.log('New stock before validation:', newStock);
     const result = InventoryItemSchema.safeParse(newStock);
 
@@ -165,7 +209,7 @@ export function useInventoryManagementModal({
     }
     const updatedInventory = [...inventory, newStock];
     setInventory(updatedInventory);
-    dispatch(setWarehouseItems({ stock: updatedInventory as any, discount: discount as Discount }));
+    dispatch(setWarehouseItems({ stock: updatedInventory as any, discount: {} }));
     showAlert('Nuevo stock agregado correctamente.', 'success');
   };
 
@@ -176,7 +220,7 @@ export function useInventoryManagementModal({
     const newInventory = [...inventory];
     newInventory.splice(index, 1);
     setInventory(newInventory);
-    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
+    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: {} }));
   };
 
   /**
@@ -196,13 +240,13 @@ export function useInventoryManagementModal({
     const newInventory = [...inventory];
     newInventory[index].location = newWarehouseId;
     setInventory(newInventory);
-    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
+    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: {} }));
   };
 
   /**
    * Actualizar la cantidad de un producto en una bodega específica.
    */
-  const handleUpdateQuantity = async (warehouseId: string, itemId: string, quantity: number, total:number) => {
+  const handleUpdateQuantity = async (warehouseId: string, itemId: number, quantity: number, total:number) => {
     debugger
     console.log('handleUpdateQuantity', { warehouseId, itemId, quantity, total });
     if (total < 0) {
@@ -225,9 +269,14 @@ export function useInventoryManagementModal({
       inv.location === warehouseId ? updatedItem : inv
     );
     setInventory(newInventory);
-    await warehouseService.addStock(warehouseId, Number(itemId), { quantity, location: warehouseId, price: Number(updatedItem.price) || 0 });
-    dispatch(updateItemQuantity({ warehouseId, itemId, quantity:total }));
-    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
+    
+    await warehouseService.addStock(warehouseId, itemId, { 
+      quantity, 
+      location: warehouseId
+    });
+    
+    dispatch(updateItemQuantity({ warehouseId, itemId: itemId.toString(), quantity:total }));
+    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: {} }));
     const response = await productService.getAll() as Product[];
     dispatch(setProducts(response));
     showAlert('Cantidad actualizada correctamente.', 'success');
@@ -267,7 +316,7 @@ export function useInventoryManagementModal({
     const newInventory = [...inventory];
     newInventory[index] = updatedItem;
     setInventory(newInventory);
-    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: discount as Discount }));
+    dispatch(setWarehouseItems({ stock: newInventory as WarehouseItem[], discount: {} }));
     showAlert('Cantidad agregada correctamente.', 'success');
   };
 
@@ -313,8 +362,6 @@ export function useInventoryManagementModal({
     setActiveTab,
     inventory,
     setInventory,
-    discount,
-    setDiscount,
     transferStates,
     setTransferStates,
     handleSubmit,
@@ -330,5 +377,10 @@ export function useInventoryManagementModal({
     showAlert,
     warehouses,
     addQuantities,
+    productPrice,
+    setProductPrice,
+    productCost,
+    setProductCost,
+    handleUpdatePriceAndCost,
   };
 }

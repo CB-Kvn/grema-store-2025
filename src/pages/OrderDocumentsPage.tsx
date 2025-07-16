@@ -6,9 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PurchaseOrder } from '@/types';
 import { purchaseOrderService } from '@/services';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { clearCart } from '@/store/slices/cartSlice';
 
 const OrderDocumentsPage = () => {
   const { orderIdFromUrl } = useParams<{ orderIdFromUrl: string }>();
+  const dispatch = useAppDispatch();
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [searchQuery, setSearchQuery] = useState(orderIdFromUrl);
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
@@ -107,12 +110,26 @@ const OrderDocumentsPage = () => {
       setIsLoading(true);
 
       // Espera al menos 2 segundos, aunque la petición sea más rápida
-      const uploadPromise = purchaseOrderService.uploadReceipt(
-        formData.orderId,
+      const uploadPromise = purchaseOrderService.uploadFileReceipt(
         formData.file as File
       );
       const delayPromise = new Promise((resolve) => setTimeout(resolve, 2000));
-      await Promise.all([uploadPromise, delayPromise]);
+      const [uploadResponse] = await Promise.all([uploadPromise, delayPromise]);
+
+      // Luego actualizar el documento con la nueva información
+      const docIndex = 0; // Asumiendo que trabajamos con el primer documento
+      const updateData = {
+        title: selectedOrder?.documents?.[docIndex]?.title || `Comprobante actualizado - ${selectedOrder?.orderNumber}`,
+        status: selectedOrder?.documents?.[docIndex]?.status || 'PENDING' as const,
+        url: uploadResponse.url,
+        mimeType: uploadResponse.fileType,
+        size: uploadResponse.size
+      };
+      debugger;
+      await purchaseOrderService.updateDocument(selectedOrder?.id || '', updateData);
+
+      // Limpiar el carrito después de completar el proceso exitosamente
+      dispatch(clearCart());
 
       setUploadSuccess(true);
       setShowDialog(true);

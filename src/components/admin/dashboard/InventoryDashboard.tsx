@@ -6,9 +6,9 @@ import { Navigation } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Bar, Doughnut, Line, Pie } from "react-chartjs-2";
+import { Bar, Line, Doughnut } from "react-chartjs-2";
 
-const chartsPerSlider = 2;
+const chartsPerSlider = 3;
 
 const InventoryDashboard: React.FC = () => {
   const {
@@ -37,16 +37,38 @@ const InventoryDashboard: React.FC = () => {
       title: "Gastos por Método de Pago",
       render: <Bar data={charts.paymentMethods} options={chartOptions} />,
     },
-
+    {
+      key: "ordersByStatus",
+      title: "Órdenes por Estado",
+      render: <Doughnut data={charts.ordersByStatus} options={chartOptions} />,
+    },
+    {
+      key: "orderPaymentMethods",
+      title: "Métodos de Pago en Órdenes",
+      render: <Doughnut data={charts.orderPaymentMethods} options={chartOptions} />,
+    },
+    {
+      key: "inventoryByWarehouse",
+      title: "Inventario por Almacén",
+      render: <Bar data={charts.inventoryByWarehouse} options={chartOptions} />,
+    },
+    {
+      key: "productsByCategory",
+      title: "Productos por Categoría",
+      render: <Doughnut data={charts.productsByCategory} options={chartOptions} />,
+    },
+    {
+      key: "stockStatus",
+      title: "Estado del Stock",
+      render: <Doughnut data={charts.stockStatus} options={chartOptions} />,
+    },
   ];
 
-  // Estado para los sliders horizontales
+  // Estado para el slider horizontal
   const [slider1Idx, setSlider1Idx] = React.useState(0);
-  const [slider2Idx, setSlider2Idx] = React.useState(chartsPerSlider);
 
-  // Slices para cada slider
+  // Slice para el slider
   const slider1Charts = chartCardsList.slice(slider1Idx, slider1Idx + chartsPerSlider);
-  const slider2Charts = chartCardsList.slice(slider2Idx, slider2Idx + chartsPerSlider);
 
   return (
     <div className="space-y-6">
@@ -97,16 +119,18 @@ const InventoryDashboard: React.FC = () => {
         </Swiper>
       </div>
 
-      {/* Primer slider horizontal */}
+      {/* Slider horizontal de gráficos */}
       <div className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {slider1Charts.map((chart) => (
-            <Card key={chart.key}>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">{chart.title}</CardTitle>
-              </CardHeader>
-              <CardContent>{chart.render}</CardContent>
-            </Card>
+            <div key={chart.key} className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg sm:text-xl">{chart.title}</CardTitle>
+                </CardHeader>
+                <CardContent>{chart.render}</CardContent>
+              </Card>
+            </div>
           ))}
         </div>
         <div className="flex items-center justify-between mt-6 mb-5">
@@ -134,42 +158,6 @@ const InventoryDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Segundo slider horizontal */}
-      <div className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {slider2Charts.map((chart) => (
-            <Card key={chart.key}>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">{chart.title}</CardTitle>
-              </CardHeader>
-              <CardContent>{chart.render}</CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="flex items-center justify-between mt-6 mb-2">
-          <button
-            onClick={() => setSlider2Idx((idx) => Math.max(chartsPerSlider, idx - 1))}
-            disabled={slider2Idx === chartsPerSlider}
-            className="p-2 rounded-full border bg-white hover:bg-primary-50 disabled:opacity-50"
-          >
-            <ChevronLeft />
-          </button>
-          <span className="text-sm text-primary-700">
-            {slider2Idx + 1} - {Math.min(slider2Idx + chartsPerSlider, chartCardsList.length)} de {chartCardsList.length}
-          </span>
-          <button
-            onClick={() =>
-              setSlider2Idx((idx) =>
-                Math.min(idx + 1, chartCardsList.length - chartsPerSlider + chartsPerSlider)
-              )
-            }
-            disabled={slider2Idx + chartsPerSlider > chartCardsList.length}
-            className="p-2 rounded-full border bg-white hover:bg-primary-50 disabled:opacity-50"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-      </div>
     </div>
   );
 };

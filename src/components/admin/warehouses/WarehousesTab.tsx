@@ -21,6 +21,7 @@ import WarehouseDetailsModal from './WarehouseDetailsModal';
 import EditWarehouseModal from './EditWarehouseModal';
 import AddWarehouseModal from './AddWarehouseModal';
 import { useWarehousesTab } from '@/hooks/useWarehousesTab';
+import AIInsights from '@/components/admin/common/AIInsights';
 
 ChartJS.register(
   CategoryScale,
@@ -211,6 +212,9 @@ const WarehousesTab = () => {
               </div>
             </div>
           </div>
+
+          {/* Análisis con IA */}
+          <AIInsights data={warehouses} type="warehouses" />
         </div>
       )}
 

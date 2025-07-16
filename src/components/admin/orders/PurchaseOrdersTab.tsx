@@ -40,6 +40,7 @@ import EditOrderModal from './EditOrderModal';
 import NewOrderModal from './NewOrderModal';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { AnimatePresence } from 'framer-motion';
+import AIInsights from '@/components/admin/common/AIInsights';
 
 ChartJS.register(
   CategoryScale,
@@ -588,6 +589,9 @@ const PurchaseOrdersTab = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Análisis con IA */}
+            <AIInsights data={orders} type="orders" />
           </div>
         )}
 

@@ -47,7 +47,7 @@ const InventoryPage = () => {
 
   
   return (
-    <div className="min-h-screen bg-primary-50 py-4 sm:py-6 lg:py-8">
+    <div className="min-h-screen bg-primary-50/70 backdrop-blur-sm py-4 sm:py-6 lg:py-8">
       <div className="max-w-[95%] lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <Card >
           <CardHeader className="border-b border-primary-100 p-4 sm:p-6">

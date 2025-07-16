@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React from 'react';
 import { Dialog } from "@headlessui/react";
 import { X, Plus } from "lucide-react";
 import ProductImageUpload from '../helpers/ImageUpload';
@@ -150,46 +150,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
                   className={errors.sku ? 'border-red-500' : ''}
                 />
                 {errors.sku && <p className="text-sm text-red-500 mt-1">{errors.sku}</p>}
-              </div>
-              {/* Precio */}
-              <div>
-                <Label htmlFor="price">Precio</Label>
-                <Input
-                  type="text"
-                  id="price"
-                  value={formData.price === 0 ? '' : formData.price}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9.]/g, '');
-                    const sanitized = value.split('.').length > 2
-                      ? value.replace(/\.+$/, '')
-                      : value;
-                    handleInputChange('price', sanitized);
-                  }}
-                  inputMode="decimal"
-                  pattern="[0-9]*"
-                  className={errors.price ? 'border-red-500' : ''}
-                />
-                {errors.price && <p className="text-sm text-red-500 mt-1">{errors.price}</p>}
-              </div>
-              {/* Costo */}
-              <div>
-                <Label htmlFor="cost">Costo</Label>
-                <Input
-                  type="text"
-                  id="cost"
-                  value={formData.cost === 0 ? '' : formData.cost}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9.]/g, '');
-                    const sanitized = value.split('.').length > 2
-                      ? value.replace(/\.+$/, '')
-                      : value;
-                    handleInputChange('cost', sanitized);
-                  }}
-                  inputMode="decimal"
-                  pattern="[0-9]*"
-                  className={errors.cost ? 'border-red-500' : ''}
-                />
-                {errors.cost && <p className="text-sm text-red-500 mt-1">{errors.cost}</p>}
               </div>
             </div>
             {/* Descripción */}

@@ -156,7 +156,11 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
         filters.categories.includes(product.category);
       const matchesMaterial =
         filters.materials.length === 0 ||
-        product.details.material?.some((m) => filters.materials.includes(m));
+        (Array.isArray(product.details?.material) 
+          ? product.details.material.some((m) => filters.materials.includes(m))
+          : product.details?.material 
+          ? filters.materials.includes(product.details.material)
+          : false);
       const matchesPrice =
         product.WarehouseItem?.[0]?.price >= filters.priceRange[0] &&
         product.WarehouseItem?.[0]?.price <= filters.priceRange[1];
@@ -492,7 +496,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
             <div className="flex items-center text-primary-600">
               <Star className="h-4 w-4 mr-1" />
               <span className="text-sm">
-                {product.details.material?.join(", ") || "N/A"}
+                {Array.isArray(product.details.material) 
+                  ? product.details.material.join(", ") 
+                  : product.details.material || "N/A"}
               </span>
             </div>
           </div>

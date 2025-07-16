@@ -12,8 +12,6 @@ export const productSchema = z.object({
   name: z.string().min(2, "El nombre es obligatorio"),
   category: z.string().min(1, "Selecciona una categoría"),
   sku: z.string().min(1, "El SKU es obligatorio"),
-  price: z.number().min(0, "El precio debe ser mayor o igual a 0"),
-  cost: z.number().min(0, "El costo debe ser mayor o igual a 0"),
   description: z.string().min(5, "La descripción es obligatoria"),
   details: z.object({
     material: z.string().optional(),
@@ -40,8 +38,6 @@ export const defaultForm: ProductFormType = {
   name: "",
   category: "",
   sku: "",
-  price: 0,
-  cost: 0,
   description: "",
   details: {
     material: "",
@@ -72,8 +68,6 @@ export function useProductForm(product: ProductFormType, onSubmit: (product: Pro
     if (product && product.name && product.name.trim() !== "") {
       setFormData({
         ...product,
-        price: typeof product.price === 'string' ? Number(product.price) || 0 : product.price,
-        cost: typeof product.cost === 'string' ? Number(product.cost) || 0 : product.cost,
         details: {
           ...(
             typeof product.details === 'object' && product.details !== null
@@ -102,10 +96,6 @@ export function useProductForm(product: ProductFormType, onSubmit: (product: Pro
   // Handlers
   const handleInputChange = (field: keyof ProductFormType, value: any) => {
     setFormData(prev => {
-      if (field === 'price' || field === 'cost') {
-        const numValue = value === '' ? 0 : Number(value);
-        return { ...prev, [field]: numValue };
-      }
       if (field === 'details') {
         return { ...prev, details: typeof value === 'object' && value !== null ? value : defaultForm.details };
       }
@@ -184,8 +174,6 @@ export function useProductForm(product: ProductFormType, onSubmit: (product: Pro
   function normalizeFormData(data: ProductFormType): ProductFormType {
     return {
       ...data,
-      price: typeof data.price === 'string' ? Number(data.price) || 0 : data.price,
-      cost: typeof data.cost === 'string' ? Number(data.cost) || 0 : data.cost,
       details:
         typeof data.details === 'object' && data.details !== null
           ? data.details
@@ -204,7 +192,7 @@ export function useProductForm(product: ProductFormType, onSubmit: (product: Pro
       warehouseId: warehouse.id,
       minimumStock: warehouse.minimumStock,
       location: warehouse.id,
-      price: formData.price,
+      price: 0,
       status: "IN_STOCK",
       discount: warehouse.discount ?? null,
     }));

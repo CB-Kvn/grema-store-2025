@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { X, Plus, Package, Warehouse, Tag, AlertTriangle } from 'lucide-react';
+import React from 'react';
+import { X, Plus, Package, Warehouse, AlertTriangle } from 'lucide-react';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
-import type { Product, Warehouse as WarehouseType, Discount, WarehouseItem } from '@/types';
-import { setWarehouseItems } from '@/store/slices/warehousesSlice';
+import type { Product } from '@/types';
 import { useInventoryManagementModal } from '@/hooks/useInventoryManagementModal';
 
 interface InventoryManagementModalProps {
@@ -11,7 +10,6 @@ interface InventoryManagementModalProps {
   onClose: () => void;
   onSave: (data: {
     inventory: { quantity: number; warehouseId: string; price?: string; productionCost?: string }[];
-    discount?: Discount;
   }) => void;
 }
 
@@ -25,9 +23,6 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
     activeTab,
     setActiveTab,
     inventory,
-    setInventory,
-    discount,
-    setDiscount,
     transferStates,
     setTransferStates,
     handleSubmit,
@@ -41,7 +36,12 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
     addQuantities,
     handleChangeAddQty,
     handleRemoveStock,
-    clearAddQty
+    clearAddQty,
+    productPrice,
+    setProductPrice,
+    productCost,
+    setProductCost,
+    handleUpdatePriceAndCost,
   } = useInventoryManagementModal({ product, onClose, onSave });
 
 
@@ -83,18 +83,6 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
               Inventario
             </button>
             <button
-              onClick={() => setActiveTab('discount')}
-              className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'discount'
-                ? 'bg-primary-100 text-primary-900'
-                : 'text-primary-600 hover:bg-primary-50'
-                }`}
-              data-step="21"
-              data-intro="Tab Descuentos: Configura y administra los descuentos especiales para este producto."
-            >
-              <Tag className="h-5 w-5 mr-2" />
-              Descuentos
-            </button>
-            <button
               onClick={() => setActiveTab('distribution')}
               className={`flex items-center px-4 py-2 rounded-lg ${activeTab === 'distribution'
                 ? 'bg-primary-100 text-primary-900'
@@ -113,6 +101,61 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
           {/* Inventory Tab */}
           {activeTab === 'inventory' && (
             <div className="space-y-4">
+              {/* Sección de Precio y Costo */}
+              <div className="bg-blue-50 p-4 rounded-lg space-y-4">
+                <h3 className="text-lg font-medium text-primary-900">Precio y Costo del Producto</h3>
+                <p className="text-sm text-gray-600">
+                  Configure el precio y costo del producto. Estos valores se aplicarán a todo el inventario.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="product-price">Precio de Venta</Label>
+                    <Input
+                      id="product-price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={productPrice}
+                      onChange={(e) => setProductPrice(Number(e.target.value) || 0)}
+                      placeholder="0.00"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="product-cost">Costo del Producto</Label>
+                    <Input
+                      id="product-cost"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={productCost}
+                      onChange={(e) => setProductCost(Number(e.target.value) || 0)}
+                      placeholder="0.00"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleUpdatePriceAndCost}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Actualizar Precio y Costo
+                </button>
+              </div>
+
+              {/* Alerta si no hay stock */}
+              {inventory.length === 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
+                    <p className="text-yellow-800">
+                      No hay stock disponible para este producto. Configure el precio y costo arriba, luego agregue stock en las bodegas.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-primary-900">Gestión de Stock</h3>
                 {/* Ocultar el botón si se alcanzó el límite */}
@@ -177,7 +220,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                           type="button"
                           className="px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 text-sm"
                           onClick={() => {
-                            if ((addQuantities[index] || 0)) {
+                            if ((addQuantities[index] || 0) && product.id) {
                               handleUpdateQuantity(item.location || '', product.id, (addQuantities[index] || 0), item.quantity + (addQuantities[index] || 0));
                               clearAddQty(index); // Limpiar input después de agregar
                             } else {
@@ -192,95 +235,6 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* Discount Tab */}
-          {activeTab === 'discount' && (
-            <div className="space-y-4">
-              <div className="flex items-center mb-4">
-                <input
-                  type="checkbox"
-                  checked={discount.isActive}
-                  onChange={(e) => setDiscount({ ...discount, isActive: e.target.checked })}
-                  className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
-                />
-                <Label className="ml-2">Activar descuento</Label>
-              </div>
-
-              {discount.isActive && (
-                <div className="bg-primary-50 p-4 rounded-lg space-y-4">
-                  <div >
-                    <Label>Tipo de Descuento</Label>
-                    <select
-                      value={discount.type}
-                      onChange={(e) => setDiscount({ ...discount, type: e.target.value as Discount['type'] })}
-                      className="w-full mt-1 rounded-lg border border-primary-200 p-2"
-                    >
-                      <option value="PERCENTAGE">Porcentaje</option>
-                      <option value="FIXED_AMOUNT">Monto Fijo</option>
-                      <option value="BUY_X_GET_Y">Compre X Lleve Y</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <Label>
-                      {discount.type === 'PERCENTAGE' ? 'Porcentaje' :
-                        discount.type === 'FIXED_AMOUNT' ? 'Monto' :
-                          'Cantidad mínima'}
-                    </Label>
-                    <Input
-                      type="number"
-                      value={discount.value}
-                      onChange={(e) => setDiscount({ ...discount, value: parseFloat(e.target.value) })}
-                      min="0"
-                      step={discount.type === 'PERCENTAGE' ? '0.01' : '1'}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Fecha de Inicio</Label>
-                      <Input
-                        type="date"
-                        value={discount.startDate}
-                        onChange={(e) => setDiscount({ ...discount, startDate: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Fecha de Fin (Opcional)</Label>
-                      <Input
-                        type="date"
-                        value={discount.endDate}
-                        onChange={(e) => setDiscount({ ...discount, endDate: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  {(discount.type === 'PERCENTAGE' || discount.type === 'FIXED_AMOUNT') && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Cantidad Mínima (Opcional)</Label>
-                        <Input
-                          type="number"
-                          value={discount.minQuantity || ''}
-                          onChange={(e) => setDiscount({ ...discount, minQuantity: parseInt(e.target.value) })}
-                          min="0"
-                        />
-                      </div>
-                      <div>
-                        <Label>Cantidad Máxima (Opcional)</Label>
-                        <Input
-                          type="number"
-                          value={discount.maxQuantity || ''}
-                          onChange={(e) => setDiscount({ ...discount, maxQuantity: parseInt(e.target.value) })}
-                          min="0"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           )}
 

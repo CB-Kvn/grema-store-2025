@@ -33,6 +33,7 @@ export interface WarehouseItem {
   minimumStock: number;
   location: string;
   price: number;
+  cost?: number;
   status: string;
   lastUpdated: string;
   discount: any;
@@ -211,6 +212,37 @@ const productsSlice = createSlice({
     clearItemInventory(state) {
       state.itemInventory = null;
     },
+    updateProductPriceAndCost(
+      state,
+      action: PayloadAction<{ productId: number; price: number; cost: number }>
+    ) {
+      const { productId, price, cost } = action.payload;
+      
+      // Actualizar en items
+      const productIndex = state.items.findIndex(product => product.id === productId);
+      if (productIndex !== -1) {
+        state.items[productIndex].WarehouseItem.forEach(item => {
+          item.price = price;
+          item.cost = cost;
+        });
+      }
+      
+      // Actualizar en itemInventory si es el producto actual
+      if (state.itemInventory && state.itemInventory.id === productId) {
+        state.itemInventory.WarehouseItem.forEach(item => {
+          item.price = price;
+          item.cost = cost;
+        });
+      }
+      
+      // Actualizar en selectedProduct si es el producto actual
+      if (state.selectedProduct && state.selectedProduct.id === productId) {
+        state.selectedProduct.WarehouseItem.forEach(item => {
+          item.price = price;
+          item.cost = cost;
+        });
+      }
+    },
     transferProductStock(
       state,
       action: PayloadAction<{
@@ -277,6 +309,7 @@ export const {
   updateImagesToProductFilePath,
   updateImagesToItemInventoryFilePath,
   clearItemInventory,
+  updateProductPriceAndCost,
   selectProductBySku,
   clearSelectedProduct,
   transferProductStock,

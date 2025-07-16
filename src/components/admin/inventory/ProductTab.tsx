@@ -196,15 +196,6 @@ const ProductTab = () => {
             <Plus className="h-5 w-5 mr-2" />
             Nuevo
           </Button>
-          <Button
-            type="button"
-            onClick={() => setIsDiscountModalOpen(!isDiscountModalOpen)}
-            variant="secondary"
-            className="flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-lg"
-          >
-            <Percent className="h-5 w-5 mr-2" />
-            Descuentos
-          </Button>
         </div>
         {/* Barra de filtros */}
         <div
@@ -258,106 +249,6 @@ const ProductTab = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal de descuentos */}
-      {isDiscountModalOpen && (
-        <div className="bg-primary-50 p-4 rounded-lg space-y-4">
-          <div className="flex items-center mb-4">
-            <Input
-              type="checkbox"
-              checked={discount.isActive}
-              onChange={(e) => setDiscount({ ...discount, isActive: e.target.checked })}
-              className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
-            />
-            <Label className="ml-2">Activar descuento</Label>
-          </div>
-          {discount.isActive && (
-            <>
-              <div>
-                <Label>Tipo de Descuento</Label>
-                <Select
-                  value={discount.type}
-                  onValueChange={(value) => setDiscount({ ...discount, type: value })}
-                >
-                  <SelectTrigger className="w-full mt-1 rounded-lg border border-primary-200 p-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="PERCENTAGE">Porcentaje</SelectItem>
-                    <SelectItem value="FIXED_AMOUNT">Monto Fijo</SelectItem>
-                    <SelectItem value="BUY_X_GET_Y">Compre X Lleve Y</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>
-                  {discount.type === "PERCENTAGE"
-                    ? "Porcentaje"
-                    : discount.type === "FIXED_AMOUNT"
-                    ? "Monto"
-                    : "Cantidad mínima"}
-                </Label>
-                <Input
-                  type="number"
-                  value={discount.value}
-                  onChange={(e) => setDiscount({ ...discount, value: parseFloat(e.target.value) })}
-                  min="0"
-                  step={discount.type === "PERCENTAGE" ? "0.01" : "1"}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Fecha de Inicio</Label>
-                  <Input
-                    type="date"
-                    value={discount.startDate}
-                    onChange={(e) => setDiscount({ ...discount, startDate: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Fecha de Fin (Opcional)</Label>
-                  <Input
-                    type="date"
-                    value={discount.endDate}
-                    onChange={(e) => setDiscount({ ...discount, endDate: e.target.value })}
-                  />
-                </div>
-              </div>
-              {(discount.type === "PERCENTAGE" || discount.type === "FIXED_AMOUNT") && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Cantidad Mínima (Opcional)</Label>
-                    <Input
-                      type="number"
-                      value={discount.minQuantity || ""}
-                      onChange={(e) => setDiscount({ ...discount, minQuantity: parseInt(e.target.value) })}
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <Label>Cantidad Máxima (Opcional)</Label>
-                    <Input
-                      type="number"
-                      value={discount.maxQuantity || ""}
-                      onChange={(e) => setDiscount({ ...discount, maxQuantity: parseInt(e.target.value) })}
-                      min="0"
-                    />
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          <div className="flex justify-end mt-4">
-            <Button
-              onClick={() => setIsDiscountModalOpen(false)}
-              className="bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-            >
-              Confirmar Descuento
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* Tabla de productos */}
       <div
         className="overflow-x-auto"

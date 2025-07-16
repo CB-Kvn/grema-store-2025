@@ -425,7 +425,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                     Gracias por tu pedido. Recibirás un mensaje por Whatsapp con los detalles de tu pedido.
                     Usa el siguiente link para confirmar tu pago:
                   </p>
-                  {shippingInfo.buyerId && (
+                  {(shippingInfo.buyerId || paymentMethod === 'SINPE MOVIL') && (
                     <>
                       <p className="text-primary-600 my-6">
                         ID de Envío: <span className="font-medium">{orderData.orderNumber}</span>
@@ -548,7 +548,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                 <div className="flex justify-between text-lg font-semibold">
                   <span className="text-primary-900">Total</span>
                   <span className="text-primary-900">
-                    ₡{calculateTotal().toLocaleString()}
+                    ₡{calculateTotal().total.toLocaleString()}
                   </span>
                 </div>
               </div>

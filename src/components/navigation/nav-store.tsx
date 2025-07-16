@@ -62,14 +62,14 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                     </Link>
                     <Button
                       variant="ghost"
-                      className="justify-start w-full"
+                      className="justify-start w-full text-primary-900"
                       onClick={() => navigate("/tienda")}
                     >
                       <Store className="mr-2 h-5 w-5 text-primary-600" /> Tienda
                     </Button>
                     <Button
                       variant="ghost"
-                      className="justify-start w-full"
+                      className="justify-start w-full text-primary-900"
                       onClick={() => navigate("/nuestros-valores")}
                     >
                       <Info className="mr-2 h-5 w-5 text-primary-600" /> Sobre Nosotros
@@ -77,7 +77,7 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                     {/* --- Sheet lateral (menú hamburguesa) --- */}
                     <Button
                       variant="ghost"
-                      className="justify-start w-full"
+                      className="justify-start w-full text-primary-900"
                       onClick={() => navigate("/admin/inventory")}
                       // Solo muestra si es admin
                       style={{ display: user?.typeUser === "ADMIN" ? "flex" : "none" }}
@@ -92,14 +92,14 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             {/* --- CENTRO: BOTONES SOLO EN LG+ --- */}
             <div className="hidden md:flex flex-1 justify-center">
               <div className="flex gap-4">
-                <Button variant="ghost" onClick={() => navigate("/tienda")}>
+                <Button variant="ghost" className="text-primary-900" onClick={() => navigate("/tienda")}>
                   <Store className="mr-2 h-5 w-5 text-primary-600" /> Tienda
                 </Button>
-                <Button variant="ghost" onClick={() => navigate("/sobre-nosotros")}>
+                <Button variant="ghost" className="text-primary-900" onClick={() => navigate("/sobre-nosotros")}>
                   <Info className="mr-2 h-5 w-5 text-primary-600" /> Sobre Nosotros
                 </Button>
                 {user?.typeUser === "ADMIN" && (
-                  <Button variant="ghost" onClick={() => navigate("/admin/inventory")}>
+                  <Button variant="ghost" className="text-primary-900" onClick={() => navigate("/admin/inventory")}>
                     <User className="mr-2 h-5 w-5 text-primary-600" /> Administración
                   </Button>
                 )}
@@ -147,11 +147,15 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                     </DropdownMenuTrigger>
                     {/* --- Menú de usuario (Dropdown) --- */}
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate("/tienda")}>Tienda</DropdownMenuItem>
+                      <DropdownMenuItem className="text-primary-900" onClick={() => navigate("/tienda")}>Tienda</DropdownMenuItem>
                       {user?.typeUser === "ADMIN" && (
-                        <DropdownMenuItem onClick={() => navigate("/admin/inventory")}>Administrar</DropdownMenuItem>
+                        <DropdownMenuItem className="text-primary-900" onClick={() => navigate("/admin/inventory")}>Administrar</DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => { logout(); setShowUserMenu(false); }}>Salir</DropdownMenuItem>
+                      <DropdownMenuItem className="text-primary-900" onClick={() => { 
+                        logout(); 
+                        setShowUserMenu(false); 
+                        navigate("/");
+                      }}>Salir</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
@@ -179,18 +183,7 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
         </div>
       </div>
 
-      {/* Franja "Ver tienda" */}
-      {!isTiendaPage && (
-        <Link
-          to="/tienda"
-          className="hidden md:block bg-primary-600 text-white py-3 hover:bg-primary-700 active:bg-primary-800 transition-colors duration-300"
-        >
-          <div className="flex items-center justify-center space-x-2">
-            <Store className="h-6 w-6" />
-            <span className="text-sm font-medium">Ver tienda</span>
-          </div>
-        </Link>
-      )}
+
 
       {/* Login Modal usando Dialog de shadcn/ui */}
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>

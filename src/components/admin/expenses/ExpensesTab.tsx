@@ -14,6 +14,8 @@ import {
   ChevronDown,
   ChevronUp,
   BarChart3,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Line, Pie, Bar } from "react-chartjs-2";
 import {
@@ -28,6 +30,7 @@ import {
 } from "chart.js";
 
 import { Input } from "@/components/ui/input";
+import AIInsights from "@/components/admin/common/AIInsights";
 import NewExpenseModal from "@/components/admin/expenses/NewExpenseModal";
 import EditExpenseModal from "@/components/admin/expenses/EditExpenseModal";
 import { useExpensesTab } from "@/hooks/useExpensesTab";
@@ -175,6 +178,9 @@ const ExpensesTab: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Análisis con IA */}
+          <AIInsights data={filteredExpenses} type="expenses" />
         </div>
       )}
 

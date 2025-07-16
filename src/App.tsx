@@ -13,7 +13,7 @@ import { useAppSelector } from "./hooks/useAppSelector";
 import { ValuesPage } from "./pages/values";
 import { Menu_Bar } from "./components/navigation/nav-store";
 import { Networking } from "./components/socials/networking";
-import { Footer } from "./components/initial-page/footer";
+import { Footer } from "./components/login/initial-page/footer";
 import { addToCartShop, removeFromCartShop, updateQuantityShop } from "./store/slices/cartSlice";
 import OrderDocumentsPage from "./pages/OrderDocumentsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
@@ -22,6 +22,8 @@ import Loader from '@/components/ui/Loader';
 import { AlertProvider } from "./context/AlertContext";
 import AboutUs from "./pages/about-us";
 import { motion } from "framer-motion";
+import { LoadingScreen } from "./components/common/LoadingScreen";
+import "./components/common/LoadingScreen.css";
 
 // Componente de fondo confeti animado (líneas más gruesas)
 function ConfettiBackground() {
@@ -81,6 +83,7 @@ function ConfettiBackground() {
 function App() {
   const dispatch = useAppDispatch();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const cartItems = useAppSelector((state) => state.cart.items);
 
   const addToCart = (product: (typeof products)[0]) => {
@@ -99,6 +102,14 @@ function App() {
     if (newQuantity < 1) return;
     dispatch(updateQuantityShop({ id: productId, quantity: newQuantity }));
   };
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
+  }
 
   return (
     <>
