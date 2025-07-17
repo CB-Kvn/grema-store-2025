@@ -23,11 +23,21 @@
 
 **Método alternativo: Meta tag HTML** (si ya tienes la etiqueta)
 Si ya agregaste la etiqueta meta pero Google no la encuentra:
-1. Verifica que el sitio esté desplegado correctamente
-2. Abre `https://www.grema-store.com` en tu navegador
-3. Ve el código fuente (Ctrl+U) y busca: `google-site-verification`
-4. Si la etiqueta está presente, espera unos minutos y vuelve a intentar
-5. Si no funciona, usa el método de archivo HTML arriba ⬆️
+
+🚨 **PROBLEMA COMÚN:** La etiqueta no aparece en el código fuente = el sitio NO está desplegado
+
+**SOLUCIÓN INMEDIATA:**
+1. ✅ Archivo `vercel.json` ya corregido (error de sintaxis resuelto)
+2. ✅ Deploy inmediato requerido:
+   ```bash
+   git add .
+   git commit -m "fix: corregir vercel.json y deploy cambios SEO"
+   git push origin main
+   ```
+3. ✅ Esperar 3-5 minutos después del deploy
+4. ✅ Verificar: abre `https://www.grema-store.com` → Ctrl+U → buscar `google-site-verification`
+5. ✅ Si aparece la etiqueta → volver a intentar verificación en Search Console
+6. ✅ Si NO aparece → usar método de archivo HTML arriba ⬆️
 
 ### Paso 3: Configurar el nuevo sitio
 Una vez verificado:
