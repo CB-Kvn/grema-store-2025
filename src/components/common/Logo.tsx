@@ -17,16 +17,13 @@ export const Logo: React.FC<LogoProps> = ({
 }) => {
   const logoSrc = variant === 'black' ? '/Logo en negro.png' : '/Logo en blamco.png';
   const logoWebp = variant === 'black' ? '/Logo en negro.webp' : '/Logo en blamco.webp';
-  const logoAvif = variant === 'black' ? '/Logo en negro.avif' : '/Logo en blamco.avif';
   
-  // Generate responsive srcSet for modern formats
-  const avifSrcSet = `${logoAvif} 320w`;
+  // Generate responsive srcSet for WebP
   const webpSrcSet = `${logoWebp} 320w`;
   const pngSrcSet = `${logoSrc} 320w`;
   
   return (
     <picture onClick={onClick} className={`cursor-pointer ${onClick ? 'cursor-pointer' : ''}`}>
-      <source srcSet={avifSrcSet} type="image/avif" sizes={sizes} />
       <source srcSet={webpSrcSet} type="image/webp" sizes={sizes} />
       <img
         src={logoSrc}

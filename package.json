@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "convert-logos": "node scripts/convert-logos-all-formats.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.3",
