@@ -956,14 +956,12 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
             ) : viewMode === "grid" ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {paginatedProducts.map((product, index) => (
+                  {paginatedProducts.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
                       onAddToCart={() => addToCart(product)}
                       onClick={() => { navigate(`/producto/${product.id}`); return null; }}
-                      priority={index < 6} // First 6 products get priority loading
-                      index={index}
                     />
                   ))}
                 </div>

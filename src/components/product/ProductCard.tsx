@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Heart, ShoppingCart, Share2, Facebook, Twitter, Instagram, Link } from 'lucide-react';
-import { OptimizedImage } from '@/components/common/OptimizedImage';
 
 
 interface Product {
@@ -28,29 +27,18 @@ interface ProductCardProps {
   product: Product;
   onAddToCart: () => void | null;
   onClick?: () => void | null;
-  priority?: boolean; // New prop for LCP optimization
-  index?: number; // New prop for position-based optimization
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  product, 
-  onAddToCart, 
-  onClick, 
-  priority = false, 
-  index = 0 
-}) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick }) => {
   const [isHovering, setIsHovering] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  
-  // Determine loading strategy based on position
-  const isAboveFold = index < 6; // First 6 products are likely above the fold
-  const shouldEagerLoad = priority || isAboveFold;
+  const discountedPrice = product.price * 0.85; // 15% de descuento
 
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(`¡Mira esta hermosa ${product.name} en Joyas de Lujo!`);
 
-    const shareUrls: Record<string, string> = {
+    const shareUrls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
       instagram: `https://instagram.com`,
@@ -80,21 +68,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
         }}
         onClick={onClick}
       >
-        {/* Full-size image with OptimizedImage component */}
-        <div className="flex-grow relative overflow-hidden">
-          <OptimizedImage
-            src={
+        {/* Full-size image background */}
+        <div
+          className="flex-grow bg-cover bg-center transition-all duration-300 transform group-hover:scale-105"
+          style={{
+            backgroundImage: `url(${
               product.Images && product.Images[0] && product.Images[0].url
                 ? product.Images[0].url[0]
-                : "https://via.placeholder.com/400x400" // Imagen de placeholder si no hay imágenes
-            }
-            alt={product.name}
-            className="w-full h-full object-cover transition-all duration-300 transform group-hover:scale-105"
-            loading={shouldEagerLoad ? "eager" : "lazy"}
-            width={400}
-            height={400}
-          />
-        </div>
+                : "https://via.placeholder.com/300" // Imagen de placeholder si no hay imágenes
+            })`,
+          }}
+        />
 
         {/* Action buttons */}
         <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex space-x-1 sm:space-x-2 z-20">
@@ -173,7 +157,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {product.name}
           </h3>
           <div className="flex items-baseline">
-            {product.WareHouseItem && product.WareHouseItem.length > 0 && product.WareHouseItem[0].price ? (
+            {product.WarehouseItem && product.WarehouseItem.length > 0 && product.WarehouseItem[0].price ? (
               <>
                 <span className="text-lg sm:text-xl font-bold text-primary-900">
                   {new Intl.NumberFormat("es-CR", {
@@ -181,9 +165,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     currency: "CRC",
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 2,
-                  }).format(product.WareHouseItem[0].price)}
+                  }).format(product.WarehouseItem[0].price)}
                 </span>
-                {product.WareHouseItem[0].discount > 0 && (
+                {product.WarehouseItem[0].discount > 0 && (
                   <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
                     {new Intl.NumberFormat("es-CR", {
                       style: "currency",
@@ -192,7 +176,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                       minimumFractionDigits: 2,
                     }).format(
                       product.WareHouseItem[0].price /
-                        (1 - product.WareHouseItem[0].discount / 100)
+                        (1 - product.WarehouseItem[0].discount / 100)
                     )}
                   </span>
                 )}

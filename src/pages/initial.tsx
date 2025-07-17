@@ -224,14 +224,12 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
             }}
             className="pb-12"
           >
-            {filteredProducts.map((product: any, index: number) => (
+            {filteredProducts.map((product: any) => (
               <SwiperSlide key={product.id}>
                 <ProductCard
                   product={product}
                   onAddToCart={() => addToCart(product)}
                   onClick={() => navigate(`/producto/${product.id}`)}
-                  priority={index < 4} // First 4 products get priority loading
-                  index={index}
                 />
               </SwiperSlide>
             ))}
@@ -302,7 +300,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 <AnimatePresence>
                   {bestSellers && bestSellers.length > 0 && (
                     <>
-                      {bestSellers.slice(0, visibleLatestProducts).map((product: any, idx: number) => {
+                      {bestSellers.slice(0, visibleLatestProducts).map((product, idx) => {
                         console.log(product); 
                         const price = product.WarehouseItem?.[0]?.price || 0;
                         const discount = product.WarehouseItem?.[0]?.discount || 0;
@@ -323,8 +321,6 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                           product={product}
                           onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
                           onClick={() => navigate(`/producto/${product.id}`)}
-                          priority={idx < 4} // First 4 products get priority loading
-                          index={idx}
                         />
                       </motion.div>
                     );
@@ -363,8 +359,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 <AnimatePresence>
                   {latest && latest.length > 0 && (
                     <>
-                      {latest.slice(0, visibleLatestProducts).map((product: any, idx: number) => {
-                        console.log(product); 
+                      {latest.slice(0, visibleLatestProducts).map((product, idx) => {
+                        console.log(product);
                         const price = product.WarehouseItem?.[0]?.price || 0;
                         const discount = product.WarehouseItem?.[0]?.discount || 0;
                         const finalPrice = discount
@@ -384,12 +380,12 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                           product={product}
                           onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
                           onClick={() => navigate(`/producto/${product.id}`)}
-                          priority={idx < 4} // First 4 products get priority loading
-                          index={idx}
                         />
                       </motion.div>
                     );
-                  })}                    </>
+                  })}
+
+                    </>
                   )}
                 </AnimatePresence>
               </div>
