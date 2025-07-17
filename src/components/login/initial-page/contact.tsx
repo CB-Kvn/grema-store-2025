@@ -87,6 +87,7 @@ const ContactPage = () => {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
+                title="Ubicación del taller de Grema Store en mapa de Google Maps"
               ></iframe>
             </div>
           </div>
