@@ -51,14 +51,11 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       <div className="text-center max-w-md w-full px-6">
         {/* Logo */}
         <div className="mb-8 animate-fade-in">
-          <picture>
-            <source srcSet="/Logo en negro.webp" type="image/webp" />
-            <img
-              src="/Logo en negro.png"
-              alt="Grema Store"
-              className="w-48 h-32 sm:w-64 sm:h-40 lg:w-80 lg:h-48 object-contain mx-auto"
-            />
-          </picture>
+          <img
+            src="/Logo en negro.png"
+            alt="Grema Store"
+            className="w-48 h-32 sm:w-64 sm:h-40 lg:w-80 lg:h-48 object-contain mx-auto"
+          />
         </div>
 
         {/* Título de bienvenida */}

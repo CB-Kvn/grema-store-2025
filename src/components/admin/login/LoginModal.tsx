@@ -31,14 +31,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="w-64 h-32 mx-auto">
-            <picture>
-              <source srcSet="/Logo en negro.webp" type="image/webp" />
-              <img
-                src="/Logo en negro.png" // Ruta desde la carpeta public
-                alt="Logo de la empresa"
-                className="w-full h-full object-contain"
-              />
-            </picture>
+            <img
+              src="/Logo en negro.png" // Ruta desde la carpeta public
+              alt="Logo de la empresa"
+              className="w-full h-full object-contain"
+            />
           </div>
 
         </div>
