@@ -1,4 +1,5 @@
 import React from 'react';
+import { OptimizedImage } from './OptimizedImage';
 
 interface LogoProps {
   variant?: 'black' | 'white';
@@ -18,22 +19,16 @@ export const Logo: React.FC<LogoProps> = ({
   const logoSrc = variant === 'black' ? '/Logo en negro.png' : '/Logo en blamco.png';
   const logoWebp = variant === 'black' ? '/Logo en negro.webp' : '/Logo en blamco.webp';
   
-  // Generate responsive srcSet for WebP
-  const webpSrcSet = `${logoWebp} 320w`;
-  const pngSrcSet = `${logoSrc} 320w`;
-  
   return (
     <picture onClick={onClick} className={`cursor-pointer ${onClick ? 'cursor-pointer' : ''}`}>
-      <source srcSet={webpSrcSet} type="image/webp" sizes={sizes} />
-      <img
+      <source srcSet={logoWebp} type="image/webp" />
+      <OptimizedImage
         src={logoSrc}
-        srcSet={pngSrcSet}
         alt="Grema Store"
         className={className}
         loading={priority ? 'eager' : 'lazy'}
         width={320}
         height={120}
-        sizes={sizes}
       />
     </picture>
   );
