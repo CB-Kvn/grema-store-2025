@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppSelector } from "@/hooks/useAppSelector";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { Product, Category } from "@/types";
-import { selectAllProducts } from "@/store/slices/productsSlice";
+import { selectAllProducts, setProducts, setLoading, setError, selectLoading, Product as ProductSlice } from "@/store/slices/productsSlice";
+import { productService } from "@/services/productService";
 import { SEOHead } from "@/components/common/SEOHead";
 import { getPageSEOData } from "@/utils/seo";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
@@ -107,7 +109,9 @@ interface ShopPageProps {
 
 export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const productos = useAppSelector(selectAllProducts);
+  const loading = useAppSelector(selectLoading);
   const seoData = getPageSEOData('store');
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -116,13 +120,33 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
-    priceRange: [0, 5000],
+    priceRange: [0, 150000],
     categories: [],
     materials: [],
     isNew: false,
     isBestSeller: false,
     colors: [], // Ahora es grupo de color
   });
+
+  // Cargar productos si el estado está vacío
+  useEffect(() => {
+    const loadProducts = async () => {
+      if (productos.length === 0) {
+        try {
+          dispatch(setLoading(true));
+          const productsData = await productService.getAll();
+          dispatch(setProducts(productsData as ProductSlice[]));
+        } catch (error) {
+          console.error('Error al cargar productos:', error);
+          dispatch(setError('Error al cargar los productos'));
+        } finally {
+          dispatch(setLoading(false));
+        }
+      }
+    };
+
+    loadProducts();
+  }, [dispatch, productos.length]);
 
   // Breadcrumbs para la tienda
   const breadcrumbItems = [
@@ -131,12 +155,12 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   ];
 
   // Extraer categorías y materiales únicos de los productos
-  const categories = Array.from(new Set(productos.map((p) => p.category)));
+  const categories = Array.from(new Set(productos.map((p) => p.category).filter(Boolean)));
   const materials = Array.from(
     new Set(
       productos.flatMap((p) =>
         Array.isArray(p.details?.material)
-          ? p.details.material
+          ? p.details.material.filter(Boolean)
           : p.details?.material
           ? [p.details.material]
           : []
@@ -159,53 +183,83 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   // Filtrar y ordenar productos
   const filteredProducts = productos
     .filter((product) => {
-      const matchesSearch =
-        (product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (product.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        filters.categories.length === 0 ||
-        filters.categories.includes(product.category || '');
-      const matchesMaterial =
-        filters.materials.length === 0 ||
-        (Array.isArray(product.details?.material) 
-          ? product.details.material.some((m) => filters.materials.includes(m))
-          : product.details?.material 
-          ? filters.materials.includes(product.details.material)
-          : false);
-      const matchesPrice =
-        (product.price || 0) >= filters.priceRange[0] &&
-        (product.price || 0) <= filters.priceRange[1];
-      const matchesNew = !filters.isNew || product.isNew;
-      const matchesBestSeller = !filters.isBestSeller || product.isBestSeller;
-      const matchesColor =
-        filters.colors.length === 0 ||
-        (Array.isArray(product.details?.color) &&
-          product.details.color.some((c) =>
-            filters.colors.includes(getColorGroup(c.hex || '') || "")
-          ));
+      // Búsqueda por texto
+      const matchesSearch = searchQuery === "" || 
+        (product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      // Filtro por categoría
+      const matchesCategory = filters.categories.length === 0 ||
+        (product.category && filters.categories.includes(product.category));
+      
+      // Filtro por material
+      const matchesMaterial = filters.materials.length === 0 ||
+        (product.details?.material && (
+          Array.isArray(product.details.material) 
+            ? product.details.material.some((m) => filters.materials.includes(m))
+            : filters.materials.includes(product.details.material)
+        ));
+      
+      // Filtro por precio - usar el precio del producto desde WarehouseItem
+      let productPrice = 0;
+      if ((product as any).WarehouseItem && Array.isArray((product as any).WarehouseItem) && (product as any).WarehouseItem.length > 0) {
+        const warehouseItem = (product as any).WarehouseItem[0];
+        productPrice = warehouseItem.price || 0;
+      } else {
+        productPrice = product.price || 0;
+      }
+      const matchesPrice = productPrice >= filters.priceRange[0] && productPrice <= filters.priceRange[1];
+      
+      // Filtro por productos nuevos
+      const matchesNew = !filters.isNew || product.isNew === true;
+      
+      // Filtro por más vendidos
+      const matchesBestSeller = !filters.isBestSeller || product.isBestSeller === true;
+      
+      // Filtro por color
+      const matchesColor = filters.colors.length === 0 ||
+        (product.details?.color && Array.isArray(product.details.color) &&
+          product.details.color.some((c) => {
+            const colorGroup = getColorGroup(c.hex || '');
+            return colorGroup && filters.colors.includes(colorGroup);
+          }));
 
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesMaterial &&
-        matchesPrice &&
-        matchesNew &&
-        matchesBestSeller &&
-        matchesColor
-      );
+      return matchesSearch && matchesCategory && matchesMaterial && matchesPrice && matchesNew && matchesBestSeller && matchesColor;
     })
     .sort((a, b) => {
+      // Obtener precios para ordenamiento desde WarehouseItem
+      let priceA = 0;
+      let priceB = 0;
+      
+      if ((a as any).WarehouseItem && Array.isArray((a as any).WarehouseItem) && (a as any).WarehouseItem.length > 0) {
+        priceA = (a as any).WarehouseItem[0].price || 0;
+      } else {
+        priceA = a.price || 0;
+      }
+      
+      if ((b as any).WarehouseItem && Array.isArray((b as any).WarehouseItem) && (b as any).WarehouseItem.length > 0) {
+        priceB = (b as any).WarehouseItem[0].price || 0;
+      } else {
+        priceB = b.price || 0;
+      }
+
       switch (sortBy) {
         case "price-asc":
-          return (a.price || 0) - (b.price || 0);
+          return priceA - priceB;
         case "price-desc":
-          return (b.price || 0) - (a.price || 0);
+          return priceB - priceA;
         case "name-asc":
-          return (a.name || '').localeCompare(b.name || '');
+          return (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' });
         case "name-desc":
-          return (b.name || '').localeCompare(a.name || '');
+          return (b.name || '').localeCompare(a.name || '', 'es', { sensitivity: 'base' });
+        case "featured":
         default:
-          return 0;
+          // Ordenar por: productos nuevos primero, luego más vendidos, luego por nombre
+          if (a.isNew && !b.isNew) return -1;
+          if (!a.isNew && b.isNew) return 1;
+          if (a.isBestSeller && !b.isBestSeller) return -1;
+          if (!a.isBestSeller && b.isBestSeller) return 1;
+          return (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' });
       }
     });
 
@@ -304,7 +358,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
 
   const clearFilters = () => {
     setFilters({
-      priceRange: [0, 5000],
+      priceRange: [0, 150000],
       categories: [],
       materials: [],
       isNew: false,
@@ -315,49 +369,66 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   };
 
   const FilterContent = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Price Range */}
-      <div>
-        <h4 className="font-medium text-primary-900 mb-3">Rango de Precio</h4>
-        <div className="space-y-2">
-          <input
-            type="range"
-            min="0"
-            max="5000"
-            value={filters.priceRange[1]}
-            onChange={(e) =>
-              handleFilterChange("priceRange", [
-                filters.priceRange[0],
-                Number(e.target.value),
-              ])
-            }
-            className="w-full"
-          />
-          <div className="flex justify-between text-sm text-primary-600">
-            <span>${filters.priceRange[0]}</span>
-            <span>${filters.priceRange[1]}</span>
+      <div className="bg-primary-25 rounded-xl p-4 border border-primary-100">
+        <h4 className="font-semibold text-primary-900 mb-4 flex items-center">
+          <span className="inline-block w-2 h-2 bg-primary-600 rounded-full mr-2"></span>
+          Rango de Precio
+        </h4>
+        <div className="space-y-4">
+          <div className="relative">
+            <input
+              type="range"
+              min="0"
+              max="150000"
+              value={filters.priceRange[1]}
+              onChange={(e) =>
+                handleFilterChange("priceRange", [
+                  filters.priceRange[0],
+                  Number(e.target.value),
+                ])
+              }
+              className="w-full h-2 bg-primary-100 rounded-lg appearance-none cursor-pointer slider-thumb"
+              style={{
+                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(filters.priceRange[1] / 150000) * 100}%, #e5e7eb ${(filters.priceRange[1] / 150000) * 100}%, #e5e7eb 100%)`
+              }}
+            />
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="bg-white px-3 py-1 rounded-full border border-primary-200">
+              <span className="text-sm font-medium text-primary-700">₡{filters.priceRange[0].toLocaleString()}</span>
+            </div>
+            <div className="bg-primary-600 px-3 py-1 rounded-full">
+              <span className="text-sm font-medium text-white">₡{filters.priceRange[1].toLocaleString()}</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Categories */}
-      <div>
-        <h4 className="font-medium text-primary-900 mb-3">Categorías</h4>
-        <div className="space-y-2">
+      <div className="bg-primary-25 rounded-xl p-4 border border-primary-100">
+        <h4 className="font-semibold text-primary-900 mb-4 flex items-center">
+          <span className="inline-block w-2 h-2 bg-primary-600 rounded-full mr-2"></span>
+          Categorías
+        </h4>
+        <div className="space-y-3">
           {categories.map((category) => (
-            <label key={category} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.categories.includes(category || '')}
-                onChange={(e) => {
-                  const newCategories = e.target.checked
-                    ? [...filters.categories, category || '']
-                    : filters.categories.filter((c) => c !== category);
-                  handleFilterChange("categories", newCategories);
-                }}
-                className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="ml-2 text-primary-700 capitalize">
+            <label key={category} className="flex items-center group cursor-pointer">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={filters.categories.includes(category || '')}
+                  onChange={(e) => {
+                    const newCategories = e.target.checked
+                      ? [...filters.categories, category || '']
+                      : filters.categories.filter((c) => c !== category);
+                    handleFilterChange("categories", newCategories);
+                  }}
+                  className="w-4 h-4 rounded border-2 border-primary-300 text-primary-600 focus:ring-primary-500 focus:ring-2 focus:ring-offset-0"
+                />
+              </div>
+              <span className="ml-3 text-primary-700 capitalize group-hover:text-primary-900 transition-colors font-medium">
                 {(category || '').replace("-", " ")}
               </span>
             </label>
@@ -366,32 +437,42 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       </div>
 
       {/* Materials */}
-      <div>
-        <h4 className="font-medium text-primary-900 mb-3">Materiales</h4>
-        <div className="space-y-2">
+      <div className="bg-primary-25 rounded-xl p-4 border border-primary-100">
+        <h4 className="font-semibold text-primary-900 mb-4 flex items-center">
+          <span className="inline-block w-2 h-2 bg-primary-600 rounded-full mr-2"></span>
+          Materiales
+        </h4>
+        <div className="space-y-3">
           {materials.map((material) => (
-            <label key={material} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.materials.includes(material)}
-                onChange={(e) => {
-                  const newMaterials = e.target.checked
-                    ? [...filters.materials, material]
-                    : filters.materials.filter((m) => m !== material);
-                  handleFilterChange("materials", newMaterials);
-                }}
-                className="rounded border-primary-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="ml-2 text-primary-700">{material}</span>
+            <label key={material} className="flex items-center group cursor-pointer">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={filters.materials.includes(material)}
+                  onChange={(e) => {
+                    const newMaterials = e.target.checked
+                      ? [...filters.materials, material]
+                      : filters.materials.filter((m) => m !== material);
+                    handleFilterChange("materials", newMaterials);
+                  }}
+                  className="w-4 h-4 rounded border-2 border-primary-300 text-primary-600 focus:ring-primary-500 focus:ring-2 focus:ring-offset-0"
+                />
+              </div>
+              <span className="ml-3 text-primary-700 group-hover:text-primary-900 transition-colors font-medium">
+                {material}
+              </span>
             </label>
           ))}
         </div>
       </div>
 
       {/* Colors */}
-      <div>
-        <h4 className="font-medium text-primary-900 mb-3">Colores</h4>
-        <div className="grid grid-cols-2 gap-2">
+      <div className="bg-primary-25 rounded-xl p-4 border border-primary-100">
+        <h4 className="font-semibold text-primary-900 mb-4 flex items-center">
+          <span className="inline-block w-2 h-2 bg-primary-600 rounded-full mr-2"></span>
+          Colores
+        </h4>
+        <div className="grid grid-cols-2 gap-3">
           {colorGroupsInProducts.map((group) => (
             <button
               key={group as string}
@@ -402,10 +483,10 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
                   : [...filters.colors, group as string];
                 handleFilterChange("colors", newGroups);
               }}
-              className={`px-3 py-2 rounded-full border-2 text-sm font-medium
+              className={`px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-200 hover:shadow-md
                 ${filters.colors.includes(group as string)
-                  ? "border-primary-600 bg-primary-100 text-primary-900"
-                  : "border-primary-300 bg-white text-primary-600"}
+                  ? "border-primary-600 bg-primary-100 text-primary-900 shadow-sm"
+                  : "border-primary-200 bg-white text-primary-600 hover:border-primary-300 hover:bg-primary-50"}
               `}
             >
               {group}
@@ -414,10 +495,46 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
         </div>
       </div>
 
+      {/* Special Filters */}
+      <div className="bg-primary-25 rounded-xl p-4 border border-primary-100">
+        <h4 className="font-semibold text-primary-900 mb-4 flex items-center">
+          <span className="inline-block w-2 h-2 bg-primary-600 rounded-full mr-2"></span>
+          Filtros Especiales
+        </h4>
+        <div className="space-y-3">
+          <label className="flex items-center group cursor-pointer">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={filters.isNew}
+                onChange={(e) => handleFilterChange("isNew", e.target.checked)}
+                className="w-4 h-4 rounded border-2 border-primary-300 text-primary-600 focus:ring-primary-500 focus:ring-2 focus:ring-offset-0"
+              />
+            </div>
+            <span className="ml-3 text-primary-700 group-hover:text-primary-900 transition-colors font-medium">
+              Productos Nuevos
+            </span>
+          </label>
+          <label className="flex items-center group cursor-pointer">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={filters.isBestSeller}
+                onChange={(e) => handleFilterChange("isBestSeller", e.target.checked)}
+                className="w-4 h-4 rounded border-2 border-primary-300 text-primary-600 focus:ring-primary-500 focus:ring-2 focus:ring-offset-0"
+              />
+            </div>
+            <span className="ml-3 text-primary-700 group-hover:text-primary-900 transition-colors font-medium">
+              Más Vendidos
+            </span>
+          </label>
+        </div>
+      </div>
+
       {/* Clear Filters Button */}
       <button
         onClick={clearFilters}
-        className="w-full bg-primary-50 text-primary-600 px-4 py-2 rounded-full hover:bg-primary-100 transition-colors"
+        className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-3 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
       >
         Limpiar Filtros
       </button>
@@ -436,20 +553,20 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
 
       {/* Mobile Filter Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 w-80 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
           isFilterDrawerOpen ? "translate-x-0" : "-translate-x-full"
         } lg:hidden overflow-auto`}
       >
-        <div className="sticky top-0 bg-white border-b border-primary-100 p-4 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-primary-900">Filtros</h3>
+        <div className="sticky top-0 bg-white border-b border-primary-100 p-6 flex justify-between items-center">
+          <h3 className="text-xl font-bold text-primary-900">Filtros</h3>
           <button
             onClick={() => setIsFilterDrawerOpen(false)}
-            className="p-2 hover:bg-primary-50 rounded-full"
+            className="p-2 hover:bg-primary-50 rounded-xl transition-colors"
           >
-            <X className="h-5 w-5 text-primary-600" />
+            <X className="h-6 w-6 text-primary-600" />
           </button>
         </div>
-        <div className="p-4">
+        <div className="p-6">
           <FilterContent />
         </div>
       </div>
@@ -457,33 +574,93 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   );
 
   const ProductListView = ({ product }: { product: Product }) => {
-    const price = product.price || 0;
+    // Debug: ver la estructura del producto
+    console.log('Product data:', product);
+    console.log('Product price:', product.price);
+    console.log('Product WarehouseItem:', (product as any).WarehouseItem);
+    console.log('Product discount:', product.discount);
+    
+    // Intentar obtener el precio de diferentes maneras
+    const getPrice = () => {
+      // Intentar acceder al precio desde WarehouseItem[0].price
+      if ((product as any).WarehouseItem && Array.isArray((product as any).WarehouseItem) && (product as any).WarehouseItem.length > 0) {
+        const warehouseItem = (product as any).WarehouseItem[0];
+        if (warehouseItem.price && warehouseItem.price > 0) return warehouseItem.price;
+      }
+      
+      // Fallback a las propiedades originales
+      if (product.price && product.price > 0) return product.price;
+      if ((product as any).precio && (product as any).precio > 0) return (product as any).precio;
+      if ((product as any).Price && (product as any).Price > 0) return (product as any).Price;
+      if ((product as any).cost && (product as any).cost > 0) return (product as any).cost;
+      if ((product as any).value && (product as any).value > 0) return (product as any).value;
+      
+      // Si no encuentra precio, devolver 0
+      return 0;
+    };
+    
+    const price = getPrice();
     const discountedPrice = product.discount
       ? price * (1 - (product.discount.value || 0) / 100)
       : price;
 
+    // Obtener la imagen correcta del producto
+    const getProductImage = () => {
+      // Si Images es un string (URL directa)
+      if (typeof product.Images === 'string' && product.Images) {
+        return product.Images;
+      }
+      
+      // Si Images es un array y tiene elementos
+      if (product.Images && typeof product.Images === 'object') {
+        const images = product.Images as any;
+        if (Array.isArray(images) && images.length > 0) {
+          const firstImage = images[0];
+          // Si el primer elemento es un objeto con url
+          if (typeof firstImage === 'object' && firstImage?.url) {
+            return Array.isArray(firstImage.url) ? firstImage.url[0] : firstImage.url;
+          }
+          // Si el primer elemento es una URL directa
+          if (typeof firstImage === 'string') {
+            return firstImage;
+          }
+        }
+      }
+      
+      // Imagen por defecto - usando una imagen base64 o una alternativa
+      return "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA0MEM2OC4zNjk2IDQwIDYyLjAxMDkgNDIuNjMzOSA1Ny4zMjIzIDQ3LjMyMjNDNTIuNjMzOSA1Mi4wMTA5IDUwIDU4LjM2OTYgNTAgNjVDNTAgNzEuNjMwNCA1Mi42MzM5IDc3Ljk4OTEgNTcuMzIyMyA4Mi42Nzc3QzYyLjAxMDkgODcuMzY2MSA2OC4zNjk2IDkwIDc1IDkwQzgxLjYzMDQgOTAgODcuOTg5MSA4Ny4zNjYxIDkyLjY3NzcgODIuNjc3N0M5Ny4zNjYxIDc3Ljk4OTEgMTAwIDcxLjYzMDQgMTAwIDY1QzEwMCA1OC4zNjk2IDk3LjM2NjEgNTIuMDEwOSA5Mi42Nzc3IDQ3LjMyMjNDODcuOTg5MSA0Mi42MzM5IDgxLjYzMDQgNDAgNzUgNDBaTTc1IDgwQzcwLjg1NzggODAgNjcuMDY0IDc4LjM2NDEgNjQuMzkzNCA3NS42MDY2QzYxLjcyMjggNzIuODQ5MSA2MCA2OS4wMjEyIDYwIDY1QzYwIDYwLjk3ODggNjEuNzIyOCA1Ny4xNTA5IDY0LjM5MzQgNTQuMzkzNEM2Ny4wNjQgNTEuNjM1OSA3MC44NTc4IDUwIDc1IDUwQzc5LjE0MjIgNTAgODIuOTM2IDUxLjYzNTkgODUuNjA2NiA1NC4zOTM0Qzg4LjI3NzIgNTcuMTUwOSA5MCA2MC45Nzg4IDkwIDY1QzkwIDY5LjAyMTIgODguMjc3MiA3Mi44NDkxIDg1LjYwNjYgNzUuNjA2NkM4Mi45MzYgNzguMzY0MSA3OS4xNDIyIDgwIDc1IDgwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTIwIDExMEgzMFYxMDBMMTAwIDcwTDEyMCAxMTBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo=";
+    };
+
     return (
       <div className="bg-white rounded-lg shadow-md p-4 flex gap-6">
-        <div className="w-48 h-48">
+        <div className="w-48 h-48 flex-shrink-0">
           <img
-            src={product.Images || "https://via.placeholder.com/150"}
-            alt={product.name}
+            src={getProductImage()}
+            alt={product.name || 'Producto'}
             className="w-full h-full object-cover rounded-md"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA0MEM2OC4zNjk2IDQwIDYyLjAxMDkgNDIuNjMzOSA1Ny4zMjIzIDQ3LjMyMjNDNTIuNjMzOSA1Mi4wMTA5IDUwIDU4LjM2OTYgNTAgNjVDNTAgNzEuNjMwNCA1Mi42MzM5IDc3Ljk4OTEgNTcuMzIyMyA4Mi42Nzc3QzYyLjAxMDkgODcuMzY2MSA2OC4zNjk2IDkwIDc1IDkwQzgxLjYzMDQgOTAgODcuOTg5MSA4Ny4zNjYxIDkyLjY3NzcgODIuNjc3N0M5Ny4zNjYxIDc3Ljk4OTEgMTAwIDcxLjYzMDQgMTAwIDY1QzEwMCA1OC4zNjk2IDk3LjM2NjEgNTIuMDEwOSA5Mi42Nzc3IDQ3LjMyMjNDODcuOTg5MSA0Mi42MzM5IDgxLjYzMDQgNDAgNzUgNDBaTTc1IDgwQzcwLjg1NzggODAgNjcuMDY0IDc4LjM2NDEgNjQuMzkzNCA3NS42MDY2QzYxLjcyMjggNzIuODQ5MSA2MCA2OS4wMjEyIDYwIDY1QzYwIDYwLjk3ODggNjEuNzIyOCA1Ny4xNTA5IDY0LjM5MzQgNTQuMzkzNEM2Ny4wNjQgNTEuNjM1OSA3MC44NTc4IDUwIDc1IDUwQzc5LjE0MjIgNTAgODIuOTM2IDUxLjYzNTkgODUuNjA2NiA1NC4zOTM0Qzg4LjI3NzIgNTcuMTUwOSA5MCA2MC45Nzg4IDkwIDY1QzkwIDY5LjAyMTIgODguMjc3MiA3Mi44NDkxIDg1LjYwNjYgNzUuNjA2NkM4Mi45MzYgNzguMzY0MSA3OS4xNDIyIDgwIDc1IDgwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTIwIDExMEgzMFYxMDBMMTAwIDcwTDEyMCAxMTBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo=";
+            }}
           />
         </div>
         <div className="flex-1 space-y-4">
           <div>
-            <h3 className="text-xl font-medium text-primary-900">{product.name}</h3>
-            <p className="text-primary-600 mt-1">{product.description}</p>
+            <h3 className="text-xl font-medium text-primary-900">{product.name || 'Producto sin nombre'}</h3>
+            <p className="text-primary-600 mt-1">{product.description || 'Sin descripción'}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-baseline">
               <span className="text-2xl font-bold text-primary-900">
                 ₡{discountedPrice.toLocaleString()}
               </span>
-              {product.discount && (
+              {product.discount && discountedPrice !== price && (
                 <span className="ml-2 text-sm line-through text-primary-400">
                   ₡{price.toLocaleString()}
+                </span>
+              )}
+              {price === 0 && (
+                <span className="ml-2 text-sm text-red-500">
+                  (Sin precio definido)
                 </span>
               )}
             </div>
@@ -501,11 +678,12 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
           <div className="flex items-center gap-4">
             <div className="flex items-center text-primary-600">
               <Tag className="h-4 w-4 mr-1" />
-              <span className="text-sm">SKU: {product.sku}</span>
+              <span className="text-sm">SKU: {product.sku || 'N/A'}</span>
             </div>
             <div className="flex items-center text-primary-600">
               <Star className="h-4 w-4 mr-1" />
-              <span className="text-sm">                {Array.isArray(product.details?.material)
+              <span className="text-sm">
+                {Array.isArray(product.details?.material)
                   ? product.details.material.join(", ")
                   : product.details?.material || "N/A"}
               </span>
@@ -525,8 +703,20 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   // Determinar la categoría actual para SEO
   const currentCategory = filters.categories.length === 1 ? filters.categories[0] : 'all';
   
+  // Mostrar loading mientras se cargan los productos
+  if (loading && productos.length === 0) {
+    return (
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-primary-600">Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-transparent">
       {/* SEO Head */}
       <SEOHead
         title={seoData.title}
@@ -547,22 +737,23 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       {/* Header */}
 
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm py-4">
+      <nav className="shadow-sm py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumbs */}
           <Breadcrumbs items={breadcrumbItems} className="my-2" />
           
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center">
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsFilterDrawerOpen(true)}
-                className="lg:hidden p-2 hover:bg-primary-50 rounded-full"
-              >
-                <Filter className="h-6 w-6 text-primary-600" />
-              </button>
-            </div>
+          <div className="flex items-center justify-end">
+            <button
+              onClick={() => setIsFilterDrawerOpen(true)}
+              className="lg:hidden relative p-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
+            >
+              <Filter className="h-6 w-6" />
+              {(filters.categories.length > 0 || filters.materials.length > 0 || filters.colors.length > 0 || filters.isNew || filters.isBestSeller) && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {filters.categories.length + filters.materials.length + filters.colors.length + (filters.isNew ? 1 : 0) + (filters.isBestSeller ? 1 : 0)}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </nav>
@@ -570,25 +761,54 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Desktop Filters Sidebar */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
+          <div className="hidden lg:block w-72 flex-shrink-0">
             <div className="sticky top-8">
-              <h2 className="text-lg font-semibold text-primary-900 mb-6">
-                Filtros
-              </h2>
-              <FilterContent />
+              <div className="bg-white rounded-2xl shadow-lg border border-primary-100 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-primary-900">
+                    Filtros
+                  </h2>
+                  <div className="h-px bg-primary-200 flex-1 ml-4"></div>
+                </div>
+                
+                {/* Product Count */}
+                <div className="text-center mb-6">
+                  <span className="text-primary-600 font-medium">
+                    {filteredProducts.length} de {productos.length} productos
+                    {searchQuery && ` para "${searchQuery}"`}
+                  </span>
+                </div>
+                
+                <FilterContent />
+              </div>
             </div>
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
             {/* Toolbar */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <span className="text-primary-600">
-                  {filteredProducts.length} productos encontrados
-                </span>
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
+              {/* Search Bar */}
+              <div className="relative w-full sm:w-auto sm:flex-1 sm:max-w-4xl">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400 h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2 border border-primary-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-sm placeholder-primary-400"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-400 hover:text-primary-600 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
-              <div className="flex items-center gap-4">
+              
+              <div className="flex items-center gap-4 flex-shrink-0">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -630,75 +850,94 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
               filters.materials.length > 0 ||
               filters.colors.length > 0 ||
               filters.isNew ||
-              filters.isBestSeller) && (
+              filters.isBestSeller ||
+              searchQuery !== "") && (
               <div className="mb-6">
-                <div className="flex flex-wrap gap-2 items-center">
-                  {filters.categories.map((category) => (
+                <div className="bg-primary-25 border border-primary-100 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-primary-900">Filtros Activos</h3>
                     <button
-                      key={category}
-                      onClick={() =>
-                        handleFilterChange(
-                          "categories",
-                          filters.categories.filter((c) => c !== category)
-                        )
-                      }
-                      className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
+                      onClick={clearFilters}
+                      className="text-xs text-primary-600 hover:text-primary-800 font-medium"
                     >
-                      {category}
-                      <X className="h-4 w-4 ml-1" />
+                      Limpiar todos
                     </button>
-                  ))}
-                  {filters.materials.map((material) => (
-                    <button
-                      key={material}
-                      onClick={() =>
-                        handleFilterChange(
-                          "materials",
-                          filters.materials.filter((m) => m !== material)
-                        )
-                      }
-                      className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
-                    >
-                      {material}
-                      <X className="h-4 w-4 ml-1" />
-                    </button>
-                  ))}
-                  {/* Mostrar grupos de colores seleccionados */}
-                  {filters.colors.map((group) => (
-                    <button
-                      key={group}
-                      onClick={() =>
-                        handleFilterChange(
-                          "colors",
-                          filters.colors.filter((g) => g !== group)
-                        )
-                      }
-                      className="flex items-center px-2 py-1 rounded-full bg-primary-100 hover:bg-primary-200"
-                      title={group}
-                    >
-                      <span className="inline-block w-4 h-4 rounded-full border mr-2 bg-gradient-to-br from-white to-primary-200" />
-                      <span className="text-primary-600 text-sm">{group}</span>
-                      <X className="h-4 w-4 ml-1 text-primary-600" />
-                    </button>
-                  ))}
-                  {filters.isNew && (
-                    <button
-                      onClick={() => handleFilterChange("isNew", false)}
-                      className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
-                    >
-                      Nuevos
-                      <X className="h-4 w-4 ml-1" />
-                    </button>
-                  )}
-                  {filters.isBestSeller && (
-                    <button
-                      onClick={() => handleFilterChange("isBestSeller", false)}
-                      className="flex items-center bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm hover:bg-primary-200"
-                    >
-                      Más Vendidos
-                      <X className="h-4 w-4 ml-1" />
-                    </button>
-                  )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
+                      >
+                        Búsqueda: "{searchQuery}"
+                        <X className="h-3 w-3 ml-1.5" />
+                      </button>
+                    )}
+                    {filters.categories.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() =>
+                          handleFilterChange(
+                            "categories",
+                            filters.categories.filter((c) => c !== category)
+                          )
+                        }
+                        className="inline-flex items-center bg-primary-100 text-primary-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-primary-200 transition-colors"
+                      >
+                        {category}
+                        <X className="h-3 w-3 ml-1.5" />
+                      </button>
+                    ))}
+                    {filters.materials.map((material) => (
+                      <button
+                        key={material}
+                        onClick={() =>
+                          handleFilterChange(
+                            "materials",
+                            filters.materials.filter((m) => m !== material)
+                          )
+                        }
+                        className="inline-flex items-center bg-primary-100 text-primary-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-primary-200 transition-colors"
+                      >
+                        {material}
+                        <X className="h-3 w-3 ml-1.5" />
+                      </button>
+                    ))}
+                    {filters.colors.map((group) => (
+                      <button
+                        key={group}
+                        onClick={() =>
+                          handleFilterChange(
+                            "colors",
+                            filters.colors.filter((g) => g !== group)
+                          )
+                        }
+                        className="inline-flex items-center bg-primary-100 text-primary-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-primary-200 transition-colors"
+                      >
+                        <span className="inline-block w-3 h-3 rounded-full border mr-1.5 bg-gradient-to-br from-white to-primary-300" />
+                        {group}
+                        <X className="h-3 w-3 ml-1.5" />
+                      </button>
+                    ))}
+                    {filters.isNew && (
+                      <button
+                        onClick={() => handleFilterChange("isNew", false)}
+                        className="inline-flex items-center bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-200 transition-colors"
+                      >
+                        Nuevos
+                        <X className="h-3 w-3 ml-1.5" />
+                      </button>
+                    )}
+                    {filters.isBestSeller && (
+                      <button
+                        onClick={() => handleFilterChange("isBestSeller", false)}
+                        className="inline-flex items-center bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-amber-200 transition-colors"
+                      >
+                        Más Vendidos
+                        <X className="h-3 w-3 ml-1.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

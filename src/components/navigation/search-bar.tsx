@@ -35,7 +35,7 @@ const SearchBar: React.FC = () => {
         onClick={() => setIsOpen(true)}
         className="relative p-2 hover:bg-primary-50 rounded-full"
       >
-        <Search className="h-8 w-8 text-primary-600" />
+        <Search className="h-10 w-10 text-primary-600" />
       </Button>
 
       {/* Ventana emergente */}

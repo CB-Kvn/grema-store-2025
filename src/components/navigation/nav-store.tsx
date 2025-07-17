@@ -1,4 +1,4 @@
-import { Store, ShoppingCart, User, Info, Menu } from "lucide-react";
+import { Store, ShoppingCart, User, Info, Menu, Package } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { useEffect, useState } from "react";
@@ -62,27 +62,34 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                     </Link>
                     <Button
                       variant="ghost"
-                      className="justify-start w-full text-primary-900"
+                      className="justify-start w-full text-primary-900 px-6 py-4 text-lg font-light"
                       onClick={() => navigate("/tienda")}
                     >
-                      <Store className="mr-2 h-5 w-5 text-primary-600" /> Tienda
+                      <Store className="mr-2 h-6 w-6 text-primary-600" /> Tienda
                     </Button>
                     <Button
                       variant="ghost"
-                      className="justify-start w-full text-primary-900"
+                      className="justify-start w-full text-primary-900 px-6 py-4 text-lg font-light"
                       onClick={() => navigate("/nuestros-valores")}
                     >
-                      <Info className="mr-2 h-5 w-5 text-primary-600" /> Sobre Nosotros
+                      <Info className="mr-2 h-6 w-6 text-primary-600" /> Sobre Nosotros
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="justify-start w-full text-primary-900 px-6 py-4 text-lg font-light"
+                      onClick={() => navigate("/tracking")}
+                    >
+                      <Package className="mr-2 h-6 w-6 text-primary-600" /> Rastreo
                     </Button>
                     {/* --- Sheet lateral (menú hamburguesa) --- */}
                     <Button
                       variant="ghost"
-                      className="justify-start w-full text-primary-900"
+                      className="justify-start w-full text-primary-900 px-6 py-4 text-lg font-light"
                       onClick={() => navigate("/admin/inventory")}
                       // Solo muestra si es admin
                       style={{ display: user?.typeUser === "ADMIN" ? "flex" : "none" }}
                     >
-                      <User className="mr-2 h-5 w-5 text-primary-600" /> Administración
+                      <User className="mr-2 h-6 w-6 text-primary-600" /> Administración
                     </Button>
                   </div>
                 </SheetContent>
@@ -92,15 +99,18 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             {/* --- CENTRO: BOTONES SOLO EN LG+ --- */}
             <div className="hidden md:flex flex-1 justify-center">
               <div className="flex gap-4">
-                <Button variant="ghost" className="text-primary-900" onClick={() => navigate("/tienda")}>
-                  <Store className="mr-2 h-5 w-5 text-primary-600" /> Tienda
+                <Button variant="ghost" className="text-primary-900 px-6 py-3 text-lg font-light" onClick={() => navigate("/tienda")}>
+                  <Store className="mr-2 h-6 w-6 text-primary-600" /> Tienda
                 </Button>
-                <Button variant="ghost" className="text-primary-900" onClick={() => navigate("/sobre-nosotros")}>
-                  <Info className="mr-2 h-5 w-5 text-primary-600" /> Sobre Nosotros
+                <Button variant="ghost" className="text-primary-900 px-6 py-3 text-lg font-light" onClick={() => navigate("/sobre-nosotros")}>
+                  <Info className="mr-2 h-6 w-6 text-primary-600" /> Sobre Nosotros
+                </Button>
+                <Button variant="ghost" className="text-primary-900 px-6 py-3 text-lg font-light" onClick={() => navigate("/tracking")}>
+                  <Package className="mr-2 h-6 w-6 text-primary-600" /> Rastreo
                 </Button>
                 {user?.typeUser === "ADMIN" && (
-                  <Button variant="ghost" className="text-primary-900" onClick={() => navigate("/admin/inventory")}>
-                    <User className="mr-2 h-5 w-5 text-primary-600" /> Administración
+                  <Button variant="ghost" className="text-primary-900 px-6 py-3 text-lg font-light" onClick={() => navigate("/admin/inventory")}>
+                    <User className="mr-2 h-6 w-6 text-primary-600" /> Administración
                   </Button>
                 )}
               </div>
@@ -113,28 +123,28 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                 <div className="hidden md:block">
                   <SearchBar />
                 </div>
-                <Button variant="ghost" size="icon" onClick={isOpen} className="relative p-2 hover:bg-primary-50 rounded-full">
-                  <ShoppingCart className="h-8 w-8 text-primary-600" />
+                <Button variant="ghost" size="icon" onClick={isOpen} className="relative p-3 hover:bg-primary-50 rounded-full">
+                  <ShoppingCart className="h-12 w-12 text-primary-600" />
                   {cartItems.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItems.reduce((total, item) => total + item.quantity, 0)}
+                    <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-sm rounded-full h-6 w-6 flex items-center justify-center">
+                      {cartItems.reduce((total: number, item: any) => total + item.quantity, 0)}
                     </span>
                   )}
                 </Button>
                 {!user && (
-                  <Button variant="ghost" size="icon" onClick={() => setIsLoginOpen(true)}>
-                    <User className="h-8 w-8 text-primary-600" />
+                  <Button variant="ghost" size="icon" onClick={() => setIsLoginOpen(true)} className="p-3 hover:bg-primary-50 rounded-full">
+                    <User className="h-10 w-10 text-primary-600" />
                   </Button>
                 )}
                 {user && (
                   <DropdownMenu open={showUserMenu} onOpenChange={setShowUserMenu}>
                     <DropdownMenuTrigger asChild>
-                      <Avatar className="cursor-pointer">
+                      <Avatar className="cursor-pointer w-10 h-10">
                         {!showFallback && (
                           <img
                             src={user.picture}
                             alt={user.name}
-                            className="w-8 h-8 rounded-full"
+                            className="w-10 h-10 rounded-full"
                             onError={() => setShowFallback(true)}
                           />
                         )}
@@ -147,11 +157,12 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                     </DropdownMenuTrigger>
                     {/* --- Menú de usuario (Dropdown) --- */}
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="text-primary-900" onClick={() => navigate("/tienda")}>Tienda</DropdownMenuItem>
+                      <DropdownMenuItem className="text-primary-900 text-lg py-3 font-light" onClick={() => navigate("/tienda")}>Tienda</DropdownMenuItem>
+                      <DropdownMenuItem className="text-primary-900 text-lg py-3 font-light" onClick={() => navigate("/tracking")}>Rastreo</DropdownMenuItem>
                       {user?.typeUser === "ADMIN" && (
-                        <DropdownMenuItem className="text-primary-900" onClick={() => navigate("/admin/inventory")}>Administrar</DropdownMenuItem>
+                        <DropdownMenuItem className="text-primary-900 text-lg py-3 font-light" onClick={() => navigate("/admin/inventory")}>Administrar</DropdownMenuItem>
                       )}
-                      <DropdownMenuItem className="text-primary-900" onClick={() => { 
+                      <DropdownMenuItem className="text-primary-900 text-lg py-3 font-light" onClick={() => { 
                         logout(); 
                         setShowUserMenu(false); 
                         navigate("/");
@@ -167,18 +178,22 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
 
       {/* Menú inferior móvil */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-primary-600 md:hidden shadow-lg">
-        <div className="flex justify-around items-center py-2">
+        <div className="flex justify-around items-center py-3">
           <Link to="/tienda" className="flex flex-col items-center text-white hover:text-primary-200">
-            <Store className="h-6 w-6" />
-            <span className="text-xs">Tienda</span>
+            <Store className="h-8 w-8" />
+            <span className="text-sm font-light">Tienda</span>
+          </Link>
+          <Link to="/tracking" className="flex flex-col items-center text-white hover:text-primary-200">
+            <Package className="h-8 w-8" />
+            <span className="text-sm font-light">Rastreo</span>
           </Link>
           <Button variant="ghost" size="icon" onClick={isOpen} className="flex flex-col items-center text-white hover:text-primary-200">
-            <ShoppingCart className="h-8 w-8" />
-            <span className="text-xs">Carrito</span>
+            <ShoppingCart className="h-10 w-10" />
+            <span className="text-sm font-light">Carrito</span>
           </Button>
           <Button variant="ghost" size="icon" onClick={() => setIsLoginOpen(true)} className="flex flex-col items-center text-white hover:text-primary-200">
             <User className="h-8 w-8" />
-            <span className="text-xs">Login</span>
+            <span className="text-sm font-light">Login</span>
           </Button>
         </div>
       </div>

@@ -8,7 +8,7 @@ interface CategorySEOProps {
   subcategories?: string[];
 }
 
-const categoryInfo = {
+const categoryInfo: Record<string, { name: string; description: string; keywords: string }> = {
   all: {
     name: 'Todas las categorías',
     description: 'Explora nuestra amplia selección de joyería fina y accesorios elegantes. Encuentra anillos, collares, aretes y pulseras de la más alta calidad.',
@@ -41,7 +41,11 @@ export const CategorySEO: React.FC<CategorySEOProps> = ({
   productCount, 
   subcategories 
 }) => {
-  const info = categoryInfo[category];
+  const info = categoryInfo[category] || {
+    name: category ? category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' ') : 'Productos',
+    description: category ? `Explora nuestra colección de ${category.replace('-', ' ')} de alta calidad en Grema Store.` : 'Explora nuestra amplia selección de productos de alta calidad en Grema Store.',
+    keywords: category ? `${category.replace('-', ' ')}, joyería, accesorios, Costa Rica` : 'joyería, accesorios, productos, Costa Rica',
+  };
   const pageUrl = `${window.location.origin}/store${category !== 'all' ? `?category=${category}` : ''}`;
   
   const breadcrumbs = [

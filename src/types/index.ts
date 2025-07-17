@@ -60,7 +60,7 @@ export interface CartItem extends Pick<Product, 'id' | 'name' | 'price' | 'Image
   discount?: Discount;
 }
 
-export type Category = 'all' | 'rings' | 'necklaces' | 'earrings' | 'bracelets';
+export type Category = 'all' | 'rings' | 'necklaces' | 'earrings' | 'bracelets' | string;
 
 export interface RootState {
   products: {
