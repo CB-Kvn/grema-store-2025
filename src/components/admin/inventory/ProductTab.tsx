@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { createPortal } from 'react-dom';
 import {
   Search, Plus, Edit, Trash2, Package, Percent, Filter, ChevronLeft, ChevronRight
 } from 'lucide-react';
@@ -39,6 +40,8 @@ const ProductTab = () => {
     minQuantity: 0,
     maxQuantity: 0,
   });
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>('');
   const itemsPerPage = 10; // Número de productos por página
   const [currentPage, setCurrentPage] = useState<number>(() => {
     // Recuperar la página actual de localStorage
@@ -155,6 +158,26 @@ const ProductTab = () => {
     }
   };
 
+  // Manejar apertura del modal de imagen
+  const handleImageClick = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setImageModalOpen(true);
+  };
+
+  // Prevenir scroll del body cuando el modal esté abierto
+  useEffect(() => {
+    if (imageModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup al desmontar el componente
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [imageModalOpen]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       const response = await productService.getAll() as Product[];
@@ -170,7 +193,7 @@ const ProductTab = () => {
         {/* Barra de búsqueda */}
         <div className="hidden lg:block flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-6 w-6 text-primary-400" />
             <Input
               type="text"
               placeholder="Buscar por nombre o SKU..."
@@ -186,6 +209,7 @@ const ProductTab = () => {
           <Button
             data-intro="Haz clic aquí para agregar un nuevo producto."
             data-step="1"
+            data-tour="add-product-btn"
             onClick={() => {
               setSelectedProduct(null);
               setIsModalOpen(true);
@@ -193,7 +217,7 @@ const ProductTab = () => {
             variant="default"
             className="flex items-center justify-center bg-primary-500 hover:bg-primary-700 text-white rounded-lg shadow-lg"
           >
-            <Plus className="h-5 w-5 mr-2" />
+            <Plus className="h-6 w-6 mr-2" />
             Nuevo
           </Button>
         </div>
@@ -224,7 +248,7 @@ const ProductTab = () => {
           >
             <SelectTrigger className="w-full px-4 py-2 bg-white border border-primary-300 rounded-lg text-primary-700 focus:ring-primary-500 focus:border-primary-500 relative">
               <SelectValue placeholder="Filtrar" />
-              <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400 pointer-events-none" />
+              <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 text-primary-400 pointer-events-none" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
@@ -238,7 +262,7 @@ const ProductTab = () => {
         {/* Barra de búsqueda móvil */}
         <div className="lg:hidden w-full">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-6 w-6 text-primary-400" />
             <Input
               type="text"
               placeholder="Buscar por nombre o SKU..."
@@ -254,24 +278,25 @@ const ProductTab = () => {
         className="overflow-x-auto"
         data-intro="Aquí puedes ver, editar o eliminar productos."
         data-step="3"
+        data-tour="products-table"
       >
-        <table className="w-full">
+        <table className="w-full min-w-[800px]">
           <thead>
             <tr className="bg-primary-50">
               {discount.isActive && (
-                <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">
+                <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900">
                   Seleccionar
                 </th>
               )}
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900 w-full">Producto</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Precio</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Estado</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Categoría</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Peso</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Material</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Colores</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Cantidad</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Acciones</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[200px]">Producto</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px]">Precio</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px]">Estado</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px] hidden lg:table-cell">Categoría</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[80px] hidden xl:table-cell">Peso</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px] hidden xl:table-cell">Material</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[120px] hidden 2xl:table-cell">Colores</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[80px]">Cantidad</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[120px]">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -279,9 +304,9 @@ const ProductTab = () => {
               const details = product.details || {};
               const colores = details.color || [];
               return (
-                <tr key={product.id} className="border-b border-primary-100">
+                <tr key={product.id} className="border-b border-primary-100 hover:bg-primary-25">
                   {discount.isActive && (
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 sm:px-4">
                       <div className="flex items-center justify-center">
                         <Input
                           type="checkbox"
@@ -293,13 +318,13 @@ const ProductTab = () => {
                               setSelectedProduct(null);
                             }
                           }}
-                          className="w-5 h-5 bg-primary-500 text-white border-primary-500 rounded focus:ring-primary-500 focus:ring-2 checked:bg-primary-600"
+                          className="w-4 h-4 sm:w-5 sm:h-5 bg-primary-500 text-white border-primary-500 rounded focus:ring-primary-500 focus:ring-2 checked:bg-primary-600"
                         />
                       </div>
                     </td>
                   )}
-                  <td className="py-3 px-4 w-full align-top">
-                    <div className="flex items-center space-x-3">
+                  <td className="py-3 px-2 sm:px-4 align-top min-w-[200px]">
+                    <div className="flex items-start space-x-2 sm:space-x-3">
                       <img
                         src={
                           product.Images &&
@@ -310,26 +335,36 @@ const ProductTab = () => {
                             : "/placeholder.png"
                         }
                         alt={product.name}
-                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover"
-                        style={{ minWidth: "4rem", minHeight: "4rem", maxHeight: "5rem" }}
-                      />
-                      <div>
-                        <p className="text-sm sm:text-base font-medium text-primary-900 break-words whitespace-pre-line">{product.name}</p>
-                        <p className="text-xs sm:text-sm text-primary-500 break-words whitespace-pre-line">SKU: {product.sku}</p>
-                        {product.description && (
-                          <p className="text-xs text-primary-700 mt-1 break-words whitespace-pre-line">{product.description}</p>
+                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
+                        onClick={() => handleImageClick(
+                          product.Images &&
+                          product.Images.length > 0 &&
+                          Array.isArray(product.Images[0].url) &&
+                          product.Images[0].url.length > 0
+                            ? product.Images[0].url[0]
+                            : "/placeholder.png"
                         )}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm md:text-base font-medium text-primary-900 break-words leading-tight">{product.name}</p>
+                        <p className="text-xs text-primary-500 break-words mt-1">SKU: {product.sku}</p>
+                        {/* Mostrar categoría en móvil cuando esté oculta */}
+                        <div className="lg:hidden mt-1">
+                          <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded">
+                            {product.category || "Sin categoría"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4">
-                    <p className="text-sm sm:text-base font-medium text-primary-900">
+                  <td className="py-3 px-2 sm:px-4">
+                    <p className="text-xs sm:text-sm md:text-base font-medium text-primary-900">
                       ₡{product.WarehouseItem?.[0]?.price?.toLocaleString() || "N/A"}
                     </p>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-2 sm:px-4">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs sm:text-sm ${product.WarehouseItem?.some((item) => item.quantity > 0)
+                      className={`px-2 py-1 rounded-full text-xs ${product.WarehouseItem?.some((item) => item.quantity > 0)
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
                         }`}
@@ -337,69 +372,74 @@ const ProductTab = () => {
                       {product.WarehouseItem?.some((item) => item.quantity > 0) ? "En Stock" : "Agotado"}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
-                    <p className="text-sm text-primary-700">{product.category || "N/A"}</p>
+                  <td className="py-3 px-2 sm:px-4 hidden lg:table-cell">
+                    <p className="text-xs sm:text-sm text-primary-700">{product.category || "N/A"}</p>
                   </td>
-                  <td className="py-3 px-4">
-                    <p className="text-sm text-primary-700">{details.peso || "N/A"}</p>
+                  <td className="py-3 px-2 sm:px-4 hidden xl:table-cell">
+                    <p className="text-xs sm:text-sm text-primary-700">{details.peso || "N/A"}</p>
                   </td>
-                  <td className="py-3 px-4">
-                    <p className="text-sm text-primary-700">{details.material || "N/A"}</p>
+                  <td className="py-3 px-2 sm:px-4 hidden xl:table-cell">
+                    <p className="text-xs sm:text-sm text-primary-700">{details.material || "N/A"}</p>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-2 sm:px-4 hidden 2xl:table-cell">
                     {Array.isArray(colores) && colores.length > 0 ? (
-                      colores.map((color, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <span
-                            className="inline-block w-4 h-4 rounded-full"
-                            style={{ backgroundColor: color.hex }}
-                          ></span>
-                          <span className="text-sm text-primary-700">{color.name}</span>
-                        </div>
-                      ))
+                      <div className="flex flex-wrap gap-1">
+                        {colores.slice(0, 2).map((color, index) => (
+                          <div key={index} className="flex items-center space-x-1">
+                            <span
+                              className="inline-block w-3 h-3 rounded-full"
+                              style={{ backgroundColor: color.hex }}
+                            ></span>
+                            <span className="text-xs text-primary-700">{color.name}</span>
+                          </div>
+                        ))}
+                        {colores.length > 2 && (
+                          <span className="text-xs text-primary-500">+{colores.length - 2}</span>
+                        )}
+                      </div>
                     ) : (
-                      <span className="text-sm text-primary-700">N/A</span>
+                      <span className="text-xs sm:text-sm text-primary-700">N/A</span>
                     )}
                   </td>
-                  <td className="py-3 px-4">
-                    <p className="text-sm text-primary-700">
+                  <td className="py-3 px-2 sm:px-4">
+                    <p className="text-xs sm:text-sm font-medium text-primary-700">
                       {product.WarehouseItem?.reduce((acc, item) => acc + (item.quantity || 0), 0) ?? 0}
                     </p>
                   </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center space-x-1 sm:space-x-2">
+                  <td className="py-3 px-2 sm:px-4">
+                    <div className="flex items-center space-x-1" data-tour="product-actions">
                       <Button
                         onClick={() => handleEdit(product)}
                         variant="ghost"
                         size="icon"
-                        className="p-1 hover:bg-primary-50 rounded"
+                        className="p-1.5 sm:p-2 hover:bg-primary-50 rounded"
                         title="Editar Producto"
                         data-intro="Edita el producto seleccionado."
                         data-step="4"
                       >
-                        <Edit className="h-4 w-4 text-primary-600" />
+                        <Edit className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary-600" />
                       </Button>
                       <Button
                         onClick={() => handleInventoryManagement(product)}
                         variant="ghost"
                         size="icon"
-                        className="p-1 hover:bg-primary-50 rounded"
+                        className="p-1.5 sm:p-2 hover:bg-primary-50 rounded"
                         title="Gestionar Inventario"
                         data-intro="Gestiona el inventario de este producto."
                         data-step="5"
                       >
-                        <Package className="h-4 w-4 text-primary-600" />
+                        <Package className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary-600" />
                       </Button>
                       <Button
                         onClick={() => handleDelete(product.id!)}
                         variant="ghost"
                         size="icon"
-                        className="p-1 hover:bg-primary-50 rounded"
+                        className="p-1.5 sm:p-2 hover:bg-primary-50 rounded"
                         title="Eliminar Producto"
                         data-intro="Elimina el producto de la tienda."
                         data-step="6"
                       >
-                        <Trash2 className="h-4 w-4 text-red-600" />
+                        <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-red-600" />
                       </Button>
                     </div>
                   </td>
@@ -411,26 +451,28 @@ const ProductTab = () => {
       </div>
 
       {/* Paginación */}
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3 sm:gap-0">
         <Button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-4 py-2 rounded-lg ${currentPage === 1 ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-primary-500 text-white hover:bg-primary-700"}`}
+          className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm ${currentPage === 1 ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-primary-500 text-white hover:bg-primary-700"}`}
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+          <span className="ml-1 sm:ml-2 hidden sm:inline">Anterior</span>
         </Button>
-        <span className="text-sm text-primary-700">
+        <span className="text-xs sm:text-sm text-primary-700 px-2 py-1 bg-primary-50 rounded">
           Página {currentPage} de {Math.ceil(filteredProducts.length / itemsPerPage)}
         </span>
         <Button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
-          className={`px-4 py-2 rounded-lg ${currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
+          className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm ${currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
             ? "bg-gray-200 text-gray-500 cursor-not-allowed"
             : "bg-primary-500 text-white hover:bg-primary-700"
             }`}
         >
-          <ChevronRight className="h-5 w-5" />
+          <span className="mr-1 sm:mr-2 hidden sm:inline">Siguiente</span>
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
       </div>
 
@@ -545,7 +587,7 @@ const ProductTab = () => {
             style={{ boxShadow: '0 6px 24px rgba(80,80,160,0.18)' }}
           >
             <svg
-              className="w-7 h-7"
+              className="w-8 h-8"
               fill="none"
               stroke="currentColor"
               strokeWidth={2.2}
@@ -560,6 +602,43 @@ const ProductTab = () => {
           </button>
         </Tooltip>
       </div>
+
+      {/* Modal de imagen */}
+      {imageModalOpen && createPortal(
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4"
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            zIndex: 999999,
+            margin: 0,
+            padding: '1rem'
+          }}
+          onClick={() => setImageModalOpen(false)}
+        >
+          <div className="relative flex items-center justify-center">
+            <img
+              src={selectedImage}
+              alt="Imagen ampliada"
+              className="max-w-[60vw] max-h-[60vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setImageModalOpen(false)}
+              className="absolute top-2 right-2 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-2 transition-all duration-200"
+              style={{ zIndex: 1000000 }}
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

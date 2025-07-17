@@ -1,0 +1,355 @@
+/* Estilos personalizados para Driver.js - Tema Grema */
+
+/* Overlay personalizado - menos opaco para ver mejor el contenido */
+.driver-overlay {
+  background: rgba(0, 0, 0, 0) !important;
+  pointer-events: auto !important;
+}
+
+/* Contenedor del popover - más visible y mejor posicionado */
+.driverjs-theme-grema .driver-popover {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3);
+  max-width: 380px;
+  min-width: 280px;
+  animation: driver-popover-appear 0.3s ease-out;
+  z-index: 10000;
+}
+
+@keyframes driver-popover-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header del popover - mejor contraste */
+.driverjs-theme-grema .driver-popover-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-bottom: 1px solid #1d4ed8;
+  border-radius: 10px 10px 0 0;
+  padding: 16px 20px 12px;
+}
+
+/* Título - texto negro para mejor contraste */
+.driverjs-theme-grema .driver-popover-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: black;
+  margin: 0;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  text-shadow: none;
+}
+
+/* Descripción - texto negro para mejor legibilidad */
+.driverjs-theme-grema .driver-popover-description {
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: black;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 500;
+}
+
+/* Footer con botones - mejor alineación */
+.driverjs-theme-grema .driver-popover-footer {
+  padding: 16px 20px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 0 0 10px 10px;
+  gap: 12px;
+}
+
+/* Barra de progreso - texto negro */
+.driverjs-theme-grema .driver-popover-progress-text {
+  font-size: 14px;
+  color: black;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* Botones - mejor tamaño y visibilidad */
+.driverjs-theme-grema .driver-popover-navigation-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.driverjs-theme-grema .driver-popover-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  min-width: 80px;
+  white-space: nowrap;
+}
+
+/* Botón siguiente/finalizar */
+.driverjs-theme-grema .driver-popover-next-btn {
+  background: #2563eb;
+  color: black;
+}
+
+.driverjs-theme-grema .driver-popover-next-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Botón anterior - texto negro */
+.driverjs-theme-grema .driver-popover-prev-btn {
+  background: #e5e7eb;
+  color: black;
+  border: 1px solid #d1d5db;
+  
+}.driverjs-theme-grema .driver-popover-prev-btn:hover {
+  background: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Botón cerrar - mejor posicionamiento y funcionalidad */
+.driverjs-theme-grema .driver-popover-close-btn {
+  background: #ef4444 !important;
+  color: white !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  border-radius: 6px !important;
+  line-height: 1 !important;
+  border: none !important;
+  cursor: pointer !important;
+  z-index: 10001 !important;
+  pointer-events: auto !important;
+}
+
+.driverjs-theme-grema .driver-popover-close-btn:hover {
+  background: #dc2626 !important;
+  transform: scale(1.05) !important;
+}
+
+/* Asegurar que todos los botones funcionen correctamente */
+.driverjs-theme-grema .driver-popover-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  min-width: 80px;
+  white-space: nowrap;
+  pointer-events: auto !important;
+  z-index: 10001 !important;
+}
+.driverjs-theme-grema .driver-popover-arrow {
+  border-color: white;
+  filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Elemento destacado - más visible sin tanto blur */
+.driver-highlighted-element {
+  border: 4px solid #3b82f6 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3), 
+              0 0 20px rgba(59, 130, 246, 0.4) !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  z-index: 9999 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Animación de pulso mejorada */
+@keyframes driver-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3), 
+                0 0 20px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.2), 
+                0 0 25px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.driver-highlighted-element {
+  animation: driver-pulse 2s infinite;
+}
+
+/* Responsive - mejor para móviles */
+@media (max-width: 640px) {
+  .driverjs-theme-grema .driver-popover {
+    max-width: calc(100vw - 24px);
+    margin: 12px;
+    min-width: auto;
+  }
+  
+  .driverjs-theme-grema .driver-popover-title {
+    font-size: 16px;
+  }
+  
+  .driverjs-theme-grema .driver-popover-description {
+    font-size: 14px;
+    padding: 16px;
+  }
+  
+  .driverjs-theme-grema .driver-popover-footer {
+    padding: 12px 16px 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .driverjs-theme-grema .driver-popover-navigation-btns {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .driverjs-theme-grema .driver-popover-btn {
+    flex: 1;
+    min-width: auto;
+  }
+  
+  .driverjs-theme-grema .driver-popover-progress-text {
+    font-size: 12px;
+    align-self: center;
+  }
+}
+
+/* Tema oscuro mejorado */
+@media (prefers-color-scheme: dark) {
+  .driverjs-theme-grema .driver-popover {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .driverjs-theme-grema .driver-popover-header {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    border-bottom-color: #4b5563;
+  }
+  
+  .driverjs-theme-grema .driver-popover-title {
+    color: black;
+  }
+  
+  .driverjs-theme-grema .driver-popover-description {
+    color: black;
+  }
+  
+  .driverjs-theme-grema .driver-popover-footer {
+    background: #374151;
+    border-top-color: #4b5563;
+  }
+  
+  .driverjs-theme-grema .driver-popover-progress-text {
+    color: black;
+    background: rgba(75, 85, 99, 0.3);
+  }
+  
+  .driverjs-theme-grema .driver-popover-prev-btn {
+    background: #4b5563;
+    color: #f9fafb;
+    border-color: #6b7280;
+  }
+  
+  .driverjs-theme-grema .driver-popover-prev-btn:hover {
+    background: #6b7280;
+  }
+  
+  .driver-highlighted-element {
+    background: rgba(0, 0, 0, 0.85) !important;
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 6px rgba(96, 165, 250, 0.3), 
+                0 0 20px rgba(96, 165, 250, 0.4) !important;
+  }
+}
+
+/* Estilos adicionales para mejor UX */
+.driverjs-theme-grema .driver-popover {
+  position: relative;
+}
+
+/* Indicador visual mejorado */
+.driverjs-theme-grema .driver-popover::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #3b82f6);
+  border-radius: 14px;
+  z-index: -1;
+  animation: gradient-rotate 3s ease infinite;
+}
+
+@keyframes gradient-rotate {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Efecto de aparición suave */
+.driverjs-theme-grema .driver-popover {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Mejoras de accesibilidad */
+.driverjs-theme-grema .driver-popover-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.driverjs-theme-grema .driver-popover-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Estilo para elementos muy pequeños */
+.driver-highlighted-element[style*="width: 0"] {
+  min-width: 40px !important;
+  min-height: 40px !important;
+}
+
+/* Forzar funcionalidad de botones - CRÍTICO para que funcionen */
+.driverjs-theme-grema button,
+.driverjs-theme-grema .driver-popover-btn,
+.driverjs-theme-grema .driver-popover-close-btn,
+.driverjs-theme-grema .driver-popover-next-btn,
+.driverjs-theme-grema .driver-popover-prev-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  z-index: 10002 !important;
+  position: relative !important;
+}
+
+/* Eliminar cualquier interferencia del backdrop-filter */
+.driverjs-theme-grema .driver-popover * {
+  pointer-events: auto !important;
+}
+
+/* Asegurar que el popover sea interactivo */
+.driverjs-theme-grema .driver-popover {
+  pointer-events: auto !important;
+  user-select: auto !important;
+}

@@ -69,6 +69,43 @@ const ExpensesTab: React.FC = () => {
   const [expenseToDelete, setExpenseToDelete] = React.useState<any>(null);
   const [showDashboard, setShowDashboard] = React.useState(false);
 
+  // Funciones de traducción
+  const translateCategory = (category: string) => {
+    switch (category) {
+      case "MATERIALS":
+        return "Materiales";
+      case "TOOLS":
+        return "Herramientas";
+      case "MARKETING":
+        return "Marketing";
+      case "SALARIES":
+        return "Salarios";
+      case "RENT":
+        return "Alquiler";
+      case "SERVICES":
+        return "Servicios";
+      default:
+        return "Otros";
+    }
+  };
+
+  const translatePaymentMethod = (paymentMethod: string) => {
+    switch (paymentMethod) {
+      case "CASH":
+        return "Efectivo";
+      case "CREDIT_CARD":
+        return "Tarjeta de Crédito";
+      case "DEBIT_CARD":
+        return "Tarjeta de Débito";
+      case "BANK_TRANSFER":
+        return "Transferencia Bancaria";
+      case "CHECK":
+        return "Cheque";
+      default:
+        return "Otro";
+    }
+  };
+
   // Stat Card Component
   const StatCard = ({
     title,
@@ -95,7 +132,7 @@ const ExpensesTab: React.FC = () => {
   return (
     <>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6" data-tour="expenses-header">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-900">
             Gastos y Compras
@@ -110,7 +147,7 @@ const ExpensesTab: React.FC = () => {
             className="flex items-center px-3 py-2 bg-primary-50 text-primary-600 rounded-lg border border-primary-200 hover:bg-primary-100"
           >
             <BarChart3 className="h-4 w-4 mr-2" />
-            {showDashboard ? 'Ocultar Dashboard' : 'Información'}
+            {showDashboard ? 'Ocultar Panel' : 'Mostrar Panel'}
             {showDashboard ? (
               <ChevronUp className="h-4 w-4 ml-2" />
             ) : (
@@ -120,6 +157,7 @@ const ExpensesTab: React.FC = () => {
           <button
             onClick={() => setIsNewExpenseModalOpen(true)}
             className="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            data-tour="add-expense-btn"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Gasto
@@ -133,7 +171,7 @@ const ExpensesTab: React.FC = () => {
           {/* Estadísticas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              title="Total Gastos"
+              title="Total de Gastos"
               value={`₡${filteredExpenses.reduce((sum: number, expense: any) => sum + expense.amount, 0).toFixed(2)}`}
               icon={<Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
             />
@@ -146,7 +184,7 @@ const ExpensesTab: React.FC = () => {
               icon={<Receipt className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
             />
             <StatCard
-              title="Total Registros"
+              title="Total de Registros"
               value={filteredExpenses.length.toString()}
               icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />}
             />
@@ -185,7 +223,7 @@ const ExpensesTab: React.FC = () => {
       )}
 
       {/* Selector de Período y Búsqueda */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6" data-tour="expenses-filters">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
@@ -231,9 +269,9 @@ const ExpensesTab: React.FC = () => {
               <tr key={expense.id}>
                 <td className="px-4 py-3 whitespace-nowrap">{new Date(expense.date).toLocaleDateString()}</td>
                 <td className="px-4 py-3">{expense.description}</td>
-                <td className="px-4 py-3">{expense.category}</td>
+                <td className="px-4 py-3">{translateCategory(expense.category)}</td>
                 <td className="px-4 py-3">₡{expense.amount.toFixed(2)}</td>
-                <td className="px-4 py-3">{expense.paymentMethod}</td>
+                <td className="px-4 py-3">{translatePaymentMethod(expense.paymentMethod)}</td>
                 <td className="px-4 py-3">
                   {expense.receipt && (
                     <button
@@ -311,7 +349,7 @@ const ExpensesTab: React.FC = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setExpenseToDelete(null)} />
           <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl z-50 flex flex-col justify-center items-center p-6 rounded-lg m-auto">
             <h2 className="text-lg font-semibold mb-4">¿Eliminar gasto?</h2>
-            <p className="mb-6 text-center">¿Estás seguro que deseas eliminar este gasto? Esta acción no se puede deshacer.</p>
+            <p className="mb-6 text-center">¿Estás seguro de que deseas eliminar este gasto? Esta acción no se puede deshacer.</p>
             <div className="flex justify-end gap-3 w-full">
               <button
                 onClick={() => setExpenseToDelete(null)}
@@ -339,7 +377,7 @@ const ExpensesTab: React.FC = () => {
           expense={editingExpense}
           onClose={() => setEditingExpense(null)}
           onExpenseUpdated={(updated: any) => {
-            // Aquí actualiza el gasto en tu store o backend
+            // Aquí se actualiza el gasto en el store o backend
             setEditingExpense(null);
           }}
         />

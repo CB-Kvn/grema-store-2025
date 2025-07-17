@@ -8,6 +8,7 @@ import { SEOHead } from "@/components/common/SEOHead";
 import { getPageSEOData } from "@/utils/seo";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { CategorySEO } from "./CategorySEO";
+import FloatingSocialButton from "@/components/common/FloatingSocialButton";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -717,6 +718,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   
   return (
     <div className="min-h-screen bg-transparent">
+      {/* Floating Social Button */}
+      <FloatingSocialButton />
+      
       {/* SEO Head */}
       <SEOHead
         title={seoData.title}

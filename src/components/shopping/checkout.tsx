@@ -10,6 +10,7 @@ import { purchaseOrderService } from '@/services/purchaseOrderService';
 import { CartItem as DiscountCartItem } from '@/utils/discountCalculator';
 import { useDiscountCalculator } from '@/hooks/useDiscountCalculator';
 import { useAppSelector } from '@/hooks/useAppSelector';
+import FloatingSocialButton from '@/components/common/FloatingSocialButton';
 
 // Tipo para representar la estructura real de los datos del carrito
 interface RealCartItem {
@@ -221,6 +222,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
   return (
     <div className="min-h-screen bg-primary-50">
+      {/* Floating Social Button */}
+      <FloatingSocialButton />
+      
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

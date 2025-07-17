@@ -21,6 +21,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { ChevronRight, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import FloatingSocialButton from "@/components/common/FloatingSocialButton";
 
 const categories = [
   { id: "all", name: "Todo" },
@@ -121,6 +122,9 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
         type={seoData.type}
         jsonLd={[generateOrganizationSchema(), generateWebsiteSchema()]}
       />
+      
+      {/* Floating Social Button */}
+      <FloatingSocialButton />
       
       {/* Botón flotante a la derecha centrado, solo visible en pantallas md+ */}
       <AnimatePresence>

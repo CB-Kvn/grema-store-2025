@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Package
 } from 'lucide-react';
@@ -13,6 +13,9 @@ import InventoryDashboard from '@/components/admin/dashboard/InventoryDashboard'
 import { authService } from '@/services/authService';
 import { UsersTable } from '@/components/admin/users/listUsers';
 import { DiscountTab } from '@/components/admin/discount/discountTab';
+import { AdminTourButton } from '@/components/admin/common/AdminTourButton';
+import { useAutoTourInit } from '@/hooks/useAutoTourInit';
+import '@/styles/tour.css';
 
 
 // Simulación de fetch
@@ -27,7 +30,10 @@ async function getAllUsers() {
 
 const InventoryPage = () => {
   const [users, setUsers] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState('clientes');
+  const [activeTab, setActiveTab] = useState('inventario');
+  
+  // Hook para inicializar tour automáticamente (sin ciclos infinitos)
+  useAutoTourInit();
   
   const tabs = [
     { value: 'inventario', label: 'Informes' },
@@ -42,7 +48,6 @@ const InventoryPage = () => {
 
   useEffect(() => {
     getAllUsers().then(setUsers);
-
   }, []);
 
   
@@ -50,7 +55,7 @@ const InventoryPage = () => {
     <div className="min-h-screen bg-primary-10/50 backdrop-blur-sm py-4 sm:py-6 lg:py-8">
       <div className="max-w-[95%] lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <Card >
-          <CardHeader className="border-b border-primary-100 p-4 sm:p-6">
+          <CardHeader className="border-b border-primary-100 p-4 sm:p-6" data-tour="products-header">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center space-x-2">
                 <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />
@@ -58,19 +63,9 @@ const InventoryPage = () => {
                   Gestión de Inventario
                 </CardTitle>
               </div>
-              {/* Mobile Menu Button */}
-              {/* <button
-                className="sm:hidden p-2 hover:bg-primary-50 rounded-lg"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? "Cerrar menú móvil" : "Abrir menú móvil"}
-                aria-expanded={isMobileMenuOpen}
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6 text-primary-600" />
-                ) : (
-                  <Menu className="h-6 w-6 text-primary-600" />
-                )}
-              </button> */}
+              
+              {/* Botón del tour */}
+              <AdminTourButton currentTab={activeTab} onTabChange={setActiveTab} />
             </div>
           </CardHeader>
 
@@ -107,7 +102,10 @@ const InventoryPage = () => {
             {/* Desktop Tabs */}
             <div className="hidden lg:block">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="flex w-full bg-primary-50 border-b border-primary-200 rounded-none">
+                <TabsList 
+                  className="flex w-full bg-primary-50 border-b border-primary-200 rounded-none"
+                  data-tour="dashboard-tabs"
+                >
                   {tabs.map((tab) => (
                     <TabsTrigger
                       key={tab.value}

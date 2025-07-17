@@ -73,7 +73,7 @@ const InventoryDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Botones circulares para seleccionar periodo */}
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2" data-tour="period-selector">
         {periodOptions.map((option) => (
           <button
             key={option}
@@ -90,7 +90,7 @@ const InventoryDashboard: React.FC = () => {
         ))}
       </div>
       {/* Slider de tarjetas informativas con Swiper */}
-      <div className="pb-2">
+      <div className="pb-2" data-tour="info-cards">
         <Swiper
           modules={[Navigation]}
           navigation
@@ -120,7 +120,7 @@ const InventoryDashboard: React.FC = () => {
       </div>
 
       {/* Slider horizontal de gráficos */}
-      <div className="mb-8">
+      <div className="mb-8" data-tour="charts-section">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {slider1Charts.map((chart) => (
             <div key={chart.key} className="space-y-4">

@@ -1,7 +1,7 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import './styles/tour.css';
 import { Provider } from 'react-redux';
 import { store } from './store/index.ts';
 import { TooltipProvider } from './components/ui/tooltip.tsx';
@@ -87,7 +87,16 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById('root')!).render(
+// Obtener el elemento root
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+// Crear root una sola vez
+const root = createRoot(rootElement);
+
+root.render(
   <HelmetProvider>
     <GoogleOAuthProvider clientId="298483544989-79j1970tm0q2i8jjrn1rq4r7mrkptpgg.apps.googleusercontent.com" >
       <AuthProvider>
