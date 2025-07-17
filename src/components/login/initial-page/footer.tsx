@@ -1,6 +1,4 @@
 
-import { CloudinaryImage } from '@/components/common/CloudinaryImage';
-
 export const Footer = () => {
   return (
     <>
@@ -178,18 +176,10 @@ export const Footer = () => {
 
                   {/* Logo */}
                   <div className="sm:col-span-2 lg:col-span-1 flex justify-center items-center">
-                    <CloudinaryImage
+                    <img
                       src="https://res.cloudinary.com/denqtcsyy/image/upload/f_auto,q_auto/v1/images/f0bqluptggwdvpa0yrru"
                       alt="Joyas de lujo elegantes"
                       className="w-48 h-48 sm:w-64 sm:h-64 object-cover rounded-lg shadow-lg"
-                      loading="lazy"
-                      sizes="(max-width: 640px) 192px, 256px"
-                      breakpoints={{
-                        sm: 192,
-                        md: 256,
-                        lg: 256,
-                        xl: 256
-                      }}
                     />
                   </div>
                 </div>

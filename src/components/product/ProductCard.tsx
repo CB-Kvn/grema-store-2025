@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Heart, ShoppingCart, Share2, Facebook, Twitter, Instagram, Link } from 'lucide-react';
-import { SmartImage, useResponsiveBreakpoints, useResponsiveSizes } from '@/components/common/SmartImage';
+import { OptimizedImage } from '@/components/common/OptimizedImage';
 
 
 interface Product {
@@ -46,10 +46,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const isAboveFold = index < 6; // First 6 products are likely above the fold
   const shouldEagerLoad = priority || isAboveFold;
 
-  // Generar breakpoints optimizados para el tamaño de la tarjeta
-  const breakpoints = useResponsiveBreakpoints(350);
-  const sizes = useResponsiveSizes(breakpoints);
-
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(`¡Mira esta hermosa ${product.name} en Joyas de Lujo!`);
@@ -84,9 +80,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
         }}
         onClick={onClick}
       >
-        {/* Full-size image with SmartImage component */}
+        {/* Full-size image with OptimizedImage component */}
         <div className="flex-grow relative overflow-hidden">
-          <SmartImage
+          <OptimizedImage
             src={
               product.Images && product.Images[0] && product.Images[0].url
                 ? product.Images[0].url[0]
@@ -95,9 +91,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             alt={product.name}
             className="w-full h-full object-cover transition-all duration-300 transform group-hover:scale-105"
             loading={shouldEagerLoad ? "eager" : "lazy"}
-            priority={shouldEagerLoad}
-            sizes={sizes}
-            breakpoints={breakpoints}
+            width={400}
+            height={400}
           />
         </div>
 
