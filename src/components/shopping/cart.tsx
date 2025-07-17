@@ -64,6 +64,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
             <button
               onClick={onClose}
               className="p-2 hover:bg-primary-50 rounded-full transition-colors"
+              aria-label="Cerrar carrito"
             >
               <X className="h-5 w-5 text-primary-600" />
             </button>
@@ -135,6 +136,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                               onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
                               className="p-1 hover:bg-primary-50 rounded"
                               disabled={item.quantity <= 1}
+                              aria-label={`Disminuir cantidad de ${item.product.name}`}
                             >
                               <Minus className="h-4 w-4 text-primary-600" />
                             </button>
@@ -144,6 +146,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                             <button
                               onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
                               className="p-1 hover:bg-primary-50 rounded"
+                              aria-label={`Aumentar cantidad de ${item.product.name}`}
                             >
                               <Plus className="h-4 w-4 text-primary-600" />
                             </button>
@@ -153,6 +156,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                         <button
                           onClick={() => onRemove(item.product.id)}
                           className="p-2 hover:bg-primary-50 rounded-full transition-colors self-start"
+                          aria-label={`Eliminar ${item.product.name} del carrito`}
                         >
                           <Trash2 className="h-5 w-5 text-primary-500" />
                         </button>

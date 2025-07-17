@@ -228,6 +228,7 @@ export const HistoryUs = () => {
               <Link
                 to="/tienda"
                 className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-full text-primary-900 bg-white hover:bg-primary-50"
+                aria-label="Explorar nuestra colección de productos"
               >
                 Explorar Colección
                 <ArrowRight className="ml-2 h-5 w-5" />

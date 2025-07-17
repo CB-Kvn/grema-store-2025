@@ -51,7 +51,12 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
               {/* Botón hamburguesa */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="p-2 hover:bg-primary-50 rounded-full">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="p-2 hover:bg-primary-50 rounded-full"
+                    aria-label="Abrir menú de navegación"
+                  >
                     <Menu className="h-6 w-6 text-primary-600" />
                   </Button>
                 </SheetTrigger>
@@ -123,7 +128,13 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                 <div className="hidden md:block">
                   <SearchBar />
                 </div>
-                <Button variant="ghost" size="icon" onClick={isOpen} className="relative p-3 hover:bg-primary-50 rounded-full">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={isOpen} 
+                  className="relative p-3 hover:bg-primary-50 rounded-full"
+                  aria-label="Abrir carrito de compras"
+                >
                   <ShoppingCart className="h-12 w-12 text-primary-600" />
                   {cartItems.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-sm rounded-full h-6 w-6 flex items-center justify-center">
@@ -132,7 +143,13 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                   )}
                 </Button>
                 {!user && (
-                  <Button variant="ghost" size="icon" onClick={() => setIsLoginOpen(true)} className="p-3 hover:bg-primary-50 rounded-full">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setIsLoginOpen(true)} 
+                    className="p-3 hover:bg-primary-50 rounded-full"
+                    aria-label="Iniciar sesión"
+                  >
                     <User className="h-10 w-10 text-primary-600" />
                   </Button>
                 )}
@@ -187,7 +204,13 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             <Package className="h-8 w-8" />
             <span className="text-sm font-light">Rastreo</span>
           </Link>
-          <Button variant="ghost" size="icon" onClick={isOpen} className="flex flex-col items-center text-white hover:text-primary-200">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={isOpen} 
+            className="flex flex-col items-center text-white hover:text-primary-200"
+            aria-label="Abrir carrito de compras"
+          >
             <ShoppingCart className="h-10 w-10" />
             <span className="text-sm font-light">Carrito</span>
           </Button>

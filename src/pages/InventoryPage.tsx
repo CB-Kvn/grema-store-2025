@@ -54,6 +54,8 @@ const InventoryPage = () => {
               <button
                 className="sm:hidden p-2 hover:bg-primary-50 rounded-lg"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={isMobileMenuOpen ? "Cerrar menú móvil" : "Abrir menú móvil"}
+                aria-expanded={isMobileMenuOpen}
               >
                 {isMobileMenuOpen ? (
                   <X className="h-6 w-6 text-primary-600" />
@@ -68,15 +70,24 @@ const InventoryPage = () => {
           {isMobileMenuOpen && (
             <div className="sm:hidden border-b border-primary-100">
               <div className="p-4 space-y-2">
-                <button className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg">
+                <button 
+                  className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg"
+                  aria-label="Filtrar productos"
+                >
                   <span className="text-primary-600">Filtros</span>
                   <Filter className="h-5 w-5 text-primary-600" />
                 </button>
-                <button className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg">
+                <button 
+                  className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg"
+                  aria-label="Ordenar productos"
+                >
                   <span className="text-primary-600">Ordenar</span>
                   <ArrowUpDown className="h-5 w-5 text-primary-600" />
                 </button>
-                <button className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg">
+                <button 
+                  className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg"
+                  aria-label="Exportar datos"
+                >
                   <span className="text-primary-600">Exportar</span>
                   <Download className="h-5 w-5 text-primary-600" />
                 </button>

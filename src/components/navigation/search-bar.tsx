@@ -34,6 +34,7 @@ const SearchBar: React.FC = () => {
         size="icon"
         onClick={() => setIsOpen(true)}
         className="relative p-2 hover:bg-primary-50 rounded-full"
+        aria-label="Abrir búsqueda de productos"
       >
         <Search className="h-10 w-10 text-primary-600" />
       </Button>
@@ -49,6 +50,7 @@ const SearchBar: React.FC = () => {
             <button
               onClick={() => setIsOpen(false)}
               className="p-2 hover:bg-gray-100 rounded-full"
+              aria-label="Cerrar búsqueda"
             >
               <X className="h-6 w-6 text-gray-600" />
             </button>

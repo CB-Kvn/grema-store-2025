@@ -22,6 +22,8 @@ export const Networking = () => {
       <button
         onClick={toggleMenu}
         className="w-12 h-12 bg-[#4A3A42] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#3a2f37] transition-colors duration-300 animate-slowPulse"
+        aria-label="Abrir menú de redes sociales"
+        aria-expanded={isOpen}
       >
         <MoreHorizontal size={24} />
       </button>
@@ -35,6 +37,7 @@ export const Networking = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="w-12 h-12 bg-[#3b5998] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#344e86] transition-colors duration-300"
+            aria-label="Visitar nuestra página de Facebook"
           >
             <FaFacebook size={24} />
           </a>
@@ -45,6 +48,7 @@ export const Networking = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="w-12 h-12 bg-[#e4405f] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#d32a4a] transition-colors duration-300"
+            aria-label="Visitar nuestro perfil de Instagram"
           >
             <FaInstagram size={24} />
           </a>
@@ -55,6 +59,7 @@ export const Networking = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="w-12 h-12 bg-[#000000] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#333333] transition-colors duration-300"
+            aria-label="Visitar nuestro perfil de TikTok"
           >
             <FaTiktok size={24} />
           </a>
@@ -65,6 +70,7 @@ export const Networking = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="w-12 h-12 bg-[#25d366] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#1da851] transition-colors duration-300"
+            aria-label="Contactar por WhatsApp"
           >
             <FaWhatsapp size={24} />
           </a>
