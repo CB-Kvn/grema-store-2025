@@ -220,7 +220,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
             <Store className="h-6 w-6 mb-1" />
             <span className="text-xs font-light">Tienda</span>
           </Link>
-          <Link to="/nuestros-valores" className="flex flex-col items-center text-white hover:text-primary-200 transition-colors py-2 px-3 rounded-lg">
+          <Link to="/sobre-nosotros" className="flex flex-col items-center text-white hover:text-primary-200 transition-colors py-2 px-3 rounded-lg">
             <Info className="h-6 w-6 mb-1" />
             <span className="text-xs font-light">Nosotros</span>
           </Link>
