@@ -39,7 +39,7 @@ export const Info_Bussiness = () => {
 
         {/* Lista de características */}
         <div className="mx-auto max-w-2xl lg:max-w-4xl mt-2">
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-12 lg:gap-y-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-12 lg:gap-y-16" role="list" aria-label="Características de nuestros productos">
             {features.map((feature, index) => (
               <div
                 key={feature.name}
@@ -47,11 +47,12 @@ export const Info_Bussiness = () => {
                 data-aos="fade-up"
                 data-aos-duration="1000"
                 data-aos-delay={`${index * 180}`}
+                role="listitem"
               >
                 <span className="bg-[#9D557A] text-white flex h-12 w-12 items-center justify-center rounded-xl shadow-md mb-4">
                   <feature.icon className="h-7 w-7" aria-hidden="true" />
                 </span>
-                <dt
+                <h3
                   className="text-lg font-semibold leading-7"
                   style={{
                     fontFamily: "Quicksand, sans-serif",
@@ -59,8 +60,8 @@ export const Info_Bussiness = () => {
                   }}
                 >
                   {feature.name}
-                </dt>
-                <dd
+                </h3>
+                <p
                   className="mt-3 text-base leading-7"
                   style={{
                     fontFamily: "Poppins, sans-serif",
@@ -68,10 +69,10 @@ export const Info_Bussiness = () => {
                   }}
                 >
                   {feature.description}
-                </dd>
+                </p>
               </div>
             ))}
-          </dl>
+          </div>
         </div>
       </div>
     </div>
