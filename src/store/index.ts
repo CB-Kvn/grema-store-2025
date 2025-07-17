@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { combineReducers } from '@reduxjs/toolkit';
+import { config } from '@/config/environment';
 import productsReducer from '@/store/slices/productsSlice';
 import cartReducer from '@/store/slices/cartSlice';
 import favoritesReducer from '@/store/slices/favoriteslice';
@@ -37,6 +38,7 @@ export const store = configureStore({
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }),
+  devTools: config.ENABLE_REDUX_DEVTOOLS,
 });
 
 export const persistor = persistStore(store);
