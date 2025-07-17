@@ -164,25 +164,24 @@ const ProductTab = () => {
   }, []);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       {/* Barra de herramientas */}
-      <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center gap-4 mb-4 sm:mb-6 relative">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-6 relative">
         {/* Barra de búsqueda */}
-        <div className="hidden sm:block flex-1">
+        <div className="hidden lg:block flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-primary-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
             <Input
               type="text"
               placeholder="Buscar por nombre o SKU..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 sm:pl-10 text-sm sm:text-base"
+              className="w-full pl-10"
             />
           </div>
         </div>
-        
         {/* Botones flotantes a la derecha */}
-        <div className="fixed right-4 bottom-4 sm:right-8 sm:bottom-8 z-50 flex flex-col gap-3 sm:static sm:flex-row sm:gap-2">
+        <div className="fixed right-8 bottom-8 z-50 flex flex-col gap-3 lg:static lg:flex-row lg:gap-2">
           {/* Botón "Nuevo" */}
           <Button
             data-intro="Haz clic aquí para agregar un nuevo producto."
@@ -192,17 +191,15 @@ const ProductTab = () => {
               setIsModalOpen(true);
             }}
             variant="default"
-            className="flex items-center justify-center bg-primary-500 hover:bg-primary-700 text-white rounded-lg shadow-lg text-sm sm:text-base px-3 sm:px-4 py-2"
+            className="flex items-center justify-center bg-primary-500 hover:bg-primary-700 text-white rounded-lg shadow-lg"
           >
-            <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Nuevo</span>
-            <span className="sm:hidden">+</span>
+            <Plus className="h-5 w-5 mr-2" />
+            Nuevo
           </Button>
         </div>
-        
         {/* Barra de filtros */}
         <div
-          className="flex-1 sm:max-w-xs"
+          className="flex-1 lg:max-w-xs"
           data-intro="Filtra los productos por stock, antigüedad y más."
           data-step="2"
         >
@@ -225,9 +222,9 @@ const ProductTab = () => {
               }
             }}
           >
-            <SelectTrigger className="w-full px-3 sm:px-4 py-2 bg-white border border-primary-300 rounded-lg text-primary-700 focus:ring-primary-500 focus:border-primary-500 relative text-sm sm:text-base">
+            <SelectTrigger className="w-full px-4 py-2 bg-white border border-primary-300 rounded-lg text-primary-700 focus:ring-primary-500 focus:border-primary-500 relative">
               <SelectValue placeholder="Filtrar" />
-              <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-primary-400 pointer-events-none" />
+              <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400 pointer-events-none" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
@@ -238,56 +235,53 @@ const ProductTab = () => {
             </SelectContent>
           </Select>
         </div>
-        
         {/* Barra de búsqueda móvil */}
-        <div className="sm:hidden w-full">
+        <div className="lg:hidden w-full">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-primary-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
             <Input
               type="text"
               placeholder="Buscar por nombre o SKU..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 text-sm"
+              className="w-full pl-10"
             />
           </div>
         </div>
       </div>
-
       {/* Tabla de productos */}
       <div
-        className="overflow-x-auto -mx-2 sm:mx-0 bg-white rounded-lg shadow-sm"
+        className="overflow-x-auto"
         data-intro="Aquí puedes ver, editar o eliminar productos."
         data-step="3"
       >
-        <div className="min-w-full">
-          <table className="w-full min-w-[800px] overflow-hidden">
-            <thead>
-              <tr className="bg-primary-50 border-b border-primary-200">
-                {discount.isActive && (
-                  <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900">
-                    Seleccionar
-                  </th>
-                )}
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[200px]">Producto</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px]">Precio</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px]">Estado</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[120px] hidden sm:table-cell">Categoría</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[80px] hidden md:table-cell">Peso</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px] hidden lg:table-cell">Material</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[120px] hidden xl:table-cell">Colores</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[100px]">Cantidad</th>
-                <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-primary-900 min-w-[120px]">Acciones</th>
-              </tr>
-            </thead>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-primary-50">
+              {discount.isActive && (
+                <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">
+                  Seleccionar
+                </th>
+              )}
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900 w-full">Producto</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Precio</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Estado</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Categoría</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Peso</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Material</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Colores</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Cantidad</th>
+              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Acciones</th>
+            </tr>
+          </thead>
           <tbody>
             {currentProducts.map((product) => {
               const details = product.details || {};
               const colores = details.color || [];
               return (
-                <tr key={product.id} className="border-b border-primary-100 hover:bg-primary-25 transition-colors">
+                <tr key={product.id} className="border-b border-primary-100">
                   {discount.isActive && (
-                    <td className="py-2 sm:py-3 px-2 sm:px-4">
+                    <td className="py-3 px-4">
                       <div className="flex items-center justify-center">
                         <Input
                           type="checkbox"
@@ -299,13 +293,13 @@ const ProductTab = () => {
                               setSelectedProduct(null);
                             }
                           }}
-                          className="w-4 h-4 sm:w-5 sm:h-5 bg-primary-500 text-white border-primary-500 rounded focus:ring-primary-500 focus:ring-2 checked:bg-primary-600"
+                          className="w-5 h-5 bg-primary-500 text-white border-primary-500 rounded focus:ring-primary-500 focus:ring-2 checked:bg-primary-600"
                         />
                       </div>
                     </td>
                   )}
-                  <td className="py-2 sm:py-3 px-2 sm:px-4 align-top">
-                    <div className="flex items-center space-x-2 sm:space-x-3">
+                  <td className="py-3 px-4 w-full align-top">
+                    <div className="flex items-center space-x-3">
                       <img
                         src={
                           product.Images &&
@@ -316,30 +310,26 @@ const ProductTab = () => {
                             : "/placeholder.png"
                         }
                         alt={product.name}
-                        className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-lg object-cover flex-shrink-0"
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover"
+                        style={{ minWidth: "4rem", minHeight: "4rem", maxHeight: "5rem" }}
                       />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm lg:text-base font-medium text-primary-900 break-words line-clamp-2">{product.name}</p>
-                        <p className="text-xs text-primary-500 break-words">SKU: {product.sku}</p>
+                      <div>
+                        <p className="text-sm sm:text-base font-medium text-primary-900 break-words whitespace-pre-line">{product.name}</p>
+                        <p className="text-xs sm:text-sm text-primary-500 break-words whitespace-pre-line">SKU: {product.sku}</p>
                         {product.description && (
-                          <p className="text-xs text-primary-700 mt-1 break-words line-clamp-2 hidden sm:block">{product.description}</p>
+                          <p className="text-xs text-primary-700 mt-1 break-words whitespace-pre-line">{product.description}</p>
                         )}
-                        {/* Mostrar información adicional en móviles */}
-                        <div className="mt-1 sm:hidden space-y-1">
-                          <p className="text-xs text-primary-600">Cat: {product.category || "N/A"}</p>
-                          <p className="text-xs text-primary-600">Mat: {details.material || "N/A"}</p>
-                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4">
-                    <p className="text-xs sm:text-sm lg:text-base font-medium text-primary-900">
+                  <td className="py-3 px-4">
+                    <p className="text-sm sm:text-base font-medium text-primary-900">
                       ₡{product.WarehouseItem?.[0]?.price?.toLocaleString() || "N/A"}
                     </p>
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4">
+                  <td className="py-3 px-4">
                     <span
-                      className={`px-1 sm:px-2 py-1 rounded-full text-xs whitespace-nowrap ${product.WarehouseItem?.some((item) => item.quantity > 0)
+                      className={`px-2 py-1 rounded-full text-xs sm:text-sm ${product.WarehouseItem?.some((item) => item.quantity > 0)
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
                         }`}
@@ -347,79 +337,69 @@ const ProductTab = () => {
                       {product.WarehouseItem?.some((item) => item.quantity > 0) ? "En Stock" : "Agotado"}
                     </span>
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4 hidden sm:table-cell">
-                    <p className="text-xs sm:text-sm text-primary-700 truncate">{product.category || "N/A"}</p>
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">{product.category || "N/A"}</p>
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4 hidden md:table-cell">
-                    <p className="text-xs sm:text-sm text-primary-700">{details.peso || "N/A"}</p>
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">{details.peso || "N/A"}</p>
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4 hidden lg:table-cell">
-                    <p className="text-xs sm:text-sm text-primary-700 truncate">{details.material || "N/A"}</p>
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">{details.material || "N/A"}</p>
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4 hidden xl:table-cell">
-                    <div className="max-w-[120px]">
-                      {Array.isArray(colores) && colores.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {colores.slice(0, 3).map((color, index) => (
-                            <div key={index} className="flex items-center space-x-1">
-                              <span
-                                className="inline-block w-3 h-3 rounded-full border border-gray-300"
-                                style={{ backgroundColor: color.hex }}
-                                title={color.name}
-                              ></span>
-                              {colores.length <= 2 && (
-                                <span className="text-xs text-primary-700 truncate">{color.name}</span>
-                              )}
-                            </div>
-                          ))}
-                          {colores.length > 3 && (
-                            <span className="text-xs text-primary-500">+{colores.length - 3}</span>
-                          )}
+                  <td className="py-3 px-4">
+                    {Array.isArray(colores) && colores.length > 0 ? (
+                      colores.map((color, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <span
+                            className="inline-block w-4 h-4 rounded-full"
+                            style={{ backgroundColor: color.hex }}
+                          ></span>
+                          <span className="text-sm text-primary-700">{color.name}</span>
                         </div>
-                      ) : (
-                        <span className="text-xs text-primary-700">N/A</span>
-                      )}
-                    </div>
+                      ))
+                    ) : (
+                      <span className="text-sm text-primary-700">N/A</span>
+                    )}
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4">
-                    <p className="text-xs sm:text-sm text-primary-700 font-medium">
+                  <td className="py-3 px-4">
+                    <p className="text-sm text-primary-700">
                       {product.WarehouseItem?.reduce((acc, item) => acc + (item.quantity || 0), 0) ?? 0}
                     </p>
                   </td>
-                  <td className="py-2 sm:py-3 px-2 sm:px-4">
-                    <div className="flex items-center space-x-1">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center space-x-1 sm:space-x-2">
                       <Button
                         onClick={() => handleEdit(product)}
                         variant="ghost"
                         size="icon"
-                        className="p-1 sm:p-2 hover:bg-primary-50 rounded"
+                        className="p-1 hover:bg-primary-50 rounded"
                         title="Editar Producto"
                         data-intro="Edita el producto seleccionado."
                         data-step="4"
                       >
-                        <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-primary-600" />
+                        <Edit className="h-4 w-4 text-primary-600" />
                       </Button>
                       <Button
                         onClick={() => handleInventoryManagement(product)}
                         variant="ghost"
                         size="icon"
-                        className="p-1 sm:p-2 hover:bg-primary-50 rounded"
+                        className="p-1 hover:bg-primary-50 rounded"
                         title="Gestionar Inventario"
                         data-intro="Gestiona el inventario de este producto."
                         data-step="5"
                       >
-                        <Package className="h-3 w-3 sm:h-4 sm:w-4 text-primary-600" />
+                        <Package className="h-4 w-4 text-primary-600" />
                       </Button>
                       <Button
                         onClick={() => handleDelete(product.id!)}
                         variant="ghost"
                         size="icon"
-                        className="p-1 sm:p-2 hover:bg-primary-50 rounded"
+                        className="p-1 hover:bg-primary-50 rounded"
                         title="Eliminar Producto"
                         data-intro="Elimina el producto de la tienda."
                         data-step="6"
                       >
-                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                        <Trash2 className="h-4 w-4 text-red-600" />
                       </Button>
                     </div>
                   </td>
@@ -431,34 +411,27 @@ const ProductTab = () => {
       </div>
 
       {/* Paginación */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-3 sm:gap-4">
-        <div className="flex items-center space-x-2">
-          <Button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base ${currentPage === 1 ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-primary-500 text-white hover:bg-primary-700"}`}
-          >
-            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="hidden sm:inline ml-1">Anterior</span>
-          </Button>
-          <Button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
-            className={`px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base ${currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
-              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-              : "bg-primary-500 text-white hover:bg-primary-700"
-              }`}
-          >
-            <span className="hidden sm:inline mr-1">Siguiente</span>
-            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-        </div>
-        <div className="text-center">
-          <span className="text-xs sm:text-sm text-primary-700">
-            Página {currentPage} de {Math.ceil(filteredProducts.length / itemsPerPage)} 
-            <span className="hidden sm:inline"> | {filteredProducts.length} productos</span>
-          </span>
-        </div>
+      <div className="flex justify-between items-center mt-4">
+        <Button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-4 py-2 rounded-lg ${currentPage === 1 ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-primary-500 text-white hover:bg-primary-700"}`}
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <span className="text-sm text-primary-700">
+          Página {currentPage} de {Math.ceil(filteredProducts.length / itemsPerPage)}
+        </span>
+        <Button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
+          className={`px-4 py-2 rounded-lg ${currentPage === Math.ceil(filteredProducts.length / itemsPerPage)
+            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+            : "bg-primary-500 text-white hover:bg-primary-700"
+            }`}
+        >
+          <ChevronRight className="h-5 w-5" />
+        </Button>
       </div>
 
       {/* Modal de formulario de producto */}
