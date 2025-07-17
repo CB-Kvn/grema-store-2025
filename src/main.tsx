@@ -3,7 +3,8 @@ import App from './App.tsx';
 import './index.css';
 import './styles/tour.css';
 import { Provider } from 'react-redux';
-import { store } from './store/index.ts';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './store/index.ts';
 import { TooltipProvider } from './components/ui/tooltip.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { motion } from 'framer-motion';
@@ -100,12 +101,14 @@ root.render(
   <HelmetProvider>
     <GoogleOAuthProvider clientId="298483544989-79j1970tm0q2i8jjrn1rq4r7mrkptpgg.apps.googleusercontent.com" >
       <AuthProvider>
-      <Provider store={store}>
-        <TooltipProvider>
-          <ConfettiBackground />
-          <App />
-        </TooltipProvider>
-      </Provider>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <TooltipProvider>
+              <ConfettiBackground />
+              <App />
+            </TooltipProvider>
+          </PersistGate>
+        </Provider>
       </AuthProvider>
     </GoogleOAuthProvider>
   </HelmetProvider>

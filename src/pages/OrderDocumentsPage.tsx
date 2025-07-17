@@ -21,7 +21,16 @@ const OrderDocumentsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [hasExistingReceipt, setHasExistingReceipt] = useState(false);
   const navigate = useNavigate();
+
+  // Función para generar hash del archivo
+  const generateFileHash = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
 
   // Filtrar órdenes según búsqueda
   const filteredOrders = orders.filter(order =>
@@ -49,6 +58,10 @@ const OrderDocumentsPage = () => {
         setSelectedOrder(found);
         setFormData(prev => ({ ...prev, orderId: found.id }));
         setSearchQuery(found.orderNumber);
+        
+        // Verificar si ya existe un comprobante (documento de tipo RECEIPT)
+        const hasReceipt = found.documents && found.documents.some(doc => doc.type === 'RECEIPT');
+        setHasExistingReceipt(!!hasReceipt);
       }
     }
   }, [orderIdFromUrl, orders]);
@@ -59,6 +72,10 @@ const OrderDocumentsPage = () => {
     setSearchQuery(order.orderNumber);
     setShowResults(false);
     setErrors(prev => ({ ...prev, orderId: '' }));
+    
+    // Verificar si ya existe un comprobante (documento de tipo RECEIPT)
+    const hasReceipt = order.documents && order.documents.some(doc => doc.type === 'RECEIPT');
+    setHasExistingReceipt(!!hasReceipt);
   };
 
   const handleSearchFocus = () => {
@@ -109,24 +126,41 @@ const OrderDocumentsPage = () => {
     try {
       setIsLoading(true);
 
-      // Espera al menos 2 segundos, aunque la petición sea más rápida
+      // Primero subir el archivo siempre
       const uploadPromise = purchaseOrderService.uploadFileReceipt(
         formData.file as File
       );
       const delayPromise = new Promise((resolve) => setTimeout(resolve, 2000));
       const [uploadResponse] = await Promise.all([uploadPromise, delayPromise]);
 
-      // Luego actualizar el documento con la nueva información
-      const docIndex = 0; // Asumiendo que trabajamos con el primer documento
-      const updateData = {
-        title: selectedOrder?.documents?.[docIndex]?.title || `Comprobante actualizado - ${selectedOrder?.orderNumber}`,
-        status: selectedOrder?.documents?.[docIndex]?.status || 'PENDING' as const,
-        url: uploadResponse.url,
-        mimeType: uploadResponse.fileType,
-        size: uploadResponse.size
-      };
-      debugger;
-      await purchaseOrderService.updateDocument(selectedOrder?.id || '', updateData);
+      // Verificar si ya existe un documento para esta orden
+      const hasExistingDocument = selectedOrder?.documents && selectedOrder.documents.length > 0;
+      
+      if (hasExistingDocument) {
+        // Si existe documento, hacer PUT (actualizar)
+        const docIndex = 0; // Asumiendo que trabajamos con el primer documento
+        const updateData = {
+          title: selectedOrder?.documents?.[docIndex]?.title || `Comprobante actualizado - ${selectedOrder?.orderNumber}`,
+          status: selectedOrder?.documents?.[docIndex]?.status || 'PENDING' as const,
+          url: uploadResponse.url,
+          hash: await generateFileHash(formData.file as File),
+          mimeType: uploadResponse.fileType,
+          size: uploadResponse.size
+        };
+        await purchaseOrderService.updateDocument(selectedOrder?.id || '', updateData);
+      } else {
+        // Si no existe documento, hacer POST (crear nuevo)
+        const documentData = {
+          type: 'RECEIPT' as const,
+          title: `Comprobante de pago - ${selectedOrder?.orderNumber}`,
+          url: uploadResponse.url,
+          hash: await generateFileHash(formData.file as File),
+          mimeType: uploadResponse.fileType,
+          size: uploadResponse.size
+        };
+        debugger
+        await purchaseOrderService.addDocument(selectedOrder?.id || '', documentData);
+      }
 
       // Limpiar el carrito después de completar el proceso exitosamente
       dispatch(clearCart());
@@ -199,6 +233,12 @@ const OrderDocumentsPage = () => {
             <h1 className="text-2xl font-semibold text-primary-900 mb-6">
               Subir comprobante
             </h1>
+
+            {selectedOrder && hasExistingReceipt && (
+              <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded">
+                ⚠️ Esta orden ya tiene un comprobante. Al subir un nuevo archivo, se reemplazará el comprobante anterior.
+              </div>
+            )}
 
             {errors.submit && (
               <div className="mb-4 p-3 bg-red-100 text-red-800 rounded">
@@ -307,10 +347,10 @@ const OrderDocumentsPage = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                       </svg>
-                      Subiendo...
+                      {hasExistingReceipt ? 'Actualizando...' : 'Subiendo...'}
                     </>
                   ) : (
-                    'Subir comprobante'
+                    hasExistingReceipt ? 'Actualizar comprobante' : 'Subir comprobante'
                   )}
                 </button>
               </div>

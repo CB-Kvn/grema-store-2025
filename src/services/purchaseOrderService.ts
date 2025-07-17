@@ -9,15 +9,20 @@ export interface UpdateOrderData extends Partial<PurchaseOrder> {}
 export interface DocumentData {
   type: 'INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'OTHER';
   title: string;
-  file: File;
+  file?: File;
+  url?: string;
+  hash?: string;
+  mimeType?: string;
+  size?: number;
 }
 
 export interface DocumentUpdateData {
   title?: string;
   status?: 'PENDING' | 'APPROVED' | 'REJECTED';
-  url?: string,
-  mimeType?: string,
-  size?: number
+  url?: string;
+  hash?: string;
+  mimeType?: string;
+  size?: number;
 }
 
 export interface UploadResponse {
