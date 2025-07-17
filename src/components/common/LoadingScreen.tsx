@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LCPLogo } from "./Logo";
 import "./LoadingScreen.css";
 
 interface LoadingScreenProps {
@@ -52,10 +51,14 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       <div className="text-center max-w-md w-full px-6">
         {/* Logo */}
         <div className="mb-8 animate-fade-in">
-          <LCPLogo
-            variant="black"
-            className="w-48 h-32 sm:w-64 sm:h-40 lg:w-80 lg:h-48 object-contain mx-auto"
-          />
+          <picture>
+            <source srcSet="/Logo en negro.webp" type="image/webp" />
+            <img
+              src="/Logo en negro.png"
+              alt="Grema Store"
+              className="w-48 h-32 sm:w-64 sm:h-40 lg:w-80 lg:h-48 object-contain mx-auto"
+            />
+          </picture>
         </div>
 
         {/* Título de bienvenida */}
