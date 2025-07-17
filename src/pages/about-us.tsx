@@ -152,7 +152,7 @@ function VerticalMosaicStairs({ images }: { images: string[] }) {
 
 export default function AboutUs() {
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center px-2 py-8 md:px-8 md:py-12">
+    <div className="min-h-screen flex flex-col items-center px-2 py-8 md:px-8 md:py-12">
       {/* Hero */}
       <section className="w-[80vw] max-w-6xl px-0 py-16 flex flex-col lg:flex-row items-center gap-0">
         <motion.div
