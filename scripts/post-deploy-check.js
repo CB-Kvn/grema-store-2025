@@ -5,8 +5,8 @@
  * Verifica que todas las redirecciones y URLs funcionen correctamente
  */
 
-const https = require('https');
-const http = require('http');
+import https from 'https';
+import http from 'http';
 
 const EXPECTED_DOMAIN = 'https://www.grema-store.com';
 const TIMEOUT = 10000;

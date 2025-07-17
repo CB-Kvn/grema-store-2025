@@ -10,16 +10,24 @@
 5. Haz clic en "Continuar"
 
 ### Paso 2: Verificar la propiedad
-**Método recomendado: Archivo HTML**
-1. Descarga el archivo de verificación que Google te proporcione
-2. Súbelo a la carpeta `public/` de tu proyecto
-3. Asegúrate de que sea accesible en: `https://www.grema-store.com/google[código].html`
-4. Haz clic en "Verificar"
 
-**Método alternativo: Meta tag HTML**
-1. Copia el meta tag que Google te proporcione
-2. Agrégalo al archivo `index.html` en la sección `<head>`
-3. Ejemplo: `<meta name="google-site-verification" content="tu-codigo-aqui" />`
+⚠️ **PROBLEMA COMÚN:** Si Google no encuentra la etiqueta meta, usa el método de archivo HTML.
+
+**Método RECOMENDADO: Archivo HTML** ✅
+1. En Google Search Console, selecciona "Archivo HTML"
+2. Descarga el archivo de verificación (ej: `googleXXXXXXXX.html`)
+3. Coloca el archivo en la carpeta `public/` de tu proyecto
+4. Asegúrate de que sea accesible en: `https://www.grema-store.com/googleXXXXXXXX.html`
+5. Haz deploy de los cambios
+6. Regresa a Search Console y haz clic en "Verificar"
+
+**Método alternativo: Meta tag HTML** (si ya tienes la etiqueta)
+Si ya agregaste la etiqueta meta pero Google no la encuentra:
+1. Verifica que el sitio esté desplegado correctamente
+2. Abre `https://www.grema-store.com` en tu navegador
+3. Ve el código fuente (Ctrl+U) y busca: `google-site-verification`
+4. Si la etiqueta está presente, espera unos minutos y vuelve a intentar
+5. Si no funciona, usa el método de archivo HTML arriba ⬆️
 
 ### Paso 3: Configurar el nuevo sitio
 Una vez verificado:
