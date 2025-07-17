@@ -1,4 +1,21 @@
 {
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "https://gremastore.com/(.*)",
+      "destination": "https://www.grema-store.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "https://grema-store.com/(.*)",
+      "destination": "https://www.grema-store.com/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]

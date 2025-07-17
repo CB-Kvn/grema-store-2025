@@ -139,7 +139,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(
-      `¡Mira esta hermosa ${product.name} en Joyas de Lujo!`
+      `¡Mira esta hermosa ${product.name} en Grema Store!`
     );
 
     const shareUrls = {

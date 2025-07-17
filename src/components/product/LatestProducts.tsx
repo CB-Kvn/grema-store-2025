@@ -38,7 +38,7 @@ const LatestProducts: React.FC<{ products: Product[]; addToCart: (product: Produ
         Últimas Novedades
       </h2>
       <p className="text-primary-600 max-w-2xl mx-auto mb-8">
-        Explora nuestras más recientes creaciones. Diseños innovadores que marcan tendencia en joyería fina.
+        Explora nuestras más recientes creaciones. Diseños innovadores que marcan tendencia en bisutería fina.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {sortedProducts.slice(0, visibleProducts).map((product) => (

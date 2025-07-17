@@ -104,9 +104,9 @@ export const useStructuredData = () => {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Grema Store',
-    url: 'https://gremastore.com',
-    logo: 'https://gremastore.com/logo-grema.png',
-    description: 'Tienda especializada en joyería fina y accesorios de alta calidad',
+    url: 'https://www.grema-store.com',
+    logo: 'https://www.grema-store.com/logo-grema.png',
+    description: 'Tienda especializada en bisutería fina y accesorios de alta calidad',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+506-8888-8888',
@@ -124,11 +124,11 @@ export const useStructuredData = () => {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Grema Store',
-    url: 'https://gremastore.com',
-    description: 'Tienda online de joyería fina y accesorios de alta calidad',
+    url: 'https://www.grema-store.com',
+    description: 'Tienda online de bisutería fina y accesorios de alta calidad',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://gremastore.com/tienda?q={search_term_string}',
+      target: 'https://www.grema-store.com/tienda?q={search_term_string}',
       'query-input': 'required name=search_term_string'
     }
   });

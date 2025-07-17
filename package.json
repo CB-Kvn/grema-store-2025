@@ -13,7 +13,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "preview:staging": "vite preview --mode staging",
-    "preview:production": "vite preview --mode production"
+    "preview:production": "vite preview --mode production",
+    "post-deploy": "node scripts/post-deploy-check.js",
+    "generate:sitemap": "node scripts/generate-sitemap.js",
+    "verify:domain": "powershell -ExecutionPolicy Bypass -File scripts/verify-domain.ps1"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.3",

@@ -8,7 +8,7 @@ Disallow: /perfil/
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://gremastore.com/sitemap.xml
+Sitemap: https://www.grema-store.com/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1

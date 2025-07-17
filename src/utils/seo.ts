@@ -1,5 +1,5 @@
 // Utility to generate sitemap XML
-export const generateSitemap = (baseUrl: string = 'https://gremastore.com') => {
+export const generateSitemap = (baseUrl: string = 'https://www.grema-store.com') => {
   const staticPages = [
     { url: '/', changefreq: 'daily', priority: '1.0' },
     { url: '/tienda', changefreq: 'daily', priority: '0.9' },
@@ -38,7 +38,7 @@ export const generateSitemap = (baseUrl: string = 'https://gremastore.com') => {
 };
 
 // Generate robots.txt
-export const generateRobotsTxt = (baseUrl: string = 'https://gremastore.com') => {
+export const generateRobotsTxt = (baseUrl: string = 'https://www.grema-store.com') => {
   return `User-agent: *
 Allow: /
 Disallow: /admin/
@@ -80,14 +80,14 @@ export const generateCategoryUrl = (category: string): string => {
 
 // Meta tags for different page types
 export const getPageSEOData = (pageType: string, data?: any) => {
-  const baseUrl = 'https://gremastore.com';
+  const baseUrl = 'https://www.grema-store.com';
   
   switch (pageType) {
     case 'home':
       return {
-        title: 'Grema Store - Joyería Fina y Accesorios de Alta Calidad',
-        description: 'Descubre nuestra colección exclusiva de joyería fina, anillos, collares, aretes y pulseras. Calidad premium y diseños únicos en Grema Store.',
-        keywords: 'joyería, anillos, collares, aretes, pulseras, oro, plata, piedras preciosas, joyería fina, accesorios, Costa Rica',
+        title: 'Grema Store - Bisutería Fina y Accesorios de Alta Calidad',
+        description: 'Descubre nuestra colección exclusiva de bisutería fina, anillos, collares, aretes y pulseras. Calidad premium y diseños únicos en Grema Store.',
+        keywords: 'bisutería, anillos, collares, aretes, pulseras, oro, plata, piedras preciosas, bisutería fina, accesorios, Costa Rica',
         canonicalUrl: baseUrl,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -95,9 +95,9 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     
     case 'store':
       return {
-        title: 'Tienda Online - Grema Store | Joyería Fina',
-        description: 'Explora nuestra tienda online con la mejor selección de joyería fina. Anillos, collares, aretes y pulseras con envío a todo Costa Rica.',
-        keywords: 'tienda joyería, comprar anillos, comprar collares, joyería online, Costa Rica',
+        title: 'Tienda Online - Grema Store | Bisutería Fina',
+        description: 'Explora nuestra tienda online con la mejor selección de bisutería fina. Anillos, collares, aretes y pulseras con envío a todo Costa Rica.',
+        keywords: 'tienda bisutería, comprar anillos, comprar collares, bisutería online, Costa Rica',
         canonicalUrl: `${baseUrl}/tienda`,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -106,8 +106,8 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     case 'product':
       return {
         title: `${data?.name || 'Producto'} - Grema Store`,
-        description: `${data?.description || 'Descubre este increíble producto de joyería fina.'} Calidad premium y diseño único en Grema Store.`,
-        keywords: `${data?.name || 'producto'}, joyería, ${data?.category || 'accesorios'}, Grema Store`,
+        description: `${data?.description || 'Descubre este increíble producto de bisutería fina.'} Calidad premium y diseño único en Grema Store.`,
+        keywords: `${data?.name || 'producto'}, bisutería, ${data?.category || 'accesorios'}, Grema Store`,
         canonicalUrl: `${baseUrl}${generateProductUrl(data)}`,
         ogImage: data?.Images || data?.image || `${baseUrl}/logo-grema.png`,
         type: 'product' as const
@@ -125,9 +125,9 @@ export const getPageSEOData = (pageType: string, data?: any) => {
       const categoryName = categoryNames[data?.category] || 'Productos';
       
       return {
-        title: `${categoryName} - Grema Store | Joyería Fina`,
-        description: `Descubre nuestra colección de ${categoryName.toLowerCase()} en Grema Store. Diseños únicos y calidad premium en joyería fina.`,
-        keywords: `${categoryName.toLowerCase()}, joyería, ${data?.category}, Grema Store, Costa Rica`,
+        title: `${categoryName} - Grema Store | Bisutería Fina`,
+        description: `Descubre nuestra colección de ${categoryName.toLowerCase()} en Grema Store. Diseños únicos y calidad premium en bisutería fina.`,
+        keywords: `${categoryName.toLowerCase()}, bisutería, ${data?.category}, Grema Store, Costa Rica`,
         canonicalUrl: `${baseUrl}${generateCategoryUrl(data?.category || 'productos')}`,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -136,8 +136,8 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     case 'about':
       return {
         title: 'Nosotros - Grema Store | Nuestra Historia',
-        description: 'Conoce la historia de Grema Store, nuestra pasión por la joyería fina y nuestro compromiso con la calidad y excelencia.',
-        keywords: 'nosotros, historia, Grema Store, joyería artesanal, Costa Rica',
+        description: 'Conoce la historia de Grema Store, nuestra pasión por la bisutería fina y nuestro compromiso con la calidad y excelencia.',
+        keywords: 'nosotros, historia, Grema Store, bisutería artesanal, Costa Rica',
         canonicalUrl: `${baseUrl}/nosotros`,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -147,7 +147,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
       return {
         title: 'Contacto - Grema Store | Información de Contacto',
         description: 'Ponte en contacto con Grema Store. Encuentra nuestra ubicación, horarios y formas de comunicarte con nosotros.',
-        keywords: 'contacto, ubicación, horarios, Grema Store, joyería Costa Rica',
+        keywords: 'contacto, ubicación, horarios, Grema Store, bisutería Costa Rica',
         canonicalUrl: `${baseUrl}/contacto`,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -155,9 +155,9 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     
     default:
       return {
-        title: 'Grema Store - Joyería Fina',
-        description: 'Joyería fina y accesorios de alta calidad en Grema Store.',
-        keywords: 'joyería, accesorios, Grema Store',
+        title: 'Grema Store - Bisutería Fina',
+        description: 'Bisutería fina y accesorios de alta calidad en Grema Store.',
+        keywords: 'bisutería, accesorios, Grema Store',
         canonicalUrl: baseUrl,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const

@@ -2,7 +2,7 @@
   export const products_list = [
     {
       "title": "Toda la colección",
-      "description": "Explora nuestra colección de joyas únicas, donde el lujo y la elegancia se encuentran."
+      "description": "Explora nuestra colección de bisutería única, donde el lujo y la elegancia se encuentran."
     },
     {
       "title": "Aretes",

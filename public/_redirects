@@ -1,0 +1,9 @@
+# Redirect index.html to root
+/index.html / 301
+
+# Redirect non-www to www
+https://grema-store.com/* https://www.grema-store.com/:splat 301!
+https://gremastore.com/* https://www.grema-store.com/:splat 301!
+
+# SPA fallback
+/* /index.html 200

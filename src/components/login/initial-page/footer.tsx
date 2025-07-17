@@ -19,7 +19,7 @@ export const Footer = () => {
               <div className="lg:col-span-4">
                 <div className="mb-6">
                   <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                    Joyas de Lujo
+                    Grema Store
                   </h2>
                   <p className="text-base sm:text-lg text-primary-100 leading-relaxed">
                     Creando piezas atemporales de elegancia desde 1990. Cada pieza
@@ -36,7 +36,7 @@ export const Footer = () => {
                         <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                       </svg>
                     </div>
-                    <span className="text-primary-100">info@joyasdelujo.com</span>
+                    <span className="text-primary-100">info@gremastore.com</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
@@ -178,7 +178,7 @@ export const Footer = () => {
                   <div className="sm:col-span-2 lg:col-span-1 flex justify-center items-center">
                     <img
                       src="https://res.cloudinary.com/denqtcsyy/image/upload/f_auto,q_auto/v1/images/f0bqluptggwdvpa0yrru"
-                      alt="Joyas de lujo elegantes"
+                      alt="Bisutería elegante"
                       className="w-48 h-48 sm:w-64 sm:h-64 object-cover rounded-lg shadow-lg"
                     />
                   </div>
@@ -191,7 +191,7 @@ export const Footer = () => {
           <div className="border-t border-primary-600 py-6 text-center">
             <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
               <p className="text-primary-200">
-                &copy; 2025 Joyas de Lujo. Todos los derechos reservados.
+                &copy; 2025 Grema Store. Todos los derechos reservados.
               </p>
               <div className="flex space-x-6 text-sm">
                 <a href="#" className="text-primary-200 hover:text-white transition-colors duration-200">

@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
 
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(`¡Mira esta hermosa ${product.name} en Joyas de Lujo!`);
+    const text = encodeURIComponent(`¡Mira esta hermosa ${product.name} en Grema Store!`);
 
     const shareUrls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,

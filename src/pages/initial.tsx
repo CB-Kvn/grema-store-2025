@@ -292,8 +292,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 Nuestros Más Vendidos
               </h2>
               <p className="text-primary-600 max-w-2xl mx-auto">
-                Descubre las piezas que han cautivado a nuestros clientes. Joyas
-                atemporales que combinan elegancia y exclusividad.
+                Descubre las piezas que han cautivado a nuestros clientes. Bisutería
+                atemporal que combina elegancia y exclusividad.
               </p>
             </div>
             {/* Related Products */}
@@ -352,7 +352,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               </h2>
               <p className="text-primary-600 max-w-2xl mx-auto">
                 Explora nuestras más recientes creaciones. Diseños innovadores
-                que marcan tendencia en joyería fina.
+                que marcan tendencia en bisutería fina.
               </p>
             </div>
             {/* Related Products */}

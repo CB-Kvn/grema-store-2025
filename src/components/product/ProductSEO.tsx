@@ -83,7 +83,7 @@ export const ProductSEO: React.FC<ProductSEOProps> = ({ product, category }) => 
       {/* Título y meta descripción */}
       <title>{productName} - Grema Store</title>
       <meta name="description" content={productDescription} />
-      <meta name="keywords" content={`${productName}, ${productCategory}, joyería, comprar, Costa Rica`} />
+      <meta name="keywords" content={`${productName}, ${productCategory}, bisutería, comprar, Costa Rica`} />
       
       {/* Meta tags para robots */}
       <meta name="robots" content="index, follow" />

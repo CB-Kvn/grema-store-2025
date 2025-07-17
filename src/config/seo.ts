@@ -4,8 +4,8 @@ export const GA_TRACKING_ID = process.env.REACT_APP_GA_TRACKING_ID || 'GA_MEASUR
 // Configuración de Meta Tags predeterminadas
 export const DEFAULT_SEO_CONFIG = {
   siteName: 'Grema Store',
-  siteDescription: 'Tienda online de joyería fina y accesorios elegantes en Costa Rica. Encuentra anillos, collares, aretes y pulseras de la más alta calidad.',
-  siteUrl: process.env.REACT_APP_SITE_URL || 'https://grema-store.com',
+  siteDescription: 'Tienda online de bisutería fina y accesorios elegantes en Costa Rica. Encuentra anillos, collares, aretes y pulseras de la más alta calidad.',
+  siteUrl: process.env.REACT_APP_SITE_URL || 'https://www.grema-store.com',
   defaultImage: '/Logo%20en%20negro.png',
   twitterHandle: '@grema_store',
   facebookAppId: process.env.REACT_APP_FACEBOOK_APP_ID || '',
@@ -62,14 +62,14 @@ export const WEBSTORE_SCHEMA = {
   },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Catálogo de Joyería',
+    name: 'Catálogo de Bisutería',
     itemListElement: [
       {
         '@type': 'Offer',
         itemOffered: {
           '@type': 'Product',
           name: 'Anillos',
-          category: 'Joyería',
+          category: 'Bisutería',
         },
       },
       {
@@ -77,7 +77,7 @@ export const WEBSTORE_SCHEMA = {
         itemOffered: {
           '@type': 'Product',
           name: 'Collares',
-          category: 'Joyería',
+          category: 'Bisutería',
         },
       },
       {
@@ -85,7 +85,7 @@ export const WEBSTORE_SCHEMA = {
         itemOffered: {
           '@type': 'Product',
           name: 'Aretes',
-          category: 'Joyería',
+          category: 'Bisutería',
         },
       },
       {
@@ -93,7 +93,7 @@ export const WEBSTORE_SCHEMA = {
         itemOffered: {
           '@type': 'Product',
           name: 'Pulseras',
-          category: 'Joyería',
+          category: 'Bisutería',
         },
       },
     ],
@@ -103,12 +103,12 @@ export const WEBSTORE_SCHEMA = {
 // Keywords por categorías
 export const CATEGORY_KEYWORDS = {
   all: [
-    'joyería Costa Rica',
+    'bisutería Costa Rica',
     'anillos oro',
     'collares plata',
     'aretes diamantes',
     'pulseras elegantes',
-    'joyería fina',
+    'bisutería fina',
     'accesorios mujer',
     'regalos especiales',
   ],

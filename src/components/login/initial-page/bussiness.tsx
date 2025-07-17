@@ -27,7 +27,7 @@ export const Info_Bussiness = () => {
             <div className="relative -mt-10 xs:-mt-16 sm:-mt-16">
               <img
                 src="/Logo en negro.png"
-                alt="Logo de Joyas de Lujo"
+                alt="Logo de Grema Store"
                 className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 object-contain drop-shadow-lg"
                 data-aos="fade-up"
                 data-aos-duration="1000"
