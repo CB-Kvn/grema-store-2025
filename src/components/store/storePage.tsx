@@ -759,9 +759,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Desktop Filters Sidebar */}
-          <div className="hidden lg:block w-72 flex-shrink-0">
+          <div className="hidden lg:block w-full lg:w-72 flex-shrink-0">
             <div className="sticky top-8">
               <div className="bg-white rounded-2xl shadow-lg border border-primary-100 p-6">
                 <div className="flex items-center justify-between mb-4">
