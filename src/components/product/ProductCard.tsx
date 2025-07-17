@@ -88,6 +88,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
               e.stopPropagation();
               setShowShareMenu(!showShareMenu);
             }}
+            aria-label={showShareMenu ? "Cerrar menú de compartir" : "Compartir producto"}
+            aria-expanded={showShareMenu}
           >
             <Share2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
           </button>
@@ -103,6 +105,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
               e.stopPropagation();
               onAddToCart();
             }}
+            aria-label={`Añadir ${product.name} al carrito`}
           >
             <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
           </button>

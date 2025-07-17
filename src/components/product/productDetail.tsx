@@ -399,6 +399,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                     <button
                       className="p-2 hover:bg-primary-50 rounded-full transition-colors"
                       onClick={() => setShowShareMenu(!showShareMenu)}
+                      aria-label={showShareMenu ? "Cerrar menú de compartir" : "Compartir producto"}
+                      aria-expanded={showShareMenu}
                     >
                       <Share2 className="h-6 w-6 text-primary-600" />
                     </button>

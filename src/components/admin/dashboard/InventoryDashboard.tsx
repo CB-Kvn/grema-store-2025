@@ -138,6 +138,7 @@ const InventoryDashboard: React.FC = () => {
             onClick={() => setSlider1Idx((idx) => Math.max(0, idx - 1))}
             disabled={slider1Idx === 0}
             className="p-2 rounded-full border bg-white hover:bg-primary-50 disabled:opacity-50"
+            aria-label="Gráfico anterior"
           >
             <ChevronLeft />
           </button>
@@ -152,6 +153,7 @@ const InventoryDashboard: React.FC = () => {
             }
             disabled={slider1Idx + chartsPerSlider >= chartCardsList.length}
             className="p-2 rounded-full border bg-white hover:bg-primary-50 disabled:opacity-50"
+            aria-label="Gráfico siguiente"
           >
             <ChevronRight />
           </button>
