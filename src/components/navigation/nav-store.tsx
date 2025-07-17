@@ -10,6 +10,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import SearchBar from "./search-bar";
 import LoginModal from "../admin/login/LoginModal";
 import { useAuthGoogleContext } from "@/context/ContextAuth";
+import { LCPLogo } from "@/components/common/Logo";
 
 export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
   const cartItems = useAppSelector((state) => state.cart.items);
@@ -36,14 +37,10 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
             {/* --- IZQUIERDA: LOGO SIEMPRE VISIBLE --- */}
             <Link to={"/"}>
               <div className="flex flex-shrink-0 items-center">
-                <picture>
-                  <source srcSet="/Logo en negro.webp" type="image/webp" />
-                  <img
-                    src="/Logo en negro.png"
-                    alt="Logo de la empresa"
-                    className="w-32 h-12 sm:w-48 sm:h-16 lg:w-64 lg:h-20 object-contain"
-                  />
-                </picture>
+                <LCPLogo
+                  variant="black"
+                  className="w-32 h-12 sm:w-48 sm:h-16 lg:w-64 lg:h-20 object-contain"
+                />
               </div>
             </Link>
 
@@ -66,10 +63,10 @@ export const Menu_Bar = ({ isOpen }: { isOpen: () => void }) => {
                 <SheetContent side="left" className="p-0">
                   <div className="flex flex-col gap-2 p-4 items-start">
                     <Link to="/" className="flex items-center gap-2 mb-4">
-                      <picture>
-                        <source srcSet="/Logo en negro.webp" type="image/webp" />
-                        <img src="/Logo en negro.png" alt="Logo" className="w-32 h-12 object-contain" />
-                      </picture>
+                      <LCPLogo
+                        variant="black"
+                        className="w-32 h-12 object-contain"
+                      />
                     </Link>
                     <Button
                       variant="ghost"
