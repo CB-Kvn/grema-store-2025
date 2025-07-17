@@ -77,4 +77,22 @@ export const logger = {
   },
 };
 
+// Imprimir información del ambiente actual al cargar la configuración
+console.log(
+  `%c🚀 GREMA STORE - Ambiente: ${config.APP_ENV.toUpperCase()}`,
+  `color: ${config.APP_ENV === 'production' ? '#22c55e' : config.APP_ENV === 'staging' ? '#f59e0b' : '#3b82f6'}; font-weight: bold; font-size: 14px;`
+);
+
+console.log('📋 Configuración actual:', {
+  Ambiente: config.APP_ENV,
+  'API URL': config.API_URL,
+  'Base URL': config.BASE_URL,
+  'Debug Mode': config.DEBUG_MODE,
+  'Logs Habilitados': config.ENABLE_LOGS,
+  'Redux DevTools': config.ENABLE_REDUX_DEVTOOLS,
+  'Analytics': config.ANALYTICS_ENABLED,
+  'Sentry': config.SENTRY_ENABLED,
+  'Optimización de Imágenes': config.IMAGE_OPTIMIZATION,
+});
+
 export default config;
