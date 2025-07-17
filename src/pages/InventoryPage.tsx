@@ -39,20 +39,20 @@ const InventoryPage = () => {
 
   
   return (
-    <div className="min-h-screen bg-primary-10/50 backdrop-blur-sm py-4 sm:py-6 lg:py-8">
-      <div className="max-w-[95%] lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-        <Card >
-          <CardHeader className="border-b border-primary-100 p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center space-x-2">
-                <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />
-                <CardTitle className="text-xl sm:text-2xl font-semibold text-primary-900">
+    <div className="min-h-screen bg-primary-10/50 backdrop-blur-sm py-2 sm:py-4 md:py-6 lg:py-8">
+      <div className="w-full max-w-[98%] sm:max-w-[95%] lg:max-w-7xl xl:max-w-[90%] 2xl:max-w-[85%] mx-auto px-2 sm:px-4 lg:px-6 xl:px-8">
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-primary-100 p-3 sm:p-4 lg:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center space-x-2 min-w-0 flex-1">
+                <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600 flex-shrink-0" />
+                <CardTitle className="text-lg sm:text-xl md:text-2xl font-semibold text-primary-900 truncate">
                   Gestión de Inventario
                 </CardTitle>
               </div>
               {/* Mobile Menu Button */}
               <button
-                className="sm:hidden p-2 hover:bg-primary-50 rounded-lg"
+                className="sm:hidden p-2 hover:bg-primary-50 rounded-lg flex-shrink-0"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? "Cerrar menú móvil" : "Abrir menú móvil"}
                 aria-expanded={isMobileMenuOpen}
@@ -68,27 +68,27 @@ const InventoryPage = () => {
 
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="sm:hidden border-b border-primary-100">
-              <div className="p-4 space-y-2">
+            <div className="sm:hidden border-b border-primary-100 bg-white">
+              <div className="p-3 sm:p-4 space-y-2">
                 <button 
-                  className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg"
+                  className="w-full flex items-center justify-between p-3 hover:bg-primary-50 rounded-lg transition-colors"
                   aria-label="Filtrar productos"
                 >
-                  <span className="text-primary-600">Filtros</span>
+                  <span className="text-primary-600 font-medium">Filtros</span>
                   <Filter className="h-5 w-5 text-primary-600" />
                 </button>
                 <button 
-                  className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg"
+                  className="w-full flex items-center justify-between p-3 hover:bg-primary-50 rounded-lg transition-colors"
                   aria-label="Ordenar productos"
                 >
-                  <span className="text-primary-600">Ordenar</span>
+                  <span className="text-primary-600 font-medium">Ordenar</span>
                   <ArrowUpDown className="h-5 w-5 text-primary-600" />
                 </button>
                 <button 
-                  className="w-full flex items-center justify-between p-2 hover:bg-primary-50 rounded-lg"
+                  className="w-full flex items-center justify-between p-3 hover:bg-primary-50 rounded-lg transition-colors"
                   aria-label="Exportar datos"
                 >
-                  <span className="text-primary-600">Exportar</span>
+                  <span className="text-primary-600 font-medium">Exportar</span>
                   <Download className="h-5 w-5 text-primary-600" />
                 </button>
               </div>
@@ -97,72 +97,87 @@ const InventoryPage = () => {
 
           <CardContent className="p-0">
             <Tabs defaultValue="clientes" className="w-full">
-              <TabsList className="flex w-full bg-primary-50 border-b border-primary-200 rounded-none">
+              <TabsList className="flex w-full bg-primary-50 border-b border-primary-200 rounded-none overflow-x-auto">
                 <TabsTrigger
                   value="inventario"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                  className="flex-1 min-w-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
                 >
                   Informes
                 </TabsTrigger>
                 <TabsTrigger
                   value="clientes"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                  className="flex-1 min-w-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
                 >
                   Clientes
                 </TabsTrigger>
                 <TabsTrigger
                   value="productos"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                  className="flex-1 min-w-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
                 >
                   Productos
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="gastos"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                  className="flex-1 min-w-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
                 >
-                  Control de gastos
+                  <span className="hidden sm:inline">Control de gastos</span>
+                  <span className="sm:hidden">Gastos</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="bodegas"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                  className="flex-1 min-w-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
                 >
                   Bodegas
                 </TabsTrigger>
                 <TabsTrigger
                   value="ordenes"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                  className="flex-1 min-w-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
                 >
                   Órdenes
                 </TabsTrigger>
                 <TabsTrigger
                   value="descuentos"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition"
+                  className="flex-1 min-w-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:bg-white data-[state=active]:text-primary-700 text-primary-500 font-semibold transition text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
                 >
                   Descuentos
                 </TabsTrigger>
               </TabsList>
-              <TabsContent className='p-6' value="clientes">
-                <UsersTable users={users} />
+              <TabsContent className='p-3 sm:p-4 lg:p-6' value="clientes">
+                <div className="overflow-x-auto">
+                  <UsersTable users={users} />
+                </div>
               </TabsContent>
-              <TabsContent className='p-6' value="productos">
-                <ProductTab />
+              <TabsContent className='p-3 sm:p-4 lg:p-6' value="productos">
+                <div className="overflow-x-auto">
+                  <ProductTab />
+                </div>
               </TabsContent>
-              <TabsContent className='p-6' value="inventario">
-                <InventoryDashboard />
+              <TabsContent className='p-3 sm:p-4 lg:p-6' value="inventario">
+                <div className="overflow-x-auto">
+                  <InventoryDashboard />
+                </div>
               </TabsContent>
-              <TabsContent className='p-6' value="gastos">
-                <ExpensesTab></ExpensesTab>
+              <TabsContent className='p-3 sm:p-4 lg:p-6' value="gastos">
+                <div className="overflow-x-auto">
+                  <ExpensesTab></ExpensesTab>
+                </div>
               </TabsContent>
-              <TabsContent className='p-6' value="bodegas">
-                <WarehousesTab />
+              <TabsContent className='p-3 sm:p-4 lg:p-6' value="bodegas">
+                <div className="overflow-x-auto">
+                  <WarehousesTab />
+                </div>
               </TabsContent>
-              <TabsContent className='p-6' value="ordenes">
-                <PurchaseOrdersTab />
+              <TabsContent className='p-3 sm:p-4 lg:p-6' value="ordenes">
+                <div className="overflow-x-auto">
+                  <PurchaseOrdersTab />
+                </div>
               </TabsContent>
-              <TabsContent value="descuentos">
-                <div className="bg-white rounded shadow p-6">
-                  <DiscountTab/>
+              <TabsContent className='p-3 sm:p-4 lg:p-6' value="descuentos">
+                <div className="bg-white rounded shadow overflow-x-auto">
+                  <div className="p-3 sm:p-4 lg:p-6">
+                    <DiscountTab/>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
