@@ -127,10 +127,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
                   className={`w-full rounded-md border ${errors.category ? 'border-red-500' : 'border-input'} bg-background px-3 py-2`}
                 >
                   <option value="">Seleccionar categoría</option>
-                  <option value="rings">Anillos</option>
-                  <option value="necklaces">Collares</option>
-                  <option value="earrings">Aretes</option>
-                  <option value="bracelets">Pulseras</option>
+                  <option value="Anillos">Anillos</option>
+                  <option value="Collares">Collares</option>
+                  <option value="Aretes">Aretes</option>
+                  <option value="Pulseras">Pulseras</option>
+                  <option value="Sets">Sets</option>
                 </select>
                 {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
               </div>
