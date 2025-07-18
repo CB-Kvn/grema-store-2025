@@ -85,9 +85,9 @@ export const getPageSEOData = (pageType: string, data?: any) => {
   switch (pageType) {
     case 'home':
       return {
-        title: 'Grema Store - Bisutería Fina y Accesorios de Alta Calidad',
-        description: 'Descubre nuestra colección exclusiva de bisutería fina, anillos, collares, aretes y pulseras. Calidad premium y diseños únicos en Grema Store.',
-        keywords: 'bisutería, anillos, collares, aretes, pulseras, oro, plata, piedras preciosas, bisutería fina, accesorios, Costa Rica',
+        title: 'Grema Store - Bisutería Artesanal y Accesorios Únicos',
+        description: 'Descubre nuestra colección exclusiva de bisutería artesanal hecha a mano. Anillos, collares, aretes y pulseras con diseños únicos y originales.',
+        keywords: 'bisutería artesanal, anillos, collares, aretes, pulseras, hecho a mano, artesanal, diseños únicos, accesorios, Costa Rica',
         canonicalUrl: baseUrl,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -95,9 +95,9 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     
     case 'store':
       return {
-        title: 'Tienda Online - Grema Store | Bisutería Fina',
-        description: 'Explora nuestra tienda online con la mejor selección de bisutería fina. Anillos, collares, aretes y pulseras con envío a todo Costa Rica.',
-        keywords: 'tienda bisutería, comprar anillos, comprar collares, bisutería online, Costa Rica',
+        title: 'Tienda Online - Grema Store | Bisutería Artesanal',
+        description: 'Explora nuestra tienda online con la mejor selección de bisutería artesanal hecha a mano. Piezas únicas con envío a todo Costa Rica.',
+        keywords: 'tienda bisutería artesanal, comprar anillos artesanales, comprar collares artesanales, bisutería hecha a mano, Costa Rica',
         canonicalUrl: `${baseUrl}/tienda`,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -106,8 +106,8 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     case 'product':
       return {
         title: `${data?.name || 'Producto'} - Grema Store`,
-        description: `${data?.description || 'Descubre este increíble producto de bisutería fina.'} Calidad premium y diseño único en Grema Store.`,
-        keywords: `${data?.name || 'producto'}, bisutería, ${data?.category || 'accesorios'}, Grema Store`,
+        description: `${data?.description || 'Descubre esta increíble pieza de bisutería artesanal hecha a mano.'} Diseño único y calidad artesanal en Grema Store.`,
+        keywords: `${data?.name || 'producto'}, bisutería artesanal, ${data?.category || 'accesorios'}, hecho a mano, Grema Store`,
         canonicalUrl: `${baseUrl}${generateProductUrl(data)}`,
         ogImage: data?.Images || data?.image || `${baseUrl}/logo-grema.png`,
         type: 'product' as const
@@ -125,9 +125,9 @@ export const getPageSEOData = (pageType: string, data?: any) => {
       const categoryName = categoryNames[data?.category] || 'Productos';
       
       return {
-        title: `${categoryName} - Grema Store | Bisutería Fina`,
-        description: `Descubre nuestra colección de ${categoryName.toLowerCase()} en Grema Store. Diseños únicos y calidad premium en bisutería fina.`,
-        keywords: `${categoryName.toLowerCase()}, bisutería, ${data?.category}, Grema Store, Costa Rica`,
+        title: `${categoryName} - Grema Store | Bisutería Artesanal`,
+        description: `Descubre nuestra colección de ${categoryName.toLowerCase()} artesanales en Grema Store. Diseños únicos hechos a mano con técnicas artesanales.`,
+        keywords: `${categoryName.toLowerCase()}, bisutería artesanal, ${data?.category}, hecho a mano, Grema Store, Costa Rica`,
         canonicalUrl: `${baseUrl}${generateCategoryUrl(data?.category || 'productos')}`,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -136,8 +136,8 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     case 'about':
       return {
         title: 'Nosotros - Grema Store | Nuestra Historia',
-        description: 'Conoce la historia de Grema Store, nuestra pasión por la bisutería fina y nuestro compromiso con la calidad y excelencia.',
-        keywords: 'nosotros, historia, Grema Store, bisutería artesanal, Costa Rica',
+        description: 'Conoce la historia de Grema Store, nuestra pasión por la bisutería artesanal y nuestro compromiso con la calidad y técnicas tradicionales.',
+        keywords: 'nosotros, historia, Grema Store, bisutería artesanal, hecho a mano, Costa Rica',
         canonicalUrl: `${baseUrl}/nosotros`,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const
@@ -155,9 +155,9 @@ export const getPageSEOData = (pageType: string, data?: any) => {
     
     default:
       return {
-        title: 'Grema Store - Bisutería Fina',
-        description: 'Bisutería fina y accesorios de alta calidad en Grema Store.',
-        keywords: 'bisutería, accesorios, Grema Store',
+        title: 'Grema Store - Bisutería Artesanal',
+        description: 'Bisutería artesanal hecha a mano y accesorios únicos en Grema Store.',
+        keywords: 'bisutería artesanal, hecho a mano, accesorios únicos, Grema Store',
         canonicalUrl: baseUrl,
         ogImage: `${baseUrl}/logo-grema.png`,
         type: 'website' as const

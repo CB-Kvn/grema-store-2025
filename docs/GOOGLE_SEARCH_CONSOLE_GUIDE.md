@@ -39,16 +39,25 @@ Si ya agregaste la etiqueta meta pero Google no la encuentra:
 5. ✅ Si aparece la etiqueta → volver a intentar verificación en Search Console
 6. ✅ Si NO aparece → usar método de archivo HTML arriba ⬆️
 
-### Paso 3: Configurar el nuevo sitio
-Una vez verificado:
+### Paso 3: Configurar el nuevo sitio 🚀 **HACER AHORA**
 
-1. **Enviar Sitemap:**
-   - Ve a "Sitemaps" en el menú lateral
-   - Agrega: `https://www.grema-store.com/sitemap.xml`
+🎉 **¡VERIFICACIÓN EXITOSA!** Tu dominio está verificado en Google Search Console.
+
+**ACCIÓN INMEDIATA REQUERIDA:**
+
+1. **Enviar Sitemap:** ⚡ **URGENTE**
+   - Ve a "Sitemaps" en el menú lateral izquierdo
+   - En el campo "Agregar un nuevo sitemap" ingresa: `sitemap.xml`
    - Haz clic en "Enviar"
+   - Deberías ver: ✅ Estado: Correcto
 
-2. **Configurar dominio preferido:**
-   - En la configuración, establece `www.grema-store.com` como dominio principal
+2. **Verificar sitemap enviado:**
+   - URL completa: `https://www.grema-store.com/sitemap.xml`
+   - Estado esperado: "Correcto" o "Procesando"
+
+3. **Configurar dominio preferido:**
+   - En "Configuración" → "Configuración del sitio"
+   - Confirma que `www.grema-store.com` sea el dominio principal
 
 ### Paso 4: Migrar datos del dominio anterior
 Si tenías `gremastore.com` o `grema-store.com` en Search Console:

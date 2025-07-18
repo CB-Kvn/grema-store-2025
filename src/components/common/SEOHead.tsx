@@ -106,7 +106,7 @@ export const useStructuredData = () => {
     name: 'Grema Store',
     url: 'https://www.grema-store.com',
     logo: 'https://www.grema-store.com/logo-grema.png',
-    description: 'Tienda especializada en bisutería fina y accesorios de alta calidad',
+    description: 'Tienda especializada en bisutería artesanal hecha a mano con diseños únicos',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+506-8888-8888',
@@ -125,7 +125,7 @@ export const useStructuredData = () => {
     '@type': 'WebSite',
     name: 'Grema Store',
     url: 'https://www.grema-store.com',
-    description: 'Tienda online de bisutería fina y accesorios de alta calidad',
+    description: 'Tienda online de bisutería artesanal hecha a mano con diseños únicos',
     potentialAction: {
       '@type': 'SearchAction',
       target: 'https://www.grema-store.com/tienda?q={search_term_string}',

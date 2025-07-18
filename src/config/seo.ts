@@ -4,7 +4,7 @@ export const GA_TRACKING_ID = process.env.REACT_APP_GA_TRACKING_ID || 'GA_MEASUR
 // Configuración de Meta Tags predeterminadas
 export const DEFAULT_SEO_CONFIG = {
   siteName: 'Grema Store',
-  siteDescription: 'Tienda online de bisutería fina y accesorios elegantes en Costa Rica. Encuentra anillos, collares, aretes y pulseras de la más alta calidad.',
+  siteDescription: 'Tienda online de bisutería artesanal hecha a mano en Costa Rica. Encuentra anillos, collares, aretes y pulseras con diseños únicos y originales.',
   siteUrl: process.env.REACT_APP_SITE_URL || 'https://www.grema-store.com',
   defaultImage: '/Logo%20en%20negro.png',
   twitterHandle: '@grema_store',
@@ -103,14 +103,14 @@ export const WEBSTORE_SCHEMA = {
 // Keywords por categorías
 export const CATEGORY_KEYWORDS = {
   all: [
-    'bisutería Costa Rica',
-    'anillos oro',
-    'collares plata',
-    'aretes diamantes',
-    'pulseras elegantes',
-    'bisutería fina',
-    'accesorios mujer',
-    'regalos especiales',
+    'bisutería artesanal Costa Rica',
+    'anillos hechos a mano',
+    'collares artesanales',
+    'aretes únicos',
+    'pulseras artesanales',
+    'bisutería artesanal',
+    'accesorios únicos mujer',
+    'regalos especiales artesanales',
   ],
   rings: [
     'anillos de compromiso',

@@ -292,8 +292,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 Nuestros Más Vendidos
               </h2>
               <p className="text-primary-600 max-w-2xl mx-auto">
-                Descubre las piezas que han cautivado a nuestros clientes. Bisutería
-                atemporal que combina elegancia y exclusividad.
+                Descubre las piezas artesanales que han cautivado a nuestros clientes. Bisutería
+                hecha a mano que combina elegancia y originalidad única.
               </p>
             </div>
             {/* Related Products */}
@@ -351,8 +351,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
                 Últimas Novedades
               </h2>
               <p className="text-primary-600 max-w-2xl mx-auto">
-                Explora nuestras más recientes creaciones. Diseños innovadores
-                que marcan tendencia en bisutería fina.
+                Explora nuestras más recientes creaciones artesanales. Diseños únicos
+                hechos a mano que marcan tendencia en bisutería artesanal.
               </p>
             </div>
             {/* Related Products */}
