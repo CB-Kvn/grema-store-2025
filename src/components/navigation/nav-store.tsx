@@ -58,7 +58,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
   // Navegación memoizada
   const navigationHandlers = useMemo(() => ({
     tienda: () => navigate("/tienda"),
-    valores: () => navigate("/nuestros-valores"),
+    valores: () => navigate("/sobre-nosotros"),
     tracking: () => navigate("/tracking"),
     admin: () => navigate("/admin/inventory"),
     home: () => navigate("/")
