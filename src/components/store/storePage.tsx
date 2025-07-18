@@ -719,7 +719,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   return (
     <div className="min-h-screen bg-transparent">
       {/* Floating Social Button */}
-      <FloatingSocialButton />
+      {/* <FloatingSocialButton /> */}
       
       {/* SEO Head */}
       <SEOHead

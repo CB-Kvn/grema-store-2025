@@ -124,7 +124,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       />
       
       {/* Floating Social Button */}
-      <FloatingSocialButton />
+      {/* <FloatingSocialButton /> */}
       
       {/* Botón flotante a la derecha centrado, solo visible en pantallas md+ */}
       <AnimatePresence>

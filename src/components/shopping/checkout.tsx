@@ -223,7 +223,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   return (
     <div className="min-h-screen bg-primary-50">
       {/* Floating Social Button */}
-      <FloatingSocialButton />
+      {/* <FloatingSocialButton /> */}
       
       {/* Header */}
       <header className="bg-white shadow-sm">
