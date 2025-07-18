@@ -240,7 +240,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
           </Swiper>
         )}
         {filteredProducts.length === 0 && !loading && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 min-h-[400px] flex items-center justify-center">
             <p className="text-primary-500">
               No se encontraron productos que coincidan con tu búsqueda.
             </p>
