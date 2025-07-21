@@ -13,6 +13,7 @@ export interface Item {
     isNew:        boolean;
     status:       string;
     product?:     Product;
+    warehouseAssignments?: { warehouseId: string; quantity: number }[];
 }
 
 export interface PurchaseOrder {

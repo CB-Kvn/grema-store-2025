@@ -10,6 +10,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { motion } from 'framer-motion';
 import { AuthProvider } from './context/ContextAuth.tsx';
 import { HelmetProvider } from 'react-helmet-async';
+import './lib/chartConfig'; // Configuración global de Chart.js
 
 // Componente de fondo confeti animado (líneas más gruesas)
 function ConfettiBackground() {

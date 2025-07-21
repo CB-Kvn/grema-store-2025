@@ -1,3 +1,4 @@
+import React from 'react';
 import { 
   Search, 
   Plus, 
@@ -20,6 +21,7 @@ const ProductTab = () => {
     selectedProduct,
     viewMode,
     setViewMode,
+    currentProducts,
     currentPage,
     handlePageChange,
     itemsPerPage,
@@ -109,7 +111,7 @@ const ProductTab = () => {
 
             {/* Lista de productos */}
             <ProductListView
-              products={products as any}
+              products={products}
               searchQuery={searchQuery}
               onViewDetails={handleViewDetails}
               onEdit={handleEditProduct}

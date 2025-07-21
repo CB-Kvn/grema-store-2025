@@ -2,36 +2,17 @@ import React, { useState } from 'react';
 import {
   Warehouse as WarehouseIcon, Search, Filter, Plus, ArrowUpDown,
   Download, Upload, AlertTriangle, CheckCircle2,
-  Settings, Eye, Edit, Trash2, BarChart3, ChevronDown, ChevronUp
+  BarChart3, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { format } from 'date-fns';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import '@/lib/chartConfig'; // Usar configuración global de Chart.js
 import { Input } from '../../ui/input';
-import WarehouseDetailsModal from './WarehouseDetailsModal';
-import EditWarehouseModal from './EditWarehouseModal';
-import AddWarehouseModal from './AddWarehouseModal';
+// Nuevos componentes inline
+import WarehouseListView from './WarehouseListView';
+import WarehouseDetailsView from './WarehouseDetailsView';
+import WarehouseFormView from './WarehouseFormView';
 import { useWarehousesTab } from '@/hooks/useWarehousesTab';
 import AIInsights from '@/components/admin/common/AIInsights';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
 
 const WarehousesTab = () => {
   const [showDashboard, setShowDashboard] = useState(false);
@@ -41,22 +22,48 @@ const WarehousesTab = () => {
     searchQuery,
     setSearchQuery,
     selectedWarehouse,
-    setSelectedWarehouse,
-    isDetailsModalOpen,
-    setIsDetailsModalOpen,
-    isEditModalOpen,
-    setIsEditModalOpen,
-    isAddModalOpen,
-    setIsAddModalOpen,
-    filteredWarehouses,
+    viewMode,
+    setViewMode,
     averageOccupancy,
     lowStockItems,
     handleViewDetails,
     handleEdit,
+    handleCreate,
+    handleBackToList,
   } = useWarehousesTab();
 
-  return (
-    <div className="space-y-6">
+  // Función para manejar la edición desde la vista de detalles
+  const handleEditFromDetails = () => {
+    setViewMode('edit');
+  };
+
+  // Renderizado condicional usando un solo return para evitar problemas de DOM
+  const renderContent = () => {
+    // Si estamos en vista de detalles, mostrar el componente de detalles
+    if (viewMode === 'details' && selectedWarehouse) {
+      return (
+        <WarehouseDetailsView
+          warehouse={selectedWarehouse}
+          onBack={handleBackToList}
+          onEdit={handleEditFromDetails}
+        />
+      );
+    }
+
+    // Si estamos en vista de edición o creación, mostrar el formulario
+    if (viewMode === 'edit' || viewMode === 'create') {
+      return (
+        <WarehouseFormView
+          warehouse={selectedWarehouse || undefined}
+          onBack={handleBackToList}
+          mode={viewMode}
+        />
+      );
+    }
+
+    // Vista principal de lista (por defecto)
+    return (
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -81,7 +88,7 @@ const WarehousesTab = () => {
             )}
           </button>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleCreate}
             className="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -254,131 +261,24 @@ const WarehousesTab = () => {
         </div>
       </div>
 
-      {/* Warehouses Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-primary-50">
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Almacén</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Ubicación</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Encargado</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Estado</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Ocupación</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Último Inventario</th>
-              <th className="py-3 px-4 text-left text-xs sm:text-sm font-medium text-primary-900">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredWarehouses.map((warehouse) => (
-              <tr key={warehouse.id} className="border-b border-primary-100">
-                <td className="py-3 px-4">
-                  <div className="flex items-center space-x-3">
-                    <WarehouseIcon className="h-5 w-5 text-primary-600" />
-                    <div>
-                      <p className="text-sm sm:text-base font-medium text-primary-900">{warehouse.name}</p>
-                      <p className="text-xs sm:text-sm text-primary-500">{warehouse.phone}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3 px-4">
-                  <p className="text-sm sm:text-base text-primary-900">{warehouse.location}</p>
-                  <p className="text-xs sm:text-sm text-primary-500">{warehouse.address}</p>
-                </td>
-                <td className="py-3 px-4">
-                  <p className="text-sm sm:text-base text-primary-900">{warehouse.manager}</p>
-                  <p className="text-xs sm:text-sm text-primary-500">{warehouse.email}</p>
-                </td>
-                <td className="py-3 px-4">
-                  <span className={`px-2 py-1 rounded-full text-xs sm:text-sm ${warehouse.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                      warehouse.status === 'MAINTENANCE' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                    }`}>
-                    {warehouse.status === 'ACTIVE' ? 'Activo' :
-                      warehouse.status === 'MAINTENANCE' ? 'Mantenimiento' :
-                        'Inactivo'}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-primary-600 rounded-full h-2"
-                        style={{
-                          width: `${(warehouse.currentOccupancy / warehouse.capacity) * 100}%`
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs sm:text-sm text-primary-600">
-                      {((warehouse.currentOccupancy / warehouse.capacity) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-primary-500 mt-1">
-                    {warehouse.currentOccupancy} / {warehouse.capacity} unidades
-                  </p>
-                </td>
-                <td className="py-3 px-4">
-                  <span className="text-sm sm:text-base text-primary-900">
-                    {warehouse.lastInventoryDate ? format(new Date(warehouse.lastInventoryDate), 'dd/MM/yyyy') : 'No disponible'}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center space-x-1 sm:space-x-2">
-                    <button
-                      onClick={() => handleViewDetails(warehouse)}
-                      className="p-1 hover:bg-primary-50 rounded"
-                      title="Ver Detalles"
-                    >
-                      <Eye className="h-4 w-4 text-primary-600" />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(warehouse)}
-                      className="p-1 hover:bg-primary-50 rounded"
-                      title="Editar Almacén"
-                    >
-                      <Edit className="h-4 w-4 text-primary-600" />
-                    </button>
-                    <button
-                      className="p-1 hover:bg-primary-50 rounded"
-                      title="Eliminar Almacén"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Warehouses Grid - Nueva vista de cards clickeables */}
+      <WarehouseListView
+        warehouses={warehouses}
+        searchQuery={searchQuery}
+        onViewDetails={handleViewDetails}
+        onEdit={handleEdit}
+        onDelete={(warehouse) => {
+          // TODO: Implementar función de eliminación
+          console.log('Eliminar warehouse:', warehouse.id);
+        }}
+      />
 
-      {/* Modals */}
-      {isDetailsModalOpen && selectedWarehouse && (
-        <WarehouseDetailsModal
-          warehouse={selectedWarehouse}
-          onClose={() => {
-            setIsDetailsModalOpen(false);
-            setSelectedWarehouse(null);
-          }}
-        />
-      )}
-
-      {isEditModalOpen && selectedWarehouse && (
-        <EditWarehouseModal
-          warehouse={selectedWarehouse}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedWarehouse(null);
-          }}
-        />
-      )}
-
-      {isAddModalOpen && (
-        <AddWarehouseModal
-          onClose={() => setIsAddModalOpen(false)}
-        />
-      )}
     </div>
-  );
+    );
+  };
+
+  // Usar renderContent para evitar múltiples returns que causan problemas de DOM
+  return renderContent();
 };
 
 // Stat Card Component

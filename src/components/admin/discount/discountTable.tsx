@@ -46,7 +46,7 @@ export function DiscountsTable({ discounts, onEdit, onDelete }: {
   };
 
   return (
-    <Card className="border-primary-200 shadow-sm">
+    <Card className="border-primary-200 shadow-sm mt-5">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-primary-900">
           <Tag className="h-5 w-5 text-primary-600" />

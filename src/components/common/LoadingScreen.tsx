@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import "./LoadingScreen.css";
+import { motion } from "framer-motion";
 
 interface LoadingScreenProps {
   onComplete: () => void;
@@ -12,14 +12,19 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Simular carga progresiva
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          timeoutRef.current = setTimeout(() => {
             setIsLoading(false);
             onComplete();
           }, 500);
@@ -29,15 +34,34 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       });
     }, 50);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [onComplete]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
+      // Limpiar intervalos existentes
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
       // Completar la carga inmediatamente si hay búsqueda
       setProgress(100);
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setIsLoading(false);
         onComplete();
       }, 300);
@@ -47,29 +71,50 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
   if (!isLoading) return null;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center z-50">
+    <motion.div 
+      className="fixed inset-0 bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center z-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="text-center max-w-md w-full px-6">
         {/* Logo */}
-        <div className="mb-8 animate-fade-in">
+        <motion.div 
+          className="mb-8"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <img
             src="/Logo en negro.png"
             alt="Grema Store"
             className="w-48 h-32 sm:w-64 sm:h-40 lg:w-80 lg:h-48 object-contain mx-auto"
           />
-        </div>
+        </motion.div>
 
         {/* Título de bienvenida */}
-        <div className="mb-8 animate-fade-in-delay">
+        <motion.div 
+          className="mb-8"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+        >
           <h1 className="text-2xl sm:text-3xl font-bold text-primary-800 mb-2">
             Bienvenido a Grema Store
           </h1>
           <p className="text-primary-600 text-sm sm:text-base">
             Encuentra todo lo que necesitas
           </p>
-        </div>
+        </motion.div>
 
         {/* Barra de búsqueda */}
-        <div className="mb-8 animate-fade-in-delay-2">
+        <motion.div 
+          className="mb-8"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
+        >
           <form onSubmit={handleSearch} className="relative">
             <Input
               type="text"
@@ -86,28 +131,39 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
               <Search className="h-4 w-4" />
             </Button>
           </form>
-        </div>
+        </motion.div>
 
         {/* Barra de progreso */}
-        <div className="mb-4 animate-fade-in-delay-3">
+        <motion.div 
+          className="mb-4"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.9 }}
+        >
           <div className="w-full bg-primary-200 rounded-full h-2">
-            <div
-              className="bg-primary-600 h-2 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
+            <motion.div
+              className="bg-primary-600 h-2 rounded-full"
+              initial={{ width: "0%" }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             />
           </div>
           <p className="text-primary-600 text-sm mt-2">
             Cargando... {progress}%
           </p>
-        </div>
+        </motion.div>
 
         {/* Mensaje de carga */}
-        <div className="animate-pulse">
+        <motion.div
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+        >
           <p className="text-primary-500 text-xs">
             Preparando tu experiencia de compra
           </p>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };

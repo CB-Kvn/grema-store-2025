@@ -1,15 +1,19 @@
 import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { selectAllWarehouses } from "@/store/slices/warehousesSlice";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
 import type { Warehouse } from "@/types";
 
+export type ViewMode = 'list' | 'details' | 'edit' | 'create';
+
 export function useWarehousesTab() {
+  const dispatch = useAppDispatch();
   const warehouses = useSelector(selectAllWarehouses);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const filteredWarehouses = useMemo(() =>
     warehouses.filter(warehouse =>
@@ -37,12 +41,59 @@ export function useWarehousesTab() {
 
   const handleViewDetails = (warehouse: Warehouse) => {
     setSelectedWarehouse(warehouse);
-    setIsDetailsModalOpen(true);
+    setViewMode('details');
   };
 
   const handleEdit = (warehouse: Warehouse) => {
     setSelectedWarehouse(warehouse);
-    setIsEditModalOpen(true);
+    setViewMode('edit');
+  };
+
+  const handleCreate = () => {
+    setSelectedWarehouse(null);
+    setViewMode('create');
+  };
+
+  const handleBackToList = () => {
+    setViewMode('list');
+    setSelectedWarehouse(null);
+  };
+
+  const handleDeleteWarehouse = async (warehouseId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      // TODO: Implementar eliminación en el servicio
+      console.log('Deleting warehouse:', warehouseId);
+      if (selectedWarehouse && selectedWarehouse.id === warehouseId) {
+        handleBackToList();
+      }
+    } catch (err) {
+      setError('Error al eliminar la bodega');
+      console.error('Error deleting warehouse:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (warehouseData: Partial<Warehouse>) => {
+    try {
+      setLoading(true);
+      setError(null);
+      if (viewMode === 'edit' && selectedWarehouse) {
+        // TODO: Implementar actualización en el servicio
+        console.log('Updating warehouse:', warehouseData);
+      } else {
+        // TODO: Implementar creación en el servicio
+        console.log('Creating warehouse:', warehouseData);
+      }
+      handleBackToList();
+    } catch (err) {
+      setError('Error al guardar la bodega');
+      console.error('Error saving warehouse:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
@@ -50,19 +101,20 @@ export function useWarehousesTab() {
     searchQuery,
     setSearchQuery,
     selectedWarehouse,
-    setSelectedWarehouse,
-    isDetailsModalOpen,
-    setIsDetailsModalOpen,
-    isEditModalOpen,
-    setIsEditModalOpen,
-    isAddModalOpen,
-    setIsAddModalOpen,
+    viewMode,
+    setViewMode,
     filteredWarehouses,
     totalCapacity,
     totalOccupancy,
     averageOccupancy,
     lowStockItems,
+    loading,
+    error,
     handleViewDetails,
     handleEdit,
+    handleCreate,
+    handleBackToList,
+    handleDeleteWarehouse,
+    handleSubmit,
   };
 }

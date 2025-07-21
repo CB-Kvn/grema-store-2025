@@ -8,15 +8,21 @@ import { addWarehouseItems } from "@/store/slices/warehousesSlice";
 import { useProductService } from "@/hooks/useProductService";
 import type { Product, WarehouseItem } from "@/types";
 
+export type ViewMode = 'list' | 'details' | 'edit' | 'create' | 'inventory';
+
 export function useProductTab() {
   const dispatch = useDispatch();
   const products = useSelector((state: RootState) => state.products.items);
   const warehouses = useSelector((state: RootState) => state.warehouses.warehouses);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  
+  // Deprecated - mantenidos para compatibilidad con modales existentes
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
   const [discount, setDiscount] = useState({
     isActive: false,
     type: "PERCENTAGE",
@@ -154,5 +160,28 @@ export function useProductTab() {
     handleDelete,
     warehouses,
     products,
+    // Nuevas funciones para el sistema de vistas inline
+    viewMode,
+    setViewMode,
+    handleViewDetails: (product: Product) => {
+      setSelectedProduct(product);
+      setViewMode('details');
+    },
+    handleEditProduct: (product: Product) => {
+      setSelectedProduct(product);
+      setViewMode('edit');
+    },
+    handleCreateProduct: () => {
+      setSelectedProduct(null);
+      setViewMode('create');
+    },
+    handleInventoryView: (product: Product) => {
+      setSelectedProduct(product);
+      setViewMode('inventory');
+    },
+    handleBackToList: () => {
+      setViewMode('list');
+      setSelectedProduct(null);
+    },
   };
 }

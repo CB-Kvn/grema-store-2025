@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Phone, Mail, User, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Warehouse } from '@/types';

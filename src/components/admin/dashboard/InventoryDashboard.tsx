@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Bar, Line, Doughnut } from "react-chartjs-2";
+import "@/lib/chartConfig"; // Importar configuración de Chart.js
 
 const chartsPerSlider = 3;
 

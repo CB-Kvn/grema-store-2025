@@ -5,6 +5,8 @@ import { setExpenses } from "@/store/slices/expensesSlice";
 import { expenseService } from "@/services/expenseService";
 import { Expense } from "@/types/expense";
 
+export type ViewMode = 'list' | 'details' | 'edit' | 'create';
+
 export function useExpensesTab() {
   const dispatch = useAppDispatch();
   const expenses = useAppSelector((state) => state.expenses.items);
@@ -12,6 +14,10 @@ export function useExpensesTab() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewExpenseModalOpen, setIsNewExpenseModalOpen] = useState(false);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+  
+  // Nuevos estados para el sistema inline
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -174,10 +180,49 @@ export function useExpensesTab() {
   const handleDeleteExpense = async (expenseId: string) => {
     try {
       await expenseService.delete(expenseId);
-      dispatch(setExpenses(expenses.filter((e) => e.id !== expenseId)));
+      dispatch(setExpenses(expenses.filter((e: any) => e.id !== expenseId)));
     } catch (error) {
       console.error("Error al eliminar el gasto:", error);
       alert("No se pudo eliminar el gasto. Inténtalo de nuevo.");
+    }
+  };
+
+  // Funciones de navegación inline
+  const handleViewDetails = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setViewMode('details');
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setViewMode('edit');
+  };
+
+  const handleCreateExpense = () => {
+    setSelectedExpense(null);
+    setViewMode('create');
+  };
+
+  const handleBackToList = () => {
+    setViewMode('list');
+    setSelectedExpense(null);
+  };
+
+  const handleSubmit = async (expenseData: Partial<Expense>) => {
+    try {
+      if (viewMode === 'edit' && selectedExpense) {
+        await expenseService.update(selectedExpense.id, expenseData);
+      } else {
+        await expenseService.create(expenseData);
+      }
+      // Recargar gastos
+      const response = await expenseService.getAll();
+      if (Array.isArray(response)) {
+        dispatch(setExpenses(response as Expense[]));
+      }
+      handleBackToList();
+    } catch (error) {
+      console.error('Error saving expense:', error);
     }
   };
 
@@ -198,5 +243,15 @@ export function useExpensesTab() {
     paymentChartData,
     handleViewReceipt,
     handleDeleteExpense,
+    
+    // Nuevas funciones inline
+    selectedExpense,
+    viewMode,
+    setViewMode,
+    handleViewDetails,
+    handleEditExpense,
+    handleCreateExpense,
+    handleBackToList,
+    handleSubmit,
   };
 }
