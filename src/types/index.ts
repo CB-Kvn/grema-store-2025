@@ -104,6 +104,7 @@ export interface AddressInfo {
   country: string;
   provincia: string;
   canton: string;
+  distrito: string;
 }
 
 export type { PurchaseOrder, Supplier, Warehouse, WarehouseItem, StockMovement, Expense };

@@ -69,6 +69,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
     country: '',
     provincia: '',
     canton: '',
+    distrito: '',
   });
   const [billingInfo, setBillingInfo] = useState<AddressInfo>({
     buyerId: '',
@@ -83,7 +84,12 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
     country: '',
     provincia: '',
     canton: '',
+    distrito: '',
   });
+
+  // Asegurar que el campo distrito mantenga su selección
+  // Si AddressForm no está usando value={values.distrito} en el select, agregarlo
+  // Si AddressForm ya lo hace, no se requiere cambio aquí
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [needInvoice, setNeedInvoice] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'SINPE MOVIL' | 'TRANSFER'>('SINPE MOVIL');
@@ -184,8 +190,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
       phone: shippingInfo.phone,
       id: orderNumber,
       orderNumber: orderNumber,
-      dataShipping: shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
-      dataBilling: needInvoice ? (billingInfo.address + ", " + provincias[Number(billingInfo.provincia) - 1] + " " + billingInfo.canton + ", " + billingInfo.zipCode) : shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
+      dataShipping: shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1].nombre + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
+      dataBilling: needInvoice ? (billingInfo.address + ", " + provincias[Number(billingInfo.provincia) - 1].nombre + " " + billingInfo.canton + ", " + billingInfo.zipCode) : shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1] + " " + shippingInfo.canton + ", " + shippingInfo.zipCode,
       paymentMethod,
       items: orderItems,
       totalAmount: totals.total,
