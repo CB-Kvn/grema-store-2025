@@ -34,10 +34,6 @@ const AddressForm: React.FC<AddressFormProps> = ({
     debugger
     const canton = availableCantones.find(c => c.nombre === values.canton);
     setAvailableDistritos(canton?.distritos || []);
-    // Si el distrito actual no existe en el nuevo cantón, limpiar distrito
-    // if (!canton?.distritos?.find(d => d.nombre === values.distrito)) {
-    //   onChange({ ...values, distrito: '' });
-    // }
   }, [values.canton, availableCantones]);
 
 
