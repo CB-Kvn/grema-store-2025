@@ -83,11 +83,6 @@ export function useProductImageState() {
     // Extrae la ruta a partir de "/photos_products/"
     const path = url.substring(url.indexOf("/photos_products/"));
 
-
-    // Llama al backend para eliminar la imagen por url
-    // await productService.createImage(productId, url);
-
-    // Actualiza itemInventory eliminando la imagen por url
     if (itemInventory && itemInventory.Images && itemInventory.filepaths) {
 
       let filepaths
@@ -103,12 +98,16 @@ export function useProductImageState() {
       const updatedImages = itemInventory.Images[0].url.filter((img: any) => !img.includes(url));
       console.log("updatedImagesInventoryFilepaths", updatedImagesInventoryFilepaths);
 
-      await productService.updateImage(itemInventory.filepaths[0].id, updatedImagesInventoryFilepaths, true, itemInventory.filepaths[0].productId) as any[];
+      const response = await productService.updateImage(itemInventory.Images[0].id, updatedImagesInventoryFilepaths, true, itemInventory.filepaths[0].productId) as any[];
+
+      debugger
 
       dispatch(updateImagesToProduct({ productId: itemInventory.id, images: updatedImages }));
-      dispatch(updateImagesToItemInventory(updatedImages));
-      dispatch(updateImagesToProductFilePath({ productId, filepaths: updatedImagesInventoryFilepaths }));
-      dispatch(updateImagesToItemInventoryFilePath(updatedImagesInventoryFilepaths));
+
+      dispatch(updateImagesToItemInventory(response));//no
+      
+      dispatch(updateImagesToProductFilePath({ productId, filepaths: updatedImagesInventoryFilepaths }))//no
+      dispatch(updateImagesToItemInventoryFilePath(response));//no
     }
 
   };

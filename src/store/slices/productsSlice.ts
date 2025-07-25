@@ -151,7 +151,7 @@ const productsSlice = createSlice({
         if (!product.Images[0]) {
           product.Images[0] = {
             id: images.id ?? productId, // Usa el id recibido o el productId como fallback
-            url: images.urls,
+            url: images.urls.urls,
             state: true,
             productId: productId,
           };
@@ -160,8 +160,10 @@ const productsSlice = createSlice({
         }
       }
     },
+
     updateImagesToItemInventory(state, action: PayloadAction<string[] & { id?: number}>) {
       const id = (action.payload as any).id;
+      debugger
       if (state.itemInventory) {
         if (!state.itemInventory.Images) state.itemInventory.Images = [];
         if (!state.itemInventory.Images[0]) {
@@ -172,7 +174,7 @@ const productsSlice = createSlice({
             productId: state.itemInventory.id,
           };
         } else {
-          state.itemInventory.Images[0].url = action.payload.images;
+          state.itemInventory.Images[0].url = action.payload.urls;
         }
       }
     },

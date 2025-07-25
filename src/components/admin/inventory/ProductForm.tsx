@@ -23,15 +23,12 @@ export interface ProductFormProps {
 const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit }) => {
   const {
     formData,
-
     errors,
     setErrors,
     imageModal,
     setImageModal,
     showCreateModal,
-
     pendingName,
-
     loadingCreate,
     details,
     cierre,

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { IKImage, IKContext } from 'imagekitio-react';
 import { Heart, ShoppingCart, Share2, Facebook, Twitter, Instagram, Link } from 'lucide-react';
 
 
@@ -58,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
   },[]);
 
   return (
-    <>
+    <IKContext urlEndpoint="https://ik.imagekit.io/wtelcc7rn"> {/* Reemplaza por tu urlEndpoint real */}
       <div
         className="relative h-[300px] sm:h-[350px] md:h-[400px] rounded-lg shadow-md overflow-hidden group cursor-pointer flex flex-col"
         onMouseEnter={() => setIsHovering(true)}
@@ -68,17 +69,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         }}
         onClick={onClick}
       >
-        {/* Full-size image background */}
-        <div
-          className="flex-grow bg-cover bg-center transition-all duration-300 transform group-hover:scale-105"
-          style={{
-            backgroundImage: `url(${
-              product.Images && product.Images[0] && product.Images[0].url
-                ? product.Images[0].url[0]
-                : "https://via.placeholder.com/300" // Imagen de placeholder si no hay imágenes
-            })`,
-          }}
-        />
+        {/* Imagen optimizada con IKImage */}
+        <div className="flex-grow relative transition-all duration-300 transform group-hover:scale-105">
+          <IKImage
+            path={
+              product.filepaths && product.filepaths[0] && product.filepaths[0].url
+                ? JSON.parse(product.filepaths[0].url)[0]
+                : "/placeholder.jpg"
+            }
+            transformation={[{ width: 300, quality: 80 }]}
+            loading="lazy"
+            lqip={{ active: true }}
+            alt={product.name || "Imagen optimizada"}
+            className="object-cover w-full h-full absolute inset-0"
+          />
+        </div>
 
         {/* Action buttons */}
         <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex space-x-1 sm:space-x-2 z-20">
@@ -197,9 +202,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
           Agregar al Carrito
         </button>
       </div>
-
-    </>
-
+    </IKContext>
   );
 };
 
