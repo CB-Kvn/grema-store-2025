@@ -74,7 +74,7 @@ export function DiscountTab() {
 
   return (
     <>
-      <div className="bg-white rounded shadow p-6">
+      
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700">{error}</p>
@@ -99,7 +99,7 @@ export function DiscountTab() {
             />
           </>
         )}
-      </div>
+      
     </>
   );
 }

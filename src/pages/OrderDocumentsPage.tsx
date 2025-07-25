@@ -162,8 +162,7 @@ const OrderDocumentsPage = () => {
         await purchaseOrderService.addDocument(selectedOrder?.id || '', documentData);
       }
 
-      // Limpiar el carrito después de completar el proceso exitosamente
-      dispatch(clearCart());
+      
 
       setUploadSuccess(true);
       setShowDialog(true);

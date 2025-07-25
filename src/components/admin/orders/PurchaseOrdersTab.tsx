@@ -109,6 +109,9 @@ const PurchaseOrdersTab = () => {
   const [showDashboard, setShowDashboard] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<PurchaseOrder | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const PAGE_SIZE = 10;
 
   // Estados para filtros y ordenamiento
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -255,9 +258,16 @@ const PurchaseOrdersTab = () => {
     dispatch(fetchOrders());
   }, [dispatch]);
 
+  const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE);
+
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
   return (
     <>
-      <div className="flex flex-col space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col space-y-6 p-2 sm:p-2">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -769,7 +779,7 @@ const PurchaseOrdersTab = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrders.map((order) => (
+                {paginatedOrders.map((order) => (
                   <TableRow key={order.id} className="border-primary-100 hover:bg-primary-50/30">
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -863,6 +873,57 @@ const PurchaseOrdersTab = () => {
             </Button>
           </CardFooter>
         </Card>
+
+        {/* Controles de paginación con estilo moderno */}
+        <div className="flex justify-center items-center mt-6 gap-2">
+          <button
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+            className={`px-2 py-1 rounded-full border border-primary-200 bg-white text-primary-600 hover:bg-primary-50 transition ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            aria-label="Primera página"
+          >
+            «
+          </button>
+          <button
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-2 py-1 rounded-full border border-primary-200 bg-white text-primary-600 hover:bg-primary-50 transition ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            aria-label="Anterior"
+          >
+            ‹
+          </button>
+          {/* Números de página */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`px-3 py-1 rounded-full border transition font-semibold text-sm ${
+                page === currentPage
+                  ? 'bg-primary-600 text-white border-primary-600 shadow'
+                  : 'bg-white text-primary-700 border-primary-200 hover:bg-primary-50'
+              }`}
+              aria-current={page === currentPage ? 'page' : undefined}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-2 py-1 rounded-full border border-primary-200 bg-white text-primary-600 hover:bg-primary-50 transition ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+            aria-label="Siguiente"
+          >
+            ›
+          </button>
+          <button
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+            className={`px-2 py-1 rounded-full border border-primary-200 bg-white text-primary-600 hover:bg-primary-50 transition ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+            aria-label="Última página"
+          >
+            »
+          </button>
+        </div>
       </div>
       {/* Modales */}
       <AnimatePresence>

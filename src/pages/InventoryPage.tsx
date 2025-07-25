@@ -125,9 +125,9 @@ const InventoryPage = () => {
                     {tab.value === 'bodegas' && <WarehousesTab />}
                     {tab.value === 'ordenes' && <PurchaseOrdersTab />}
                     {tab.value === 'descuentos' && (
-                      <div className="bg-white rounded shadow p-6">
+                     
                         <DiscountTab/>
-                      </div>
+                      
                     )}
                   </TabsContent>
                 ))}
@@ -159,9 +159,9 @@ const InventoryPage = () => {
                 {activeTab === 'bodegas' && <WarehousesTab />}
                 {activeTab === 'ordenes' && <PurchaseOrdersTab />}
                 {activeTab === 'descuentos' && (
-                  <div className="bg-white rounded shadow p-4 sm:p-6">
+                 
                     <DiscountTab/>
-                  </div>
+                  
                 )}
               </div>
             </div>

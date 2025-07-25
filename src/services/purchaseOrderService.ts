@@ -116,7 +116,7 @@ export const purchaseOrderService = {
     return response.data;
   },
 
-  uploadFileReceipt: async (file: File): Promise<UploadResponse> => {
+  uploadFileReceipt: async (file: File): Promise<any> => {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -126,5 +126,15 @@ export const purchaseOrderService = {
       },
     });
     return response.data as UploadResponse;
+  },
+
+  sendEmail: async (to: string,
+    subject: string,
+    orderNumber: string,
+    paymentLink: string,
+    trackingLink: string,): Promise<any> => {
+
+    const response = await api.post('/mail/send', { to, subject, orderNumber, paymentLink, trackingLink });
+    return response.data as any;
   },
 };

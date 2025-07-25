@@ -18,10 +18,15 @@ const userPersistConfig = {
   storage,
 };
 
+const cartsPersistConfig = {
+  key: 'cart',
+  storage,
+};
+
 // Crear reducer combinado
 const rootReducer = combineReducers({
   products: productsReducer,
-  cart: cartReducer,
+  cart: persistReducer(cartsPersistConfig, cartReducer),
   favorites: favoritesReducer,
   expenses: expensesReducer,
   purchases: purchasesReducer,  
