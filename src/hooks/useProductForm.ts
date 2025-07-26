@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { useAppSelector } from "@/hooks/useAppSelector";
-import { updateProductInventory } from "@/store/slices/productsSlice";
+import { updateProduct, updateProductInventory } from "@/store/slices/productsSlice";
 import { warehouseService } from "@/services/warehouseService";
 import { productService } from "@/services/productService";
 import { ProductFormType } from "@/components/admin/inventory/ProductForm";
@@ -165,7 +165,9 @@ export function useProductForm(product: ProductFormType, onSubmit: (product: Pro
     const { Images, ...rest } = data;
     try {
       const updated = await productService.update(rest.id, rest);
+      console.log('Producto actualizado:', updated);
       dispatch(updateProductInventory(updated));
+      dispatch(updateProduct(updated))
     } catch (error) {
       console.error('Error actualizando producto:', error);
     }

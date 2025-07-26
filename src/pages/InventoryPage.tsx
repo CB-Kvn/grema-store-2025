@@ -16,6 +16,7 @@ import { DiscountTab } from '@/components/admin/discount/discountTab';
 import { AdminTourButton } from '@/components/admin/common/AdminTourButton';
 import { useAutoTourInit } from '@/hooks/useAutoTourInit';
 import '@/styles/tour.css';
+import { useInventoryPage } from '@/hooks/useInventoryPage';
 
 
 // Simulación de fetch
@@ -31,6 +32,7 @@ async function getAllUsers() {
 const InventoryPage = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('inventario');
+  const {} = useInventoryPage();
   
   // Hook para inicializar tour automáticamente (sin ciclos infinitos)
   useAutoTourInit();

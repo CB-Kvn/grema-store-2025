@@ -119,6 +119,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                       onChange={(e) => setProductPrice(Number(e.target.value) || 0)}
                       placeholder="0.00"
                       className="w-full"
+                      disabled={inventory.length === 0}
                     />
                   </div>
                   <div>
@@ -132,6 +133,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                       onChange={(e) => setProductCost(Number(e.target.value) || 0)}
                       placeholder="0.00"
                       className="w-full"
+                      disabled={inventory.length === 0}
                     />
                   </div>
                 </div>
@@ -150,7 +152,7 @@ const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
                   <div className="flex items-center">
                     <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
                     <p className="text-yellow-800">
-                      No hay stock disponible para este producto. Configure el precio y costo arriba, luego agregue stock en las bodegas.
+                      No hay stocks disponible para este producto.Agregue primero un stock en las bodegas y luego configure el precio y costo arriba.
                     </p>
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog } from "@headlessui/react";
 import { X, Plus } from "lucide-react";
 import ProductImageUpload from '../helpers/ImageUpload';
@@ -7,6 +7,8 @@ import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { z } from "zod";
 import { productSchema, useProductForm } from "@/hooks/useProductForm";
+import { clearItemInventory } from '@/store/slices/productsSlice';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
 
 // Esquema de validación con Zod
 
@@ -47,6 +49,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
     handleUpdateProduct,
     generateUniqueSku,
   } = useProductForm(product, onSubmit, onClose);
+
+  const [showSuccess, setShowSuccess] = React.useState(false);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    return () => {
+      console.log('Cleaning up ProductForm');
+      dispatch(clearItemInventory())
+    }
+  }, []);
 
 
   return (
@@ -133,7 +144,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
                 {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
               </div>
               {/* SKU */}
-              <div>
+              {/* <div>
                 <Label htmlFor="sku">SKU</Label>
                 <Input
                   id="sku"
@@ -148,7 +159,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
                   className={errors.sku ? 'border-red-500' : ''}
                 />
                 {errors.sku && <p className="text-sm text-red-500 mt-1">{errors.sku}</p>}
-              </div>
+              </div> */}
             </div>
             {/* Descripción */}
             <div>
@@ -394,6 +405,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
             </div>
           </div>
 
+          {/* Campo SKU y botón para generar SKU alineados */}
+          <div className="flex flex-row items-end gap-2 mb-4">
+            <div className="flex-1">
+              <Label htmlFor="sku">SKU</Label>
+              <Input
+                id="sku"
+                value={formData.sku}
+                onChange={(e) => handleInputChange('sku', e.target.value)}
+                className={errors.sku ? 'border-red-500' : ''}
+              />
+              {errors.sku && <p className="text-sm text-red-500 mt-1">{errors.sku}</p>}
+            </div>
+            <button
+              type="button"
+              className="h-[40px] px-3 py-2 bg-primary-100 text-primary-700 rounded hover:bg-primary-200 flex items-center"
+              onClick={() => {
+                const newSku = generateUniqueSku();
+                handleInputChange('sku', newSku);
+              }}
+            >
+              Generar SKU
+            </button>
+          </div>
+
           {/* Botones de acción */}
           <div className="flex justify-end space-x-4">
             <button
@@ -404,21 +439,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
               Cancelar
             </button>
             {formData.id ? (
-              <button
-                type="button"
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                onClick={async () => {
-                  const normalized = normalizeFormData(formData);
-                  const errs = validate(normalized);
-                  setErrors(errs);
-                  if (Object.keys(errs).length === 0) {
-                    await handleUpdateProduct(normalized);
-                    onClose();
-                  }
-                }}
-              >
-                Actualizar producto
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  onClick={async () => {
+                    const normalized = normalizeFormData(formData);
+                    const errs = validate(normalized);
+                    setErrors(errs);
+                    if (Object.keys(errs).length === 0) {
+                      await handleUpdateProduct(normalized);
+                      setShowSuccess(true);
+                      setTimeout(() => {
+                        setShowSuccess(false);
+                        onClose();
+                      }, 1800);
+                    }
+                  }}
+                >
+                  Actualizar producto
+                </button>
+                {showSuccess && (
+                  <div className="fixed right-6 bottom-6 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-[9999] animate-fade-in">
+                    Producto actualizado correctamente
+                  </div>
+                )}
+              </>
             ) : (
               <button
                 type="submit"

@@ -48,7 +48,7 @@ const ProductTab = () => {
     const savedPage = localStorage.getItem('currentPage');
     return savedPage ? parseInt(savedPage, 10) : 1;
   });
-  const {deleteProduct} = useProductService()
+  const { deleteProduct } = useProductService()
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
 
   // Guardar la página actual en localStorage
@@ -86,9 +86,11 @@ const ProductTab = () => {
   // Filtrar productos y reiniciar la página actual
   useEffect(() => {
     const filtered = products.filter((product) => {
+      const name = product.name ? product.name.toLowerCase() : '';
+      const sku = product.sku ? product.sku.toLowerCase() : '';
       const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+        name.includes(searchQuery.toLowerCase()) ||
+        sku.includes(searchQuery.toLowerCase());
       return matchesSearch;
     });
     setFilteredProducts(filtered);
@@ -171,7 +173,7 @@ const ProductTab = () => {
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     // Cleanup al desmontar el componente
     return () => {
       document.body.style.overflow = 'unset';
@@ -328,9 +330,9 @@ const ProductTab = () => {
                       <img
                         src={
                           product.Images &&
-                          product.Images.length > 0 &&
-                          Array.isArray(product.Images[0].url) &&
-                          product.Images[0].url.length > 0
+                            product.Images.length > 0 &&
+                            Array.isArray(product.Images[0].url) &&
+                            product.Images[0].url.length > 0
                             ? product.Images[0].url[0]
                             : "/placeholder.png"
                         }
@@ -338,9 +340,9 @@ const ProductTab = () => {
                         className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
                         onClick={() => handleImageClick(
                           product.Images &&
-                          product.Images.length > 0 &&
-                          Array.isArray(product.Images[0].url) &&
-                          product.Images[0].url.length > 0
+                            product.Images.length > 0 &&
+                            Array.isArray(product.Images[0].url) &&
+                            product.Images[0].url.length > 0
                             ? product.Images[0].url[0]
                             : "/placeholder.png"
                         )}
@@ -511,7 +513,7 @@ const ProductTab = () => {
         {/* ...todo el contenido del componente... */}
 
         {/* Botón flotante para iniciar el tour */}
-        <Tooltip content="Guía rápida" side="left" delayDuration={20000}>
+        {/* <Tooltip content="Guía rápida" side="left" delayDuration={20000}>
           <button
             type="button"
             aria-label="Iniciar guía rápida"
@@ -600,19 +602,19 @@ const ProductTab = () => {
               />
             </svg>
           </button>
-        </Tooltip>
+        </Tooltip> */}
       </div>
 
       {/* Modal de imagen */}
       {imageModalOpen && createPortal(
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4"
-          style={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             zIndex: 999999,
             margin: 0,
             padding: '1rem'

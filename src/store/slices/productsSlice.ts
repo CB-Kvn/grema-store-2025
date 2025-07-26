@@ -109,6 +109,7 @@ const productsSlice = createSlice({
       state.itemInventory = action.payload;
     },
     updateProductInventory(state, action: PayloadAction<Partial<Product>>) {
+      console.log('Updating product inventory with:', action.payload);
       if (state.itemInventory) {
         state.itemInventory = { ...state.itemInventory, ...action.payload };
       }
@@ -119,10 +120,15 @@ const productsSlice = createSlice({
     addProduct(state, action: PayloadAction<Product>) {
       state.items.push(action.payload);
     },
-    updateProduct(state, action: PayloadAction<Product>) {
+    updateProduct(state, action: PayloadAction<Partial<Product>>) {
       const index = state.items.findIndex((product) => product.id === action.payload.id);
       if (index !== -1) {
-        state.items[index] = action.payload;
+        Object.keys(action.payload).forEach((key) => {
+          const value = action.payload[key as keyof Product];
+          if (value !== undefined) {
+            (state.items[index] as any)[key] = value;
+          }
+        });
       }
     },
     deleteProduct(state, action: PayloadAction<number>) {
