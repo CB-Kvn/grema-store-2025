@@ -1,5 +1,8 @@
 
 export const Footer = () => {
+
+  const email = import.meta.env.VITE_APP_EMAIL
+  const phone = import.meta.env.VITE_APP_PHONE
   return (
     <>
       {/* Footer */}
@@ -36,7 +39,7 @@ export const Footer = () => {
                         <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                       </svg>
                     </div>
-                    <span className="text-primary-100">info@gremastore.com</span>
+                    <span className="text-primary-100">{email}</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
@@ -44,7 +47,7 @@ export const Footer = () => {
                         <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
                       </svg>
                     </div>
-                    <span className="text-primary-100">+1 (555) 123-4567</span>
+                    <span className="text-primary-100">{phone}</span>
                   </div>
                 </div>
 

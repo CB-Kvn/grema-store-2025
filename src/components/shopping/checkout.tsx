@@ -55,6 +55,7 @@ interface CheckoutPageProps {
 }
 
 const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
+  const phone = import.meta.env.VITE_APP_PHONE
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector(state => state.user.currentUser);
@@ -423,7 +424,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                             <Label>Número SINPE Móvil</Label>
                             <div className="flex items-center mt-1">
                               <div className="flex-1 bg-white p-3 rounded-lg font-medium">
-                                6194-1946
+                                {phone}
                               </div>
                               <button
                                 type="button"
