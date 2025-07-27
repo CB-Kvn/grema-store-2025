@@ -25,6 +25,7 @@ const WarehouseFormView: React.FC<WarehouseFormViewProps> = ({
     setFormData,
     errors,
     handleSubmit,
+    setEditOrNew
   } = useAddWarehouseModal(() => {
     // Al completar el formulario, volver a la lista
     onBack();
@@ -34,6 +35,7 @@ const WarehouseFormView: React.FC<WarehouseFormViewProps> = ({
   React.useEffect(() => {
     if (mode === 'edit' && warehouse) {
       setFormData(warehouse);
+      setEditOrNew(mode)
     }
   }, [mode, warehouse, setFormData]);
 

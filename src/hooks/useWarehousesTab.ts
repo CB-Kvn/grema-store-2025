@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { selectAllWarehouses } from "@/store/slices/warehousesSlice";
+import { deleteWarehouse, selectAllWarehouses } from "@/store/slices/warehousesSlice";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
 import type { Warehouse } from "@/types";
+import { warehouseService } from "@/services/warehouseService";
 
 export type ViewMode = 'list' | 'details' | 'edit' | 'create';
 
@@ -95,6 +96,8 @@ export function useWarehousesTab() {
       setLoading(false);
     }
   };
+
+  
 
   return {
     warehouses,

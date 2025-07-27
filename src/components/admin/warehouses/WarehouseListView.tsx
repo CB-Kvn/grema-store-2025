@@ -8,6 +8,9 @@ import { format } from 'date-fns';
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import type { Warehouse } from '@/types';
+import { warehouseService } from '@/services';
+import { deleteWarehouse } from '@/store/slices/warehousesSlice';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
 
 interface WarehouseListViewProps {
   warehouses: Warehouse[];
@@ -24,6 +27,7 @@ const WarehouseListView: React.FC<WarehouseListViewProps> = ({
   onEdit,
   onDelete
 }) => {
+  const dispatch = useAppDispatch();
   const filteredWarehouses = warehouses.filter(warehouse =>
     warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     warehouse.location.toLowerCase().includes(searchQuery.toLowerCase())
@@ -67,6 +71,18 @@ const WarehouseListView: React.FC<WarehouseListViewProps> = ({
       </div>
     );
   }
+
+  const deleteWarehouseList = async (warehouseId: string) => {
+    try {
+
+      await warehouseService.delete(warehouseId);
+      dispatch(deleteWarehouse(warehouseId));
+
+    } catch (err) {
+
+      console.error('Error deleting warehouse:', err);
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -197,7 +213,7 @@ const WarehouseListView: React.FC<WarehouseListViewProps> = ({
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDelete(warehouse);
+                        deleteWarehouseList(warehouse.id);
                       }}
                       className="text-red-600 hover:bg-red-50"
                     >
