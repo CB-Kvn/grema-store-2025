@@ -24,7 +24,11 @@ export function useWarehousesTab() {
     [warehouses]
   );
   const totalOccupancy = useMemo(
-    () => warehouses.reduce((sum, w) => sum + w.currentOccupancy, 0),
+    () => {
+      console.log('Calculando totalOccupancy');
+      console.log(warehouses);
+      warehouses.reduce((sum, w) => sum + w.ocupacion, 0)
+    },
     [warehouses]
   );
   const averageOccupancy = totalCapacity > 0 ? (totalOccupancy / totalCapacity) * 100 : 0;

@@ -23,6 +23,7 @@ export interface ProductFormProps {
 
 
 const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit }) => {
+
   const {
     formData,
     errors,
@@ -50,6 +51,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
     generateUniqueSku,
   } = useProductForm(product, onSubmit, onClose);
 
+  // // Scroll al inicio al abrir el modal
+  // React.useEffect(() => {
+  //   const modal = document.getElementById('product-form-modal-tour');
+  //   if (modal) {
+  //     modal.scrollTop = 0;
+  //   }
+  // }, [product]);
+
   const [showSuccess, setShowSuccess] = React.useState(false);
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -70,7 +79,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
 
       {/* Modal para ver imagen en grande */}
       <Dialog open={imageModal.open} onClose={() => setImageModal({ open: false, url: null })} className="z-[100]">
-        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-[100]">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-[100] ">
           <Dialog.Panel className="bg-white rounded-lg shadow-lg p-4 max-w-lg w-full relative z-[101]">
             <button
               onClick={() => setImageModal({ open: false, url: null })}
@@ -90,7 +99,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSubmit })
       {/* Modal lateral para el formulario */}
       <div
         id="product-form-modal-tour"
-        className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-auto"
+        className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white shadow-xl z-50 overflow-y-scroll"
         data-intro="Esta ventana es el formulario avanzado para crear o editar productos en tu inventario. Aquí puedes ingresar toda la información relevante del producto, incluyendo nombre, categoría, SKU, precio, costo, descripción, imágenes, detalles técnicos (como material, peso, largo, pureza y certificado), piedras y colores disponibles, así como detalles del cierre. Utiliza los botones para agregar imágenes, piedras o colores adicionales. Al finalizar, puedes guardar los cambios o cancelar la operación. Revisa cuidadosamente cada sección para asegurar que los datos sean correctos antes de guardar."
         data-step="1"
       >

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Flame, Sparkles } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
@@ -53,9 +53,17 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const products = useAppSelector((state) => state.products.items);
-  const latest = useAppSelector((state) => state.products.isNew);
-  const bestSellers = useAppSelector((state) => state.products.isBestSeller);
+  const products = useAppSelector((state) => state.products.items) || [];
+  const latest = useAppSelector((state) => state.products.isNew) || [];
+  const bestSellers = useAppSelector((state) => state.products.isBestSeller) || [];
+
+  // Si bestSellers está vacío, toma 8 productos aleatorios de products
+  const randomProducts = useMemo(() => {
+    if (bestSellers && bestSellers.length > 0) return bestSellers;
+    if (products.length === 0) return [];
+    const shuffled = [...products].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 8);
+  }, [bestSellers, products]);
   const filteredProducts = products.filter((product: any) => {
     const matchesSearch =
       product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,27 +82,32 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
   // Referencia al contenedor de productos relacionados
   const relatedRef = useRef<HTMLDivElement>(null);
 
-  // Cargar más productos al llegar al final de la sección
+  // Cargar más productos solo en la lista activa
   useEffect(() => {
     const handleScroll = () => {
       if (!relatedRef.current) return;
       const rect = relatedRef.current.getBoundingClientRect();
+      let maxLength = 0;
+      if (activeTab === "bestSellers") {
+        maxLength = randomProducts.length;
+      } else if (activeTab === "newArrivals") {
+        maxLength = latest.length;
+      }
       if (
-        rect.bottom <= window.innerHeight + 100 && // 100px de margen para anticipar
+        rect.bottom <= window.innerHeight + 100 &&
         !loadingP &&
-        visibleLatestProducts < products.length
+        visibleLatestProducts < maxLength
       ) {
         setLoadingP(true);
         setTimeout(() => {
-          setVisibleLatestProducts((prev) => Math.min(prev + 4, products.length)); // Mostrar 4 más
+          setVisibleLatestProducts((prev) => Math.min(prev + 4, maxLength));
           setLoadingP(false);
-        }, 1500); // Simula carga
+        }, 1500);
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadingP, visibleLatestProducts, products.length]);
+  }, [loadingP, visibleLatestProducts, activeTab, randomProducts.length, latest.length]);
 
   useEffect(() => {
     getAllProducts();
@@ -136,7 +149,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
             exit={{ x: 120, opacity: 0 }}
             transition={{ duration: 0.4 }}
             onClick={handleGoToShop}
-            className="hidden md:flex fixed right-8 top-1/2 z-50 -translate-y-1/2 bg-primary-700 hover:bg-primary-900 text-white rounded-full shadow-lg px-7 py-4 items-center gap-2 transition-all duration-300"
+            className="hidden md:flex fixed right-8 top-1/2 z-30 -translate-y-1/2 bg-primary-700 hover:bg-primary-900 text-white rounded-full shadow-lg px-7 py-4 items-center gap-2 transition-all duration-300 "
             aria-label="Ir a la tienda"
           >Tienda
             <ShoppingBag className="w-6 h-6" />
@@ -302,34 +315,32 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
               {/* Productos */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <AnimatePresence>
-                  {bestSellers && bestSellers.length > 0 && (
+                  {(randomProducts && randomProducts.length > 0) && (
                     <>
-                      {bestSellers.slice(0, visibleLatestProducts).map((product, idx) => {
-                        console.log(product); 
+                      {randomProducts.slice(0, visibleLatestProducts).map((product, idx) => {
                         const price = product.WarehouseItem?.[0]?.price || 0;
                         const discount = product.WarehouseItem?.[0]?.discount || 0;
                         const finalPrice = discount
-                      ? price - price * (discount / 100)
-                      : price;
-                    const imageUrl = product.Images?.[0]?.url?.[0];
-                    return (
-                      <motion.div
-                        key={product.id}
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 40 }}
-                        transition={{ duration: 0.4, delay: idx * 0.08 }}
-                        layout
-                      >
-                        <ProductCard
-                          product={product}
-                          onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
-                          onClick={() => navigate(`/producto/${product.id}`)}
-                        />
-                      </motion.div>
-                    );
-                  })}
-
+                          ? price - price * (discount / 100)
+                          : price;
+                        const imageUrl = product.Images?.[0]?.url?.[0];
+                        return (
+                          <motion.div
+                            key={product.id}
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 40 }}
+                            transition={{ duration: 0.4, delay: idx * 0.08 }}
+                            layout
+                          >
+                            <ProductCard
+                              product={product}
+                              onAddToCart={() => console.log(`Agregar al carrito: ${product.name}`)}
+                              onClick={() => navigate(`/producto/${product.id}`)}
+                            />
+                          </motion.div>
+                        );
+                      })}
                     </>
                   )}
                 </AnimatePresence>

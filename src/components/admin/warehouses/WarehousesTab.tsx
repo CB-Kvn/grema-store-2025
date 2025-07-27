@@ -309,11 +309,11 @@ const WarehousesTab = () => {
                       />
                     </div>
                     <span className="text-xs sm:text-sm text-primary-600">
-                      {((warehouse.currentOccupancy / warehouse.capacity) * 100).toFixed(1)}%
+                      {((warehouse.ocupacion / warehouse.capacity) * 100).toFixed(1)}%
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-primary-500 mt-1">
-                    {warehouse.currentOccupancy} / {warehouse.capacity} unidades
+                    {warehouse.ocupacion} / {warehouse.capacity} unidades
                   </p>
                 </td>
                 <td className="py-3 px-4">
