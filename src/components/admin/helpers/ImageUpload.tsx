@@ -56,6 +56,8 @@ const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
                 type="button"
                 onClick={async () => {
                   await deleteImageState(url, idx);
+                  // Forzar re-render para permitir seguir eliminando
+                  setTimeout(() => {}, 0);
                 }}
                 className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-100"
                 title="Eliminar imagen"

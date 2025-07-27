@@ -8,7 +8,6 @@ import { SEOHead } from "@/components/common/SEOHead";
 import { getPageSEOData } from "@/utils/seo";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { CategorySEO } from "./CategorySEO";
-import FloatingSocialButton from "@/components/common/FloatingSocialButton";
 import {
   ArrowLeft,
   ChevronLeft,

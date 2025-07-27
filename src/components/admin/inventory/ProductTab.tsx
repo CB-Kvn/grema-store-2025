@@ -83,7 +83,7 @@ const ProductTab = () => {
     }
   };
 
-  // Filtrar productos y reiniciar la página actual
+  // Filtrar productos y reiniciar la página actual SOLO al cambiar el filtro de búsqueda
   useEffect(() => {
     const filtered = products.filter((product) => {
       const name = product.name ? product.name.toLowerCase() : '';
@@ -94,7 +94,8 @@ const ProductTab = () => {
       return matchesSearch;
     });
     setFilteredProducts(filtered);
-    setCurrentPage(1); // Reiniciar a la primera página al cambiar los filtros
+    // Solo reiniciar la página si cambia el searchQuery
+    setCurrentPage((prevPage) => searchQuery ? 1 : prevPage);
   }, [searchQuery, products]);
 
   const getByIdProducts = async (id: number) => {
