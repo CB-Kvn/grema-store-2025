@@ -61,7 +61,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
   return (
     <IKContext urlEndpoint="https://ik.imagekit.io/wtelcc7rn"> {/* Reemplaza por tu urlEndpoint real */}
       <div
-        className="relative h-[300px] sm:h-[350px] md:h-[400px] rounded-lg shadow-md overflow-hidden group cursor-pointer flex flex-col"
+        className="relative w-full aspect-[3/4] sm:aspect-[4/5] lg:aspect-[3/4] max-h-[400px] min-h-[300px] rounded-lg shadow-md overflow-hidden group cursor-pointer flex flex-col bg-gradient-to-br from-white to-primary-25 border border-primary-100"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => {
           setIsHovering(false);

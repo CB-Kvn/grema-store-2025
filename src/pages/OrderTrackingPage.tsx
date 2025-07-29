@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { selectAllOrders } from '@/store/slices/purchaseOrdersSlice';
 import { purchaseOrderService } from '@/services';
+import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 
 const OrderTrackingPage = () => {
   const orders = useSelector(selectAllOrders);
@@ -16,6 +17,12 @@ const OrderTrackingPage = () => {
   const [searchedOrder, setSearchedOrder] = useState<any | null>(null);
   const [error, setError] = useState('');
   const [showDetails, setShowDetails] = useState(false);
+
+  // Breadcrumbs para tracking
+  const breadcrumbItems = [
+    { name: 'Inicio', url: '/' },
+    { name: 'Seguimiento', url: '/seguimiento', isActive: true }
+  ];
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,56 +83,75 @@ const OrderTrackingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-primary-50 py-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Package className="h-12 w-12 text-primary-600 mx-auto mb-4" />
-          <h1 className="text-3xl font-serif font-bold text-primary-900 mb-2">
-            Seguimiento de Orden
-          </h1>
-          <p className="text-primary-600">
-            Ingresa tu número de orden para ver el estado de tu pedido
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-primary-25 via-white to-primary-50 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-100/30 to-primary-200/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-primary-100/30 to-primary-200/20 rounded-full blur-3xl" />
+      </div>
+      
+      <div className="relative z-10 py-12">
+        {/* Breadcrumbs */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <Breadcrumbs items={breadcrumbItems} className="mb-6" />
         </div>
-
-        {/* Search Form */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
-              <Input
-                type="text"
-                placeholder="Ingresa el número de orden (ej: PO-2024-001)"
-                value={orderNumber}
-                onChange={(e) => setOrderNumber(e.target.value)}
-                className="pl-10"
-              />
+        
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-lg">
+              <Package className="h-10 w-10 text-white" />
             </div>
-            <button
-              type="submit"
-              className="w-full bg-primary-600 text-white py-2 rounded-full font-medium hover:bg-primary-700 transition-colors"
-            >
-              Buscar Orden
-            </button>
-          </form>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
-            <div className="flex items-center">
-              <AlertTriangle className="h-5 w-5 text-red-400 mr-2" />
-              <p className="text-red-700">{error}</p>
-            </div>
+            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-primary-900 mb-3">
+              Seguimiento de Orden
+            </h1>
+            <p className="text-primary-600 text-lg">
+              Ingresa tu número de orden para ver el estado de tu pedido
+            </p>
           </div>
-        )}
 
-        {/* Order Details */}
-        {searchedOrder && (
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {/* Order Summary */}
-            <div className="p-6 border-b border-primary-100">
+          {/* Search Form */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-primary-100/50 p-8 mb-8">
+          <form onSubmit={handleSearch} className="space-y-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+                <Input
+                  type="text"
+                  placeholder="Ingresa el número de orden (ej: PO-2024-001)"
+                  value={orderNumber}
+                  onChange={(e) => setOrderNumber(e.target.value)}
+                  className="pl-12 pr-4 py-4 text-lg border-primary-200 focus:border-primary-400 focus:ring-primary-400/20 rounded-xl bg-white/70 backdrop-blur-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 rounded-xl font-semibold text-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Buscar Orden
+                </span>
+              </button>
+            </form>
+        </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6 mb-8 shadow-lg">
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                </div>
+                <p className="text-red-700 font-medium">{error}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Order Details */}
+          {searchedOrder && (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-primary-100/50 overflow-hidden">
+              {/* Order Summary */}
+              <div className="p-8 border-b border-primary-100/50">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-medium text-primary-900">
@@ -222,22 +248,24 @@ const OrderTrackingPage = () => {
               </div>
             </div>
 
-            {/* Order Details Toggle */}
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="w-full p-4 flex items-center justify-between text-primary-600 hover:bg-primary-50"
-            >
-              <span className="font-medium">Detalles de la Orden</span>
-              {showDetails ? (
-                <ChevronUp className="h-5 w-5" />
-              ) : (
-                <ChevronDown className="h-5 w-5" />
-              )}
-            </button>
+              {/* Order Details Toggle */}
+              <button
+                onClick={() => setShowDetails(!showDetails)}
+                className="w-full p-6 flex items-center justify-between text-primary-600 hover:bg-primary-50/50 transition-all duration-300 border-t border-primary-100/50"
+              >
+                <span className="font-semibold text-lg">Detalles de la Orden</span>
+                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center transition-transform duration-300">
+                  {showDetails ? (
+                    <ChevronUp className="h-5 w-5 transform rotate-0" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 transform rotate-0" />
+                  )}
+                </div>
+              </button>
 
-            {/* Expanded Details */}
-            {showDetails && (
-              <div className="p-6 border-t border-primary-100">
+              {/* Expanded Details */}
+              {showDetails && (
+                <div className="p-8 border-t border-primary-100/50 bg-gradient-to-br from-primary-25/50 to-white">
                 {/* Items */}
                 <div className="space-y-4">
                   <h3 className="font-medium text-primary-900">Productos</h3>
@@ -292,10 +320,11 @@ const OrderTrackingPage = () => {
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { PurchaseOrder } from '@/types';
 import { purchaseOrderService } from '@/services';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { clearCart } from '@/store/slices/cartSlice';
+import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 
 const OrderDocumentsPage = () => {
   const { orderIdFromUrl } = useParams<{ orderIdFromUrl: string }>();
@@ -23,6 +24,12 @@ const OrderDocumentsPage = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [hasExistingReceipt, setHasExistingReceipt] = useState(false);
   const navigate = useNavigate();
+
+  // Breadcrumbs para documentos de órdenes
+  const breadcrumbItems = [
+    { name: 'Inicio', url: '/' },
+    { name: 'Documentos', url: '/documentos', isActive: true }
+  ];
 
   // Función para generar hash del archivo
   const generateFileHash = async (file: File): Promise<string> => {
@@ -227,6 +234,11 @@ const OrderDocumentsPage = () => {
 
       {/* Formulario siempre visible */}
       <div className="min-h-screen bg-primary-50 py-8">
+        {/* Breadcrumbs */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <Breadcrumbs items={breadcrumbItems} className="mb-6" />
+        </div>
+        
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h1 className="text-2xl font-semibold text-primary-900 mb-6">

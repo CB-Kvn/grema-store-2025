@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination, Thumbs } from "swiper/modules";
@@ -18,6 +18,9 @@ import {
   Check,
   Flame,
   Sparkles,
+  Percent,
+  DollarSign,
+  Tag,
 } from "lucide-react";
 
 import { useAppSelector } from "@/hooks/useAppSelector";
@@ -28,9 +31,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import RelatedProducts from "./RelatedProducts";
 import { ProductSEO } from "./ProductSEO";
 import { useSEOAnalytics } from "@/hooks/useSEOAnalytics";
+import { useDiscountCalculator } from "@/hooks/useDiscountCalculator";
+import { CartItem } from "@/utils/discountCalculator";
+import { Badge } from "../ui/badge";
 
 interface ProductDetailProps {
-  addToCart: (product: (typeof products)[0] & { quantity: number }) => void;
+  addToCart: (product: (typeof products)[0] & { quantity: number; isGift?: boolean; giftMessage?: string }) => void;
   updateQuantity: (productId: number, newQuantity: number) => void;
 }
 
@@ -48,7 +54,38 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
   const [pendingQuantities, setPendingQuantities] = useState(0);
   const productCartShop = useAppSelector((state) => state.cart.items);
   const products = useAppSelector((state) => state.products.items);
+  const user = useAppSelector((state) => state.user.currentUser);
   const product = products.find((p) => p.id === activeProductId); // Producto activo basado en el estado
+
+  // --- NUEVO: Lógica de descuentos (memoizada para evitar re-renders) ---
+  const cartItemForDiscount: CartItem[] = useMemo(() => {
+    return product ? [{
+      product: {
+        id: product.id,
+        name: product.name,
+        price: product.WarehouseItem?.[0]?.price || 0,
+        Images: product.Images?.[0]?.url?.[0] || '',
+        description: product.description,
+        category: product.category,
+        sku: product.sku,
+        details: product.details,
+        createdAt: product.createdAt || '',
+        updatedAt: product.updatedAt || '',
+        available: product.available,
+        WarehouseItem: product.WarehouseItem || [],
+        filepaths: product.filepaths || []
+      },
+      quantity: 1 // Usar cantidad fija de 1 para cálculos unitarios
+    }] : [];
+  }, [product]); // Remover quantity de las dependencias
+
+  const {
+    calculationResult,
+    itemsWithDiscounts,
+    hasDiscounts,
+    isLoading: discountLoading,
+    error: discountError
+  } = useDiscountCalculator(cartItemForDiscount);
 
   // --- NUEVO: Sumatoria de stock total en WarehouseItem ---
   const totalStock = Array.isArray(product?.WarehouseItem)
@@ -79,7 +116,80 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
       fetchData();
     }
     pendingQuantitiesSearch()
-  }, []);
+  }, [id, products]); // Agregar dependencias necesarias
+
+  // --- NUEVO: Función para obtener información de descuentos (memoizada) ---
+  const discountInfo = useMemo(() => {
+    if (!hasDiscounts || !itemsWithDiscounts.length) {
+      return null;
+    }
+
+    const itemWithDiscount = itemsWithDiscounts[0];
+    if (!itemWithDiscount.appliedDiscount) {
+      return null;
+    }
+
+    const discount = itemWithDiscount.appliedDiscount;
+    // Los precios ya son unitarios porque usamos quantity: 1 en cartItemForDiscount
+    
+    return {
+      type: discount.type,
+      value: discount.value,
+      discountApplied: discount.discountApplied,
+      originalPrice: discount.originalPrice,
+      finalPrice: discount.finalPrice,
+      message: discount.message,
+      savings: discount.discountApplied,
+      savingsPercentage: discount.originalPrice > 0 ? (discount.discountApplied / discount.originalPrice) * 100 : 0
+    };
+  }, [hasDiscounts, itemsWithDiscounts]); // Memoizar basado en los resultados del hook
+
+  // Obtener los colores disponibles del producto actual
+  const getAvailableColors = () => {
+    if (!product) return [];
+    return products
+      .filter((p) => p.name === product.name) // Filtrar productos con el mismo nombre
+      .flatMap((p) => p.details.color || []) // Extraer los colores disponibles
+      .reduce((uniqueColors, color) => {
+        // Eliminar colores duplicados
+        if (!uniqueColors.some((c) => c.hex === color.hex)) {
+          uniqueColors.push(color);
+        }
+        return uniqueColors;
+      }, []);
+  };
+
+  // Cambiar al producto del color seleccionado
+  const handleColorChange = (selectedColorHex: string) => {
+    if (!product) return;
+    const selectedProduct = products.find(
+      (p) =>
+        p.name === product.name &&
+        p.details.color?.some((color) => color.hex === selectedColorHex)
+    );
+
+    if (selectedProduct) {
+      setActiveProductId(selectedProduct.id); // Actualizar el producto activo
+    }
+  };
+
+  const availableColors = getAvailableColors();
+
+  // Verificar si el producto ya está en el carrito
+  const isProductInCart = product ? productCartShop.some((item) => item.product.id === product.id) : false;
+
+  // Obtener la cantidad del producto en el carrito
+  const productInCart = product ? productCartShop.find((element) => element.product.id === product.id) : undefined;
+  const quantityInCart = productInCart ? productInCart.quantity : 1;
+
+  // Actualizar el estado local de quantity cuando cambie el producto o el carrito
+  useEffect(() => {
+    if (productInCart) {
+      setQuantity(productInCart.quantity);
+    } else {
+      setQuantity(1);
+    }
+  }, [productInCart, product?.id]);
 
   if (!product) {
     return (
@@ -96,44 +206,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
     );
   }
 
-  // Obtener los colores disponibles del producto actual
-  const getAvailableColors = () => {
-    return products
-      .filter((p) => p.name === product.name) // Filtrar productos con el mismo nombre
-      .flatMap((p) => p.details.color || []) // Extraer los colores disponibles
-      .reduce((uniqueColors, color) => {
-        // Eliminar colores duplicados
-        if (!uniqueColors.some((c) => c.hex === color.hex)) {
-          uniqueColors.push(color);
-        }
-        return uniqueColors;
-      }, []);
-  };
-
-  // Cambiar al producto del color seleccionado
-  const handleColorChange = (selectedColorHex: string) => {
-    const selectedProduct = products.find(
-      (p) =>
-        p.name === product.name &&
-        p.details.color?.some((color) => color.hex === selectedColorHex)
-    );
-
-    if (selectedProduct) {
-      setActiveProductId(selectedProduct.id); // Actualizar el producto activo
-    }
-  };
-
-  const availableColors = getAvailableColors();
-
-  // Verificar si el producto ya está en el carrito
-  const isProductInCart = productCartShop.some((item) => item.id === product.id);
-
-  // Obtener la cantidad del producto en el carrito
-  const productInCart = productCartShop.find((element) => element.id === Number(id));
-  const quantityInCart = productInCart ? productInCart.quantity : quantity;
-
   const handleAddToCart = () => {
-    addToCart({ ...product, quantity: quantityInCart });
+    // Usar la cantidad del estado local si no está en el carrito, o la cantidad del carrito si ya está
+    const finalQuantity = isProductInCart ? quantityInCart : quantity;
+    addToCart({ ...product, quantity: finalQuantity, isGift, giftMessage });
   };
 
   const handleShare = (platform: string) => {
@@ -289,7 +365,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               thumbs={{ swiper: thumbsSwiper }}
               navigation
               pagination={{ clickable: true }}
-              className="h-[350px] xs:h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-lg overflow-hidden"
+              className="h-[350px] xs:h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-lg overflow-hidden border-2 border-primary-100 shadow-sm"
               onSwiper={setMainSwiper} // Guarda la instancia del Swiper principal
             >
               {product.Images[0]?.url.map((image, index) => (
@@ -371,27 +447,103 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 {product.description}
               </p>
               <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-baseline">
-                  <span className="text-xl md:text-3xl font-bold text-primary-900">
-                    {new Intl.NumberFormat("es-CR", {
-                      style: "currency",
-                      currency: "CRC",
-                      maximumFractionDigits: 2,
-                      minimumFractionDigits: 2,
-                    }).format(product.WarehouseItem?.[0]?.price ?? 0)}
-                  </span>
-                  {product.WarehouseItem?.[0]?.discount > 0 && (
-                    <span className="ml-2 text-lg line-through text-primary-400">
-                      {new Intl.NumberFormat("es-CR", {
-                        style: "currency",
-                        currency: "CRC",
-                        maximumFractionDigits: 2,
-                        minimumFractionDigits: 2,
-                      }).format(
-                        (product.WarehouseItem?.[0]?.price ?? 0) /
-                        (1 - (product.WarehouseItem?.[0]?.discount ?? 0) / 100)
+                <div className="flex flex-col">
+                  <div className="flex items-baseline">
+                    {discountInfo ? (
+                      <>
+                        <span className="text-xl md:text-3xl font-bold text-green-600">
+                          {new Intl.NumberFormat("es-CR", {
+                            style: "currency",
+                            currency: "CRC",
+                            maximumFractionDigits: 2,
+                            minimumFractionDigits: 2,
+                          }).format(discountInfo.finalPrice)}
+                        </span>
+                        <span className="ml-2 text-lg line-through text-primary-400">
+                          {new Intl.NumberFormat("es-CR", {
+                            style: "currency",
+                            currency: "CRC",
+                            maximumFractionDigits: 2,
+                            minimumFractionDigits: 2,
+                          }).format(discountInfo.originalPrice)}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xl md:text-3xl font-bold text-primary-900">
+                          {new Intl.NumberFormat("es-CR", {
+                            style: "currency",
+                            currency: "CRC",
+                            maximumFractionDigits: 2,
+                            minimumFractionDigits: 2,
+                          }).format(product.WarehouseItem?.[0]?.price ?? 0)}
+                        </span>
+                        {product.WarehouseItem?.[0]?.discount > 0 && (
+                          <span className="ml-2 text-lg line-through text-primary-400">
+                            {new Intl.NumberFormat("es-CR", {
+                              style: "currency",
+                              currency: "CRC",
+                              maximumFractionDigits: 2,
+                              minimumFractionDigits: 2,
+                            }).format(
+                              (product.WarehouseItem?.[0]?.price ?? 0) /
+                              (1 - (product.WarehouseItem?.[0]?.discount ?? 0) / 100)
+                            )}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* --- NUEVO: Información de descuentos --- */}
+                  {discountInfo && (
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {discountInfo.type === 'PERCENTAGE' && (
+                            <><Percent className="h-3 w-3 mr-1" />{discountInfo.value}% descuento</>
+                          )}
+                          {discountInfo.type === 'FIXED' && (
+                            <><DollarSign className="h-3 w-3 mr-1" />Descuento fijo</>
+                          )}
+                          {discountInfo.type === 'BUY_X_GET_Y' && (
+                            <>Compra X Lleva Y</>
+                          )}
+                        </Badge>
+                        <span className="text-sm font-medium text-green-600">
+                          Ahorras {new Intl.NumberFormat("es-CR", {
+                            style: "currency",
+                            currency: "CRC",
+                            maximumFractionDigits: 2,
+                            minimumFractionDigits: 2,
+                          }).format(discountInfo.savings)} ({discountInfo.savingsPercentage.toFixed(1)}%)
+                        </span>
+                      </div>
+                      {discountInfo.message && (
+                        <div className="text-sm text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-200">
+                          💡 {discountInfo.message}
+                        </div>
                       )}
-                    </span>
+                    </div>
+                  )}
+                  
+                  {/* --- NUEVO: Mensaje cuando el usuario no tiene descuentos --- */}
+                  {user && (!user.discounts || user.discounts.length === 0) && (
+                    <div className="mt-2">
+                      <div className="text-sm text-primary-600 bg-primary-50 p-2 rounded-lg border border-primary-200">
+                        ℹ️ No tienes descuentos disponibles para este producto
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* --- NUEVO: Mensaje cuando no hay usuario logueado --- */}
+                  {!user && (
+                    <div className="mt-2">
+                      <div className="text-sm text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-200">
+                        🔐 <Link to="/login" className="underline hover:text-blue-800">Inicia sesión</Link> para ver descuentos disponibles
+                      </div>
+                    </div>
                   )}
                 </div>
                 <div className="flex space-x-4">
@@ -533,22 +685,40 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => {
-                    const newQuantity = quantityInCart - 1;
-                    if (newQuantity >= 1) {
-                      updateQuantity(product.id, newQuantity); // Actualizar cantidad
+                    if (isProductInCart) {
+                      const newQuantity = quantityInCart - 1;
+                      if (newQuantity >= 1) {
+                        updateQuantity(product.id, newQuantity);
+                      }
+                    } else {
+                      const newQuantity = quantity - 1;
+                      if (newQuantity >= 1) {
+                        setQuantity(newQuantity);
+                      }
                     }
                   }}
-                  className="px-3 py-1 border border-primary-200 rounded-md hover:bg-primary-50"
+                  disabled={isProductInCart ? quantityInCart <= 1 : quantity <= 1}
+                  className="px-3 py-1 border border-primary-200 rounded-md hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   -
                 </button>
-                <span className="w-12 text-center">{quantityInCart}</span>
+                <span className="w-12 text-center">{isProductInCart ? quantityInCart : quantity}</span>
                 <button
                   onClick={() => {
-                    const newQuantity = quantityInCart + 1;
-                    updateQuantity(product.id, newQuantity); // Actualizar cantidad
+                    if (isProductInCart) {
+                      const newQuantity = quantityInCart + 1;
+                      if (newQuantity <= availableStock) {
+                        updateQuantity(product.id, newQuantity);
+                      }
+                    } else {
+                      const newQuantity = quantity + 1;
+                      if (newQuantity <= availableStock) {
+                        setQuantity(newQuantity);
+                      }
+                    }
                   }}
-                  className="px-3 py-1 border border-primary-200 rounded-md hover:bg-primary-50"
+                  disabled={isProductInCart ? quantityInCart >= availableStock : quantity >= availableStock}
+                  className="px-3 py-1 border border-primary-200 rounded-md hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   +
                 </button>
@@ -591,12 +761,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ addToCart, updateQuantity
                 <Check className="h-5 w-5 text-green-600" />
                 <span className="text-green-700">Este producto ya está en el carrito</span>
               </div>
+            ) : availableStock <= 0 ? (
+              <div className="flex items-center justify-center space-x-2 bg-red-50 p-4 rounded-lg border border-red-200">
+                <span className="text-red-700">Producto sin stock disponible</span>
+              </div>
             ) : (
               <button
                 onClick={handleAddToCart}
-                className="w-full bg-primary-600 text-white py-4 rounded-full font-medium hover:bg-primary-700 transition-colors"
+                disabled={quantity > availableStock || availableStock <= 0}
+                className="w-full bg-primary-600 text-white py-4 rounded-full font-medium hover:bg-primary-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Agregar al Carrito
+                {quantity > availableStock ? 'Cantidad excede stock disponible' : 'Agregar al Carrito'}
               </button>
             )}
 

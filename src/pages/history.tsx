@@ -2,10 +2,21 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Info, Users, Heart, Sparkles, Award, ArrowRight, PackageSearch, Flower2, HandHeart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
 export const HistoryUs = () => {
+  // Breadcrumbs para historia
+  const breadcrumbItems = [
+    { name: 'Inicio', url: '/' },
+    { name: 'Historia', url: '/historia', isActive: true }
+  ];
+
   return (
     <div className="min-h-screen w-full">
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <Breadcrumbs items={breadcrumbItems} className="mb-6" />
+      </div>
       {/* Hero Section */}
       <div className="relative overflow-hidden w-full">
         <div className="max-w-7xl mx-auto w-full">

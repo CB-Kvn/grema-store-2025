@@ -10,10 +10,21 @@ import {
   Diamond,
 } from "lucide-react";
 import { values } from "@/utils/valores";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
 export const ValuesPage = () => {
+  // Breadcrumbs para valores
+  const breadcrumbItems = [
+    { name: 'Inicio', url: '/' },
+    { name: 'Valores', url: '/valores', isActive: true }
+  ];
+
   return (
     <div className="min-h-screen bg-primary-50">
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <Breadcrumbs items={breadcrumbItems} className="mb-6" />
+      </div>
       {/* Hero Section */}
       <div className="bg-white py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

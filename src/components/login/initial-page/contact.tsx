@@ -40,7 +40,7 @@ const ContactPage = () => {
       {/* Contact Info Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 -m-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-primary-50 p-8 rounded-lg shadow-md flex flex-col items-center justify-center h-full border border-primary-600">
+          <div className="bg-gradient-to-br from-primary-50 to-primary-100 p-8 rounded-lg shadow-lg flex flex-col items-center justify-center h-full border border-primary-200 hover:shadow-xl hover:scale-105 transition-all duration-300 transform active:scale-95">
             <Phone className="h-10 w-10 text-primary-600 mb-4" />
             <h3 className="text-xl font-semibold text-primary-900 mb-2 text-center">
               Teléfono
@@ -48,7 +48,7 @@ const ContactPage = () => {
             <p className="text-primary-600 text-center">+506 6194-1946</p>
           </div>
 
-          <div className="bg-primary-50 p-8 rounded-lg shadow-md flex flex-col items-center justify-center h-full border border-primary-600">
+          <div className="bg-gradient-to-br from-primary-50 to-primary-100 p-8 rounded-lg shadow-lg flex flex-col items-center justify-center h-full border border-primary-200 hover:shadow-xl hover:scale-105 transition-all duration-300 transform active:scale-95">
             <MapPin className="h-10 w-10 text-primary-600 mb-4" />
             <h3 className="text-xl font-semibold text-primary-900 mb-2 text-center">
               Dirección
@@ -60,7 +60,7 @@ const ContactPage = () => {
             <p className="text-primary-600 text-center">Puntarenas, Costa Rica</p>
           </div>
 
-          <div className="bg-primary-50 p-8 rounded-lg shadow-md flex flex-col items-center justify-center h-full border border-primary-600">
+          <div className="bg-gradient-to-br from-primary-50 to-primary-100 p-8 rounded-lg shadow-lg flex flex-col items-center justify-center h-full border border-primary-200 hover:shadow-xl hover:scale-105 transition-all duration-300 transform active:scale-95">
             <Clock className="h-10 w-10 text-primary-600 mb-4" />
             <h3 className="text-xl font-semibold text-primary-900 mb-2 text-center">
               Horario
@@ -74,7 +74,7 @@ const ContactPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Map */}
-          <div className="bg-primary-50 p-8 rounded-lg shadow-md border border-primary-600">
+          <div className="bg-gradient-to-br from-primary-50 to-primary-100 p-8 rounded-lg shadow-lg border border-primary-200 hover:shadow-xl hover:scale-105 transition-all duration-300 transform active:scale-95">
             <h2 className="text-2xl font-serif font-bold text-primary-900 mb-6">
               Nuestro taller se encuentra en:
             </h2>
@@ -93,31 +93,31 @@ const ContactPage = () => {
           </div>
 
           {/* Social Media */}
-          <div className="bg-primary-50 p-8 rounded-lg shadow-md border border-primary-600">
+          <div className="bg-gradient-to-br from-primary-50 to-primary-100 p-8 rounded-lg shadow-lg border border-primary-200 hover:shadow-xl hover:scale-105 transition-all duration-300 transform active:scale-95">
             <h2 className="text-2xl font-serif font-bold text-primary-900 mb-6">
               Síguenos en redes sociales
             </h2>
             <div className="grid grid-cols-1 gap-4">
               <a
                 href="#"
-                className="flex items-center p-4 rounded-lg bg-white hover:bg-primary-100 transition-colors"
+                className="flex items-center p-4 rounded-lg bg-gradient-to-r from-white to-primary-50 hover:bg-gradient-to-r hover:from-primary-100 hover:to-primary-200 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95 border border-primary-200"
               >
                 <Facebook className="h-6 w-6 text-primary-600 mr-3" />
-                <span className="text-primary-900">Facebook</span>
+                <span className="text-primary-900 font-medium">Facebook</span>
               </a>
               <a
                 href="#"
-                className="flex items-center p-4 rounded-lg bg-white hover:bg-primary-100 transition-colors"
+                className="flex items-center p-4 rounded-lg bg-gradient-to-r from-white to-primary-50 hover:bg-gradient-to-r hover:from-primary-100 hover:to-primary-200 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95 border border-primary-200"
               >
                 <Instagram className="h-6 w-6 text-primary-600 mr-3" />
-                <span className="text-primary-900">Instagram</span>
+                <span className="text-primary-900 font-medium">Instagram</span>
               </a>
               <a
                 href="#"
-                className="flex items-center p-4 rounded-lg bg-white hover:bg-primary-100 transition-colors"
+                className="flex items-center p-4 rounded-lg bg-gradient-to-r from-white to-primary-50 hover:bg-gradient-to-r hover:from-primary-100 hover:to-primary-200 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95 border border-primary-200"
               >
                 <TikTokIcon />
-                <span className="text-primary-900 ml-3">TikTok</span>
+                <span className="text-primary-900 ml-3 font-medium">TikTok</span>
               </a>
             </div>
             <div className="mt-8 text-center text-primary-600">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { HandHeart, Users, Sparkles, Award, Flower2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
 // Nuevo componente para mostrar familia
 function FamilyBlock() {
@@ -151,10 +152,21 @@ function VerticalMosaicStairs({ images }: { images: string[] }) {
 }
 
 export default function AboutUs() {
+  // Breadcrumbs para about-us
+  const breadcrumbItems = [
+    { name: 'Inicio', url: '/' },
+    { name: 'Sobre Nosotros', url: '/sobre-nosotros', isActive: true }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col items-center px-2 py-8 md:px-8 md:py-12">
+      {/* Breadcrumbs */}
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+        <Breadcrumbs items={breadcrumbItems} className="mb-6" />
+      </div>
+      
       {/* Hero */}
-      <section className="w-[80vw] max-w-6xl px-0 py-16 flex flex-col lg:flex-row items-center gap-0">
+      <section className="w-[80vw] max-w-6xl px-0 py-16 lg:py-20 flex flex-col lg:flex-row items-center gap-0">
         <motion.div
           initial={{ opacity: 0, x: -60 }}
           animate={{ opacity: 1, x: 0 }}

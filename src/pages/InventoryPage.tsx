@@ -17,6 +17,7 @@ import { AdminTourButton } from '@/components/admin/common/AdminTourButton';
 import { useAutoTourInit } from '@/hooks/useAutoTourInit';
 import '@/styles/tour.css';
 import { useInventoryPage } from '@/hooks/useInventoryPage';
+import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 
 
 // Simulación de fetch
@@ -36,6 +37,12 @@ const InventoryPage = () => {
   
   // Hook para inicializar tour automáticamente (sin ciclos infinitos)
   useAutoTourInit();
+
+  // Breadcrumbs para inventario
+  const breadcrumbItems = [
+    { name: 'Inicio', url: '/' },
+    { name: 'Administrar', url: '/administrar', isActive: true }
+  ];
   
   const tabs = [
     { value: 'inventario', label: 'Informes' },
@@ -55,6 +62,11 @@ const InventoryPage = () => {
   
   return (
     <div className="min-h-screen bg-primary-10/50 backdrop-blur-sm py-4 sm:py-6 lg:py-8">
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <Breadcrumbs items={breadcrumbItems} className="mb-6" />
+      </div>
+      
       <div className="max-w-[95%] lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <Card >
           <CardHeader className="border-b border-primary-100 p-4 sm:p-6" data-tour="products-header">

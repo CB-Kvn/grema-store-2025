@@ -86,9 +86,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const cartItems = useAppSelector((state) => state.cart.items);
 
-  const addToCart = (product: (typeof products)[0]) => {
-    console.log("EN CaRRO");
-    dispatch(addToCartShop({ product: product }));
+  const addToCart = (product: (typeof products)[0] & { quantity: number; isGift?: boolean; giftMessage?: string }) => {
+    console.log("EN CARRO", { product, quantity: product.quantity, isGift: product.isGift, giftMessage: product.giftMessage });
+    dispatch(addToCartShop({ 
+      product: product, 
+      quantity: product.quantity,
+      isGift: product.isGift || false,
+      giftMessage: product.giftMessage || ''
+    }));
     setIsCartOpen(true);
   };
 

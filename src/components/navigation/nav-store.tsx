@@ -72,7 +72,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
 
   return (
     <>
-      <nav className="sticky top-0 z-30 bg-primary-600 bg-opacity-50 backdrop-blur-md shadow-md border-b border-primary-700">
+      <nav className="sticky top-0 z-30 bg-gradient-to-r from-primary-600/40 to-primary-700/80 backdrop-blur-lg shadow-lg border-b border-primary-200/20">
         <div className="mx-auto max-w-7xl p-4 sm:px-6 lg:px-8">
           {/* NAVBAR */}
           <div className="relative flex h-16 items-center lg:justify-between justify-center">
@@ -82,7 +82,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                 <img
                   src="/Logo en negro.png"
                   alt="Logo de la empresa"
-                  className="w-44 h-12 sm:w-52 sm:h-14 md:w-60 md:h-16 lg:w-48 lg:h-16 xl:w-64 xl:h-20 object-contain transition-all duration-200"
+                  className="w-52 h-14 sm:w-60 sm:h-16 md:w-64 md:h-18 lg:w-48 lg:h-16 xl:w-64 xl:h-20 object-contain transition-all duration-200"
                 />
               </div>
             </Link>
@@ -101,7 +101,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                   className="text-primary-900 px-3 lg:px-6 py-3 text-sm lg:text-lg font-light hover:bg-primary-50 transition-colors" 
                   onClick={navigationHandlers.tienda}
                 >
-                  <Store className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-600" /> 
+                  <Store className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-900" /> 
                   Tienda
                 </Button>
                 <Button 
@@ -109,7 +109,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                   className="text-primary-900 px-3 lg:px-6 py-3 text-sm lg:text-lg font-light hover:bg-primary-50 transition-colors" 
                   onClick={navigationHandlers.valores}
                 >
-                  <Info className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-600" /> 
+                  <Info className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-900" /> 
                   <span className="hidden lg:inline">Sobre Nosotros</span>
                   <span className="lg:hidden">Nosotros</span>
                 </Button>
@@ -118,7 +118,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                   className="text-primary-900 px-3 lg:px-6 py-3 text-sm lg:text-lg font-light hover:bg-primary-50 transition-colors" 
                   onClick={navigationHandlers.tracking}
                 >
-                  <Package className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-600" /> 
+                  <Package className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-900" /> 
                   Rastreo
                 </Button>
                 {user?.typeUser === "ADMIN" && (
@@ -127,7 +127,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                     className="text-primary-900 px-3 lg:px-6 py-3 text-sm lg:text-lg font-light hover:bg-primary-50 transition-colors" 
                     onClick={navigationHandlers.admin}
                   >
-                    <User className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-600" /> 
+                    <User className="mr-1 lg:mr-2 h-5 lg:h-6 w-5 lg:w-6 text-primary-900" /> 
                     <span className="hidden lg:inline">Administración</span>
                     <span className="lg:hidden">Admin</span>
                   </Button>
@@ -149,7 +149,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                   className="relative p-2 lg:p-3 hover:bg-primary-50 rounded-full transition-colors"
                   aria-label="Abrir carrito de compras"
                 >
-                  <ShoppingCart className="h-8 lg:h-12 w-8 lg:w-12 text-primary-600" />
+                  <ShoppingCart className="h-8 lg:h-12 w-8 lg:w-12 text-primary-900" />
                   {cartItems.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs lg:text-sm rounded-full h-5 lg:h-6 w-5 lg:w-6 flex items-center justify-center">
                       {totalCartItems}
@@ -164,7 +164,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                     className="p-2 lg:p-3 hover:bg-primary-50 rounded-full transition-colors"
                     aria-label="Iniciar sesión"
                   >
-                    <User className="h-8 lg:h-10 w-8 lg:w-10 text-primary-600" />
+                    <User className="h-8 lg:h-10 w-8 lg:w-10 text-primary-900" />
                   </Button>
                 )}
                 {user && (
@@ -186,22 +186,22 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                       </Avatar>
                     </DropdownMenuTrigger>
                     {/* --- Menú de usuario (Dropdown) --- */}
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem className="text-primary-900 text-base py-3 font-light hover:bg-primary-50" onClick={navigationHandlers.tienda}>
+                    <DropdownMenuContent align="end" className="w-48 bg-gradient-to-br from-white to-primary-25 shadow-xl border border-primary-100 rounded-xl">
+                      <DropdownMenuItem className="text-primary-900 text-base py-3 font-medium hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:shadow-md transition-all duration-300 rounded-lg mx-1 my-1" onClick={navigationHandlers.tienda}>
                         <Store className="mr-2 h-4 w-4" />
                         Tienda
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-primary-900 text-base py-3 font-light hover:bg-primary-50" onClick={navigationHandlers.tracking}>
+                      <DropdownMenuItem className="text-primary-900 text-base py-3 font-medium hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:shadow-md transition-all duration-300 rounded-lg mx-1 my-1" onClick={navigationHandlers.tracking}>
                         <Package className="mr-2 h-4 w-4" />
                         Rastreo
                       </DropdownMenuItem>
                       {user?.typeUser === "ADMIN" && (
-                        <DropdownMenuItem className="text-primary-900 text-base py-3 font-light hover:bg-primary-50" onClick={navigationHandlers.admin}>
+                        <DropdownMenuItem className="text-primary-900 text-base py-3 font-medium hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:shadow-md transition-all duration-300 rounded-lg mx-1 my-1" onClick={navigationHandlers.admin}>
                           <User className="mr-2 h-4 w-4" />
                           Administrar
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem className="text-red-600 text-base py-3 font-light hover:bg-red-50" onClick={handleLogout}>
+                      <DropdownMenuItem className="text-red-600 text-base py-3 font-medium hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:shadow-md transition-all duration-300 rounded-lg mx-1 my-1" onClick={handleLogout}>
                         Cerrar Sesión
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -213,46 +213,48 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
         </div>
       </nav>
 
+
+
       {/* Menú inferior móvil - visible hasta MD */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-primary-600 lg:hidden shadow-lg border-t border-primary-700">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-primary-600/80 to-primary-700/80 backdrop-blur-lg lg:hidden shadow-2xl border-t border-primary-500">
         <div className="flex justify-around items-center py-2 px-4">
-          <Link to="/tienda" className="flex flex-col items-center text-white hover:text-primary-200 transition-colors py-2 px-3 rounded-lg">
+          <Link to="/tienda" className="flex flex-col items-center text-white hover:text-primary-100 hover:bg-gradient-to-r hover:from-primary-500 hover:to-primary-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 py-2 px-3 rounded-xl">
             <Store className="h-6 w-6 mb-1" />
-            <span className="text-xs font-light">Tienda</span>
+            <span className="text-xs font-medium">Tienda</span>
           </Link>
-          <Link to="/sobre-nosotros" className="flex flex-col items-center text-white hover:text-primary-200 transition-colors py-2 px-3 rounded-lg">
+          <Link to="/sobre-nosotros" className="flex flex-col items-center text-white hover:text-primary-100 hover:bg-gradient-to-r hover:from-primary-500 hover:to-primary-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 py-2 px-3 rounded-xl">
             <Info className="h-6 w-6 mb-1" />
-            <span className="text-xs font-light">Nosotros</span>
+            <span className="text-xs font-medium">Nosotros</span>
           </Link>
-          <Link to="/tracking" className="flex flex-col items-center text-white hover:text-primary-200 transition-colors py-2 px-3 rounded-lg">
+          <Link to="/tracking" className="flex flex-col items-center text-white hover:text-primary-100 hover:bg-gradient-to-r hover:from-primary-500 hover:to-primary-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 py-2 px-3 rounded-xl">
             <Package className="h-6 w-6 mb-1" />
-            <span className="text-xs font-light">Rastreo</span>
+            <span className="text-xs font-medium">Rastreo</span>
           </Link>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={isOpen} 
-            className="flex flex-col items-center text-white hover:text-primary-200 hover:bg-primary-700 transition-colors py-2 px-3 rounded-lg relative"
+            className="flex flex-col items-center text-white hover:text-primary-100 hover:bg-gradient-to-r hover:from-primary-500 hover:to-primary-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 py-2 px-3 rounded-xl relative"
             aria-label="Abrir carrito de compras"
           >
             <ShoppingCart className="h-6 w-6 mb-1" />
-            <span className="text-xs font-light">Carrito</span>
             {cartItems.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-lg font-bold">
                 {totalCartItems}
               </span>
             )}
+            <span className="text-xs font-medium">Carrito</span>
           </Button>
           {!user ? (
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleLoginOpen} 
-              className="flex flex-col items-center text-white hover:text-primary-200 hover:bg-primary-700 transition-colors py-2 px-3 rounded-lg"
+              className="flex flex-col items-center text-white hover:text-primary-100 hover:bg-gradient-to-r hover:from-primary-500 hover:to-primary-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 py-2 px-3 rounded-xl"
               aria-label="Iniciar sesión"
             >
               <User className="h-6 w-6 mb-1" />
-              <span className="text-xs font-light">Login</span>
+              <span className="text-xs font-medium">Login</span>
             </Button>
           ) : (
             <DropdownMenu>
@@ -260,7 +262,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="flex flex-col items-center text-white hover:text-primary-200 hover:bg-primary-700 transition-colors py-2 px-3 rounded-lg"
+                  className="flex flex-col items-center text-white hover:text-primary-100 hover:bg-gradient-to-r hover:from-primary-500 hover:to-primary-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 py-2 px-3 rounded-xl"
                   aria-label="Menú de usuario"
                 >
                   <Avatar className="w-6 h-6 mb-1">
@@ -277,17 +279,17 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <span className="text-xs font-light">Perfil</span>
+                  <span className="text-xs font-medium">Perfil</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="mb-2">
+              <DropdownMenuContent align="end" className="mb-2 bg-gradient-to-br from-white to-primary-25 shadow-xl border border-primary-100 rounded-xl">
                 {user?.typeUser === "ADMIN" && (
-                  <DropdownMenuItem className="text-primary-900 text-sm py-2 font-light" onClick={navigationHandlers.admin}>
+                  <DropdownMenuItem className="text-primary-900 text-sm py-2 font-medium hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:shadow-md transition-all duration-300 rounded-lg mx-1 my-1" onClick={navigationHandlers.admin}>
                     <User className="mr-2 h-4 w-4" />
                     Administrar
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem className="text-primary-900 text-sm py-2 font-light" onClick={handleLogout}>
+                <DropdownMenuItem className="text-red-600 text-sm py-2 font-medium hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:shadow-md transition-all duration-300 rounded-lg mx-1 my-1" onClick={handleLogout}>
                   Cerrar Sesión
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -296,8 +298,7 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
         </div>
       </div>
 
-      {/* Espaciador para el menú inferior móvil */}
-      <div className="h-20 lg:hidden" />
+
 
 
 

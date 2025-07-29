@@ -12,7 +12,7 @@ export const Info_Bussiness = () => {
   }, []);
 
   return (
-    <div className="pb-20 pt-8" id="about-us">
+    <div className="" id="about-us">
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
           {/* Título y logo */}
@@ -43,13 +43,13 @@ export const Info_Bussiness = () => {
             {features.map((feature, index) => (
               <div
                 key={feature.name}
-                className="relative flex flex-col items-center text-center pl-0 bg-primary-50 rounded-xl shadow-sm py-7 px-6 hover:shadow-lg transition-shadow duration-200"
+                className="relative flex flex-col items-center text-center pl-0 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl shadow-lg py-7 px-6 hover:shadow-xl hover:scale-105 transition-all duration-300 transform active:scale-95 border border-primary-200"
                 data-aos="fade-up"
                 data-aos-duration="1000"
                 data-aos-delay={`${index * 180}`}
                 role="listitem"
               >
-                <span className="bg-[#9D557A] text-white flex h-12 w-12 items-center justify-center rounded-xl shadow-md mb-4">
+                <span className="bg-gradient-to-r from-primary-600 to-primary-700 text-white flex h-12 w-12 items-center justify-center rounded-xl shadow-lg mb-4 hover:shadow-xl transition-shadow duration-300">
                   <feature.icon className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <h3
