@@ -19,7 +19,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   keywords = '',
   ogTitle,
   ogDescription,
-  ogImage = '/logo-grema.png',
+  ogImage = 'https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png',
   ogUrl,
   canonicalUrl,
   type = 'website',
@@ -105,7 +105,7 @@ export const useStructuredData = () => {
     '@type': 'Organization',
     name: 'Grema Store',
     url: 'https://www.grema-store.com',
-    logo: 'https://www.grema-store.com/logo-grema.png',
+    logo: 'https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png',
     description: 'Tienda especializada en bisutería artesanal hecha a mano con diseños únicos',
     contactPoint: {
       '@type': 'ContactPoint',

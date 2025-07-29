@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { IKImage, IKContext } from 'imagekitio-react';
 import { Mail, Lock, LogIn, X } from "lucide-react";
 import LoginGoogle from "@/components/login/components/loginGoogle";
 
@@ -31,11 +32,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="w-64 h-32 mx-auto">
-            <img
-              src="/Logo en negro.png" // Ruta desde la carpeta public
-              alt="Logo de la empresa"
-              className="w-full h-full object-contain"
-            />
+            <IKContext urlEndpoint="https://ik.imagekit.io/xj7y5uqcr">
+              <IKImage
+                path="/tr:w-250,q-80/Logos/Logo_en_negro.png"
+                loading="lazy"
+                lqip={{ active: true }}
+                alt="Logo Grema"
+                className="h-12 w-auto object-contain"
+              />
+            </IKContext>
           </div>
 
         </div>

@@ -1,5 +1,6 @@
 import { Store, ShoppingCart, User, Info, Package } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { IKImage, IKContext } from 'imagekitio-react';
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -79,11 +80,15 @@ export const Menu_Bar: React.FC<MenuBarProps> = ({ isOpen }) => {
             {/* --- LOGO CENTRADO EN MOBILE/TABLET, IZQUIERDA EN DESKTOP --- */}
             <Link to={"/"} className="lg:flex-shrink-0">
               <div className="flex flex-shrink-0 items-center">
-                <img
-                  src="/Logo en negro.png"
-                  alt="Logo de la empresa"
-                  className="w-52 h-14 sm:w-60 sm:h-16 md:w-64 md:h-18 lg:w-48 lg:h-16 xl:w-64 xl:h-20 object-contain transition-all duration-200"
-                />
+                <IKContext urlEndpoint="https://ik.imagekit.io/xj7y5uqcr">
+              <IKImage
+                path="/tr:w-300,q-80/Logos/Logo_en_negro.png"
+                loading="lazy"
+                lqip={{ active: true }}
+                alt="Logo de la empresa"
+                className="w-52 h-14 sm:w-60 sm:h-16 md:w-64 md:h-18 lg:w-48 lg:h-16 xl:w-64 xl:h-20 object-contain transition-all duration-200"
+              />
+            </IKContext>
               </div>
             </Link>
 

@@ -85,7 +85,7 @@ export const CategorySEO: React.FC<CategorySEOProps> = ({
       url: window.location.origin,
       logo: {
         '@type': 'ImageObject',
-        url: `${window.location.origin}/Logo%20en%20negro.png`,
+        url: `https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`,
       },
     },
   };
@@ -114,13 +114,13 @@ export const CategorySEO: React.FC<CategorySEOProps> = ({
       <meta property="og:description" content={info.description} />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:site_name" content="Grema Store" />
-      <meta property="og:image" content={`${window.location.origin}/Logo%20en%20negro.png`} />
+      <meta property="og:image" content={`https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`} />
       
       {/* Twitter Cards */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={`${info.name} - Grema Store`} />
       <meta name="twitter:description" content={info.description} />
-      <meta name="twitter:image" content={`${window.location.origin}/Logo%20en%20negro.png`} />
+      <meta name="twitter:image" content={`https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`} />
       
       {/* Información adicional */}
       {productCount && (

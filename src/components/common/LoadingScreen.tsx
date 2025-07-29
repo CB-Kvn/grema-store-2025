@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { IKImage, IKContext } from 'imagekitio-react';
 import "./LoadingScreen.css";
 
 interface LoadingScreenProps {
@@ -50,12 +51,16 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
     <div className="fixed inset-0 bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center z-50">
       <div className="text-center max-w-md w-full px-6">
         {/* Logo */}
-        <div className="mb-8 animate-fade-in">
-          <img
-            src="/Logo en negro.png"
-            alt="Grema Store"
-            className="w-48 h-32 sm:w-64 sm:h-40 lg:w-80 lg:h-48 object-contain mx-auto"
-          />
+        <div className="mb-8 animate-fade-in flex justify-center">
+          <IKContext urlEndpoint="https://ik.imagekit.io/xj7y5uqcr">
+              <IKImage
+                path="/tr:w-400,q-80/Logos/Logo_en_negro.png"
+              loading="lazy"
+              lqip={{ active: true }}
+              alt="Logo Grema"
+              className="w-34 h-32 object-contain animate-pulse"
+            />
+          </IKContext>
         </div>
 
         {/* Título de bienvenida */}

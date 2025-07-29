@@ -6,7 +6,7 @@ export const DEFAULT_SEO_CONFIG = {
   siteName: 'Grema Store',
   siteDescription: 'Tienda online de bisutería artesanal hecha a mano en Costa Rica. Encuentra anillos, collares, aretes y pulseras con diseños únicos y originales.',
   siteUrl: process.env.REACT_APP_SITE_URL || 'https://www.grema-store.com',
-  defaultImage: '/Logo%20en%20negro.png',
+  defaultImage: 'https://ik.imagekit.io/xj7y5uqcr/tr:w-200,q-80/Logos/Logo_en_negro.png',
   twitterHandle: '@grema_store',
   facebookAppId: process.env.REACT_APP_FACEBOOK_APP_ID || '',
   author: 'Grema Store',

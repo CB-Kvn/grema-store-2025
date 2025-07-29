@@ -89,7 +89,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
         description: 'Descubre nuestra colección exclusiva de bisutería artesanal hecha a mano. Anillos, collares, aretes y pulseras con diseños únicos y originales.',
         keywords: 'bisutería artesanal, anillos, collares, aretes, pulseras, hecho a mano, artesanal, diseños únicos, accesorios, Costa Rica',
         canonicalUrl: baseUrl,
-        ogImage: `${baseUrl}/logo-grema.png`,
+        ogImage: `https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`,
         type: 'website' as const
       };
     
@@ -99,7 +99,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
         description: 'Explora nuestra tienda online con la mejor selección de bisutería artesanal hecha a mano. Piezas únicas con envío a todo Costa Rica.',
         keywords: 'tienda bisutería artesanal, comprar anillos artesanales, comprar collares artesanales, bisutería hecha a mano, Costa Rica',
         canonicalUrl: `${baseUrl}/tienda`,
-        ogImage: `${baseUrl}/logo-grema.png`,
+        ogImage: `https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`,
         type: 'website' as const
       };
     
@@ -109,7 +109,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
         description: `${data?.description || 'Descubre esta increíble pieza de bisutería artesanal hecha a mano.'} Diseño único y calidad artesanal en Grema Store.`,
         keywords: `${data?.name || 'producto'}, bisutería artesanal, ${data?.category || 'accesorios'}, hecho a mano, Grema Store`,
         canonicalUrl: `${baseUrl}${generateProductUrl(data)}`,
-        ogImage: data?.Images || data?.image || `${baseUrl}/logo-grema.png`,
+        ogImage: data?.Images || data?.image || `https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`,
         type: 'product' as const
       };
     
@@ -129,7 +129,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
         description: `Descubre nuestra colección de ${categoryName.toLowerCase()} artesanales en Grema Store. Diseños únicos hechos a mano con técnicas artesanales.`,
         keywords: `${categoryName.toLowerCase()}, bisutería artesanal, ${data?.category}, hecho a mano, Grema Store, Costa Rica`,
         canonicalUrl: `${baseUrl}${generateCategoryUrl(data?.category || 'productos')}`,
-        ogImage: `${baseUrl}/logo-grema.png`,
+        ogImage: `https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`,
         type: 'website' as const
       };
     
@@ -139,7 +139,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
         description: 'Conoce la historia de Grema Store, nuestra pasión por la bisutería artesanal y nuestro compromiso con la calidad y técnicas tradicionales.',
         keywords: 'nosotros, historia, Grema Store, bisutería artesanal, hecho a mano, Costa Rica',
         canonicalUrl: `${baseUrl}/nosotros`,
-        ogImage: `${baseUrl}/logo-grema.png`,
+        ogImage: `https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`,
         type: 'website' as const
       };
     
@@ -149,7 +149,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
         description: 'Ponte en contacto con Grema Store. Encuentra nuestra ubicación, horarios y formas de comunicarte con nosotros.',
         keywords: 'contacto, ubicación, horarios, Grema Store, bisutería Costa Rica',
         canonicalUrl: `${baseUrl}/contacto`,
-        ogImage: `${baseUrl}/logo-grema.png`,
+        ogImage: `https://ik.imagekit.io/xj7y5uqcr/tr:w-400,q-80/Logos/Logo_en_negro.png`,
         type: 'website' as const
       };
     
@@ -159,7 +159,7 @@ export const getPageSEOData = (pageType: string, data?: any) => {
         description: 'Bisutería artesanal hecha a mano y accesorios únicos en Grema Store.',
         keywords: 'bisutería artesanal, hecho a mano, accesorios únicos, Grema Store',
         canonicalUrl: baseUrl,
-        ogImage: `${baseUrl}/logo-grema.png`,
+        ogImage: `https://ik.imagekit.io/wtelcc7rn/logo-grema.png?tr=w-400,q-90`,
         type: 'website' as const
       };
   }

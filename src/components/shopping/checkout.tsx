@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { IKImage, IKContext } from 'imagekitio-react';
 import { Truck, Gift, Shield, ArrowLeft, Copy, Phone, Wallet, AlertCircle } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { cantones, provincias } from '@/utils/location';
@@ -593,11 +594,19 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
 
                     return (
                       <div key={`${item.product.id}-${index}`} className="flex items-start space-x-4">
-                        <img
-                          src={imageUrl}
-                          alt={item.product.name || 'Producto'}
-                          className="w-16 h-16 object-cover rounded-md"
-                        />
+                        <IKContext urlEndpoint="https://ik.imagekit.io/grema">
+                          <IKImage
+                            path={imageUrl}
+                            alt={item.product.name || 'Producto'}
+                            className="w-16 h-16 object-cover rounded-md"
+                            transformation={[{
+                              height: 64,
+                              width: 64,
+                              cropMode: 'maintain_ratio'
+                            }]}
+                            loading="lazy"
+                          />
+                        </IKContext>
                         <div className="flex-1">
                           <h3 className="text-sm font-medium text-primary-900">
                             {item.product.name || 'Producto sin nombre'}
