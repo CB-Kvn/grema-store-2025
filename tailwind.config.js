@@ -1,7 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: {
+    files: [
+      "./index.html", 
+      "./src/**/*.{js,ts,jsx,tsx}",
+      "./src/components/**/*.{js,ts,jsx,tsx}",
+      "./src/pages/**/*.{js,ts,jsx,tsx}",
+      "./src/hooks/**/*.{js,ts,jsx,tsx}"
+    ],
+    extract: {
+      // Extract classes from template literals and dynamic class names
+      js: (content) => {
+        const matches = content.match(/[\w-/:]+(?<!:)/g) || [];
+        return matches;
+      }
+    }
+  },
+  // Enable JIT mode for better performance
+  mode: 'jit',
   theme: {
   	extend: {
   		colors: {

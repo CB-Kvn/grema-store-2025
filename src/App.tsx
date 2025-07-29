@@ -1,8 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import { useLazyCSS, loadCriticalCSS, loadNonCriticalCSS, loadLibraryCSS } from "./hooks/useLazyCSS";
 import Initial, { products } from "./pages/initial";
 import ProductDetail from "./components/product/productDetail";
 import CartDrawer from "./components/shopping/cart";
@@ -85,6 +83,49 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const cartItems = useAppSelector((state) => state.cart.items);
+
+  // Load critical CSS immediately
+  useEffect(() => {
+    loadCriticalCSS();
+    
+    // Load non-critical CSS after initial render
+    loadNonCriticalCSS();
+    
+    // Load library-specific CSS when needed
+    const loadLibrariesCSS = () => {
+      // Check if Swiper is used
+      if (document.querySelector('.swiper')) {
+        loadLibraryCSS.swiper();
+      }
+      
+      // Check if AOS is used
+      if (document.querySelector('[data-aos]')) {
+        loadLibraryCSS.aos();
+      }
+      
+      // Check if DatePicker is used
+      if (document.querySelector('.react-datepicker')) {
+        loadLibraryCSS.datepicker();
+      }
+    };
+    
+    // Load libraries CSS after a delay to allow components to mount
+    setTimeout(loadLibrariesCSS, 1000);
+    
+    // Also check periodically for dynamically added components
+    const interval = setInterval(loadLibrariesCSS, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Optimized lazy loading for specific conditions
+  useLazyCSS([
+    {
+      href: 'https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css',
+      id: 'driver-css',
+      condition: () => document.querySelector('.driver-popover') !== null
+    }
+  ]);
 
   const addToCart = (product: (typeof products)[0] & { quantity: number; isGift?: boolean; giftMessage?: string }) => {
     console.log("EN CARRO", { product, quantity: product.quantity, isGift: product.isGift, giftMessage: product.giftMessage });

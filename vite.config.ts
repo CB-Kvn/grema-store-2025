@@ -23,20 +23,35 @@ export default defineConfig(({ command, mode }) => {
       __APP_ENV__: JSON.stringify(mode),
     },
     build: {
-      // Configuración de build según el ambiente
-      minify: mode === 'production' ? 'esbuild' : false,
-      sourcemap: mode !== 'production',
+      minify: 'terser',
+      cssMinify: 'lightningcss',
       rollupOptions: {
         output: {
-          // Configurar nombres de archivos según ambiente
-          chunkFileNames: mode === 'production' 
-            ? 'assets/[name].[hash].js' 
-            : 'assets/[name].js',
-          assetFileNames: mode === 'production'
-            ? 'assets/[name].[hash].[ext]'
-            : 'assets/[name].[ext]',
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+            swiper: ['swiper'],
+            aos: ['aos'],
+            datepicker: ['react-datepicker'],
+            skeleton: ['react-loading-skeleton'],
+            driver: ['driver.js']
+          },
+          assetFileNames: (assetInfo) => {
+            const info = assetInfo.name?.split('.') || [];
+            const extType = info[info.length - 1];
+            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+              return `assets/images/[name]-[hash][extname]`;
+            }
+            if (/css/i.test(extType)) {
+              return `assets/css/[name]-[hash][extname]`;
+            }
+            return `assets/[name]-[hash][extname]`;
+          },
         },
       },
+      cssCodeSplit: true,
+      target: 'esnext',
+      sourcemap: false
     },
     server: {
       // Configuración del servidor de desarrollo
