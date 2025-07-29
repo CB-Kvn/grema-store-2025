@@ -89,7 +89,7 @@ const WarehousesTab = () => {
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="flex items-center px-3 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Almacén

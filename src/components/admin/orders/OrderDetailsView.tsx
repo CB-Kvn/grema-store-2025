@@ -17,10 +17,13 @@ import {
   Truck,
   CreditCard,
   FileText,
-  Clock
+  Clock,
+  ShoppingCart,
+  Warehouse
 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { PurchaseOrder } from '@/types';
+import { useAppSelector } from '@/hooks/useAppSelector';
 
 interface OrderDetailsViewProps {
   order: PurchaseOrder;
@@ -33,6 +36,8 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
   onBack,
   onEdit,
 }) => {
+  // Get warehouses from Redux store
+  const { warehouses } = useAppSelector((state) => state.warehouses);
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -48,6 +53,12 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
+  };
+  
+  // Helper function to get warehouse name by ID
+  const getWarehouseName = (warehouseId: string) => {
+    const warehouse = warehouses.find(w => w.id === warehouseId);
+    return warehouse ? warehouse.name : warehouseId;
   };
 
   return (
@@ -82,7 +93,7 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
           <Badge className={`${getStatusColor(order.status)} border text-sm px-3 py-1`}>
             {order.status}
           </Badge>
-          <Button onClick={onEdit} className="bg-primary-600 hover:bg-primary-700">
+          <Button onClick={onEdit} variant="gradient">
             <Edit className="h-4 w-4 mr-2" />
             Editar
           </Button>
@@ -91,7 +102,7 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Información del cliente */}
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -126,7 +137,7 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
         </Card>
 
         {/* Información de envío y facturación */}
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
@@ -154,7 +165,7 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
         </Card>
 
         {/* Información financiera */}
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
@@ -197,7 +208,7 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
       </div>
 
       {/* Fechas importantes */}
-      <Card>
+      <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
@@ -245,7 +256,7 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
 
       {/* Notas */}
       {order.notes && (
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -259,73 +270,90 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
           </CardContent>
         </Card>
       )}
+      {/* Productos de la Orden */}
+      <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            Productos de la Orden
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {order.items && order.items.length > 0 ? (
+            <div className="space-y-6">
+              {order.items.map((item, index) => (
+                <div key={item.id} className="border-b border-primary-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+                    <div>
+                      <h4 className="font-medium text-primary-900">
+                        {item.product?.name || `Producto ID: ${item.productId}`}
+                      </h4>
+                      <p className="text-sm text-primary-600">
+                        SKU: {item.product?.sku || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm text-primary-600">Cantidad</p>
+                        <p className="font-medium text-primary-900">{item.quantity}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-primary-600">Precio Unitario</p>
+                        <p className="font-medium text-primary-900">${item.unitPrice.toFixed(2)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-primary-600">Total</p>
+                        <p className="font-semibold text-primary-900">${item.totalPrice.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Asignaciones de Almacén */}
+                  {item.warehouseAssignments && item.warehouseAssignments.length > 0 && (
+                    <div className="mt-3 bg-primary-50 p-3 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Warehouse className="h-4 w-4 text-primary-600" />
+                        <h5 className="text-sm font-medium text-primary-700">Asignaciones de Inventario</h5>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {item.warehouseAssignments.map((assignment, idx) => (
+                          <div key={idx} className="bg-white p-2 rounded border border-primary-100 flex justify-between items-center">
+                            <span className="text-sm text-primary-700">
+                              {getWarehouseName(assignment.warehouseId)}
+                            </span>
+                            <Badge variant="outline" className="bg-primary-50">
+                              {assignment.quantity} unidades
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 text-right text-sm text-primary-600">
+                        Total asignado: {item.warehouseAssignments.reduce((sum, a) => sum + a.quantity, 0)} de {item.quantity}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              <div className="flex justify-end pt-4 border-t border-primary-100">
+                <div className="text-right">
+                  <p className="text-lg font-semibold text-primary-900">
+                    Total de Productos: ${order.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6 text-primary-500">
+              No hay productos en esta orden
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
       {/* Notas */}
       {order.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Notas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-primary-700 bg-primary-50 p-4 rounded-lg">
-              {order.notes}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      {/* Notas */}
-      {order.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Notas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-primary-700 bg-primary-50 p-4 rounded-lg">
-              {order.notes}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      {/* Notas */}
-      {order.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Notas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-primary-700 bg-primary-50 p-4 rounded-lg">
-              {order.notes}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      {/* Notas */}
-      {order.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Notas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-primary-700 bg-primary-50 p-4 rounded-lg">
-              {order.notes}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      {/* Notas */}
-      {order.notes && (
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />

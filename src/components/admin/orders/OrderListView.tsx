@@ -344,7 +344,7 @@ const OrderListView: React.FC<OrderListViewProps> = ({
       <div className="space-y-6">
         {/* Grid de órdenes */}
         {/* Ajusta la altura según necesites */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredOrders.map((order, index) => {
             const statusConfig = getStatusConfig(order.status);
 
@@ -356,7 +356,7 @@ const OrderListView: React.FC<OrderListViewProps> = ({
                 transition={{ duration: 0.3, delay: index * 0.05 }}
                 className="group"
               >
-                <Card className={`h-full hover:shadow-lg transition-all duration-200 cursor-pointer group border-primary-200 hover:border-primary-300 ${statusConfig.priority === 'high' ? 'ring-1 ring-primary-100' : ''}`}>
+                <Card className={`h-full hover:shadow-lg transition-all duration-200 cursor-pointer group border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 ${statusConfig.priority === 'high' ? 'ring-1 ring-primary-100' : ''}`}>
                   <CardHeader className="pb-3 space-y-0">
                     <div className="flex items-start justify-between">
                       <div className="min-w-0 flex-1">

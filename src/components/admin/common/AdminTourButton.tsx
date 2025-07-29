@@ -19,7 +19,7 @@ interface AdminTourButtonProps {
 
 export const AdminTourButton: React.FC<AdminTourButtonProps> = ({
   currentTab = 'inventario',
-  variant = 'outline',
+  variant = 'gradient',
   size = 'default',
   onTabChange
 }) => {

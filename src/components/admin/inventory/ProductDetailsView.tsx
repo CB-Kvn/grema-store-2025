@@ -72,7 +72,8 @@ const ProductDetailsView: React.FC<ProductDetailsViewProps> = ({
           <Button
             size="sm"
             onClick={onEdit}
-            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700"
+            variant="gradient"
+            className="flex items-center gap-2"
           >
             <Edit className="h-4 w-4" />
             Editar Producto
@@ -80,174 +81,175 @@ const ProductDetailsView: React.FC<ProductDetailsViewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Columna principal - Imagen y descripción */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Imagen principal */}
-          <Card>
+          {/* Imagen principal con detalles técnicos y descripción */}
+          <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
             <CardContent className="p-6">
-              <div className="aspect-square bg-primary-50 rounded-lg overflow-hidden mb-4">
-                {(() => {
-                  const images = product.Images as any;
-                  return images && Array.isArray(images) && images.length > 0 && images[0].url && images[0].url.length > 0 ? (
-                    <img
-                      src={images[0].url[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package className="h-16 w-16 text-primary-300" />
-                    </div>
-                  );
-                })()}
-              </div>
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Columna de la imagen */}
+                <div className="lg:w-1/2">
+                  <div className="aspect-[3/4] max-h-[600px] bg-primary-50 rounded-lg overflow-hidden mb-4">
+                    {(() => {
+                      const images = product.Images as any;
+                      return images && Array.isArray(images) && images.length > 0 && images[0].url && images[0].url.length > 0 ? (
+                        <img
+                          src={images[0].url[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="h-16 w-16 text-primary-300" />
+                        </div>
+                      );
+                    })()}
+                  </div>
 
-              {/* Badges del producto */}
-              <div className="flex flex-wrap gap-2">
-                {product.isBestSeller && (
-                  <Badge className="bg-yellow-100 text-yellow-800">
-                    <Star className="h-3 w-3 mr-1" />
-                    Best Seller
-                  </Badge>
-                )}
-                {product.isNew && (
-                  <Badge className="bg-green-100 text-green-800">
-                    Nuevo
-                  </Badge>
-                )}
-                {product.isGift && (
-                  <Badge className="bg-purple-100 text-purple-800">
-                    <Gift className="h-3 w-3 mr-1" />
-                    Regalo
-                  </Badge>
-                )}
-                {product.discount?.isActive && (
-                  <Badge className="bg-red-100 text-red-800">
-                    <Percent className="h-3 w-3 mr-1" />
-                    Descuento {product.discount.value}%
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  {/* Badges del producto */}
+                  <div className="flex flex-wrap gap-2">
+                    {product.isBestSeller && (
+                      <Badge className="bg-yellow-100 text-yellow-800">
+                        <Star className="h-3 w-3 mr-1" />
+                        Best Seller
+                      </Badge>
+                    )}
+                    {product.isNew && (
+                      <Badge className="bg-green-100 text-green-800">
+                        Nuevo
+                      </Badge>
+                    )}
+                    {product.isGift && (
+                      <Badge className="bg-purple-100 text-purple-800">
+                        <Gift className="h-3 w-3 mr-1" />
+                        Regalo
+                      </Badge>
+                    )}
+                    {product.discount?.isActive && (
+                      <Badge className="bg-red-100 text-red-800">
+                        <Percent className="h-3 w-3 mr-1" />
+                        Descuento {product.discount.value}%
+                      </Badge>
+                    )}
+                  </div>
 
-          {/* Descripción */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Descripción
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-primary-700 leading-relaxed">
-                {product.description || 'No hay descripción disponible.'}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Detalles técnicos */}
-          {product.details && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MoreVertical className="h-5 w-5" />
-                  Detalles Técnicos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {product.details.material && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <Gem className="h-5 w-5 text-primary-600" />
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Material</p>
-                        <p className="text-sm text-primary-600">{product.details.material}</p>
-                      </div>
+                  {/* Descripción del producto */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-primary-900">
+                      <Eye className="h-5 w-5" />
+                      Descripción
+                    </h3>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-sm text-primary-700 leading-relaxed">
+                        {product.description || 'No hay descripción disponible.'}
+                      </p>
                     </div>
-                  )}
-                  {product.details.piedra && Array.isArray(product.details.piedra) && product.details.piedra.length > 0 && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <Gem className="h-5 w-5 text-primary-600" />
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Piedra</p>
-                        <p className="text-sm text-primary-600">{product.details.piedra.join(', ')}</p>
-                      </div>
-                    </div>
-                  )}
-                  {product.details.peso && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <Weight className="h-5 w-5 text-primary-600" />
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Peso</p>
-                        <p className="text-sm text-primary-600">{product.details.peso}</p>
-                      </div>
-                    </div>
-                  )}
-                  {product.details.pureza && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <Star className="h-5 w-5 text-primary-600" />
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Pureza</p>
-                        <p className="text-sm text-primary-600">{product.details.pureza}</p>
-                      </div>
-                    </div>
-                  )}
-                  {(product.details as any).largo && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <Gem className="h-5 w-5 text-primary-600" />
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Largo</p>
-                        <p className="text-sm text-primary-600">{(product.details as any).largo}</p>
-                      </div>
-                    </div>
-                  )}
-                  {(product.details as any).garantia && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <Star className="h-5 w-5 text-primary-600" />
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Garantía</p>
-                        <p className="text-sm text-primary-600">{(product.details as any).garantia}</p>
-                      </div>
-                    </div>
-                  )}
-                  {(product.details as any).certificado && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <Star className="h-5 w-5 text-primary-600" />
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Certificado</p>
-                        <p className="text-sm text-primary-600">{(product.details as any).certificado}</p>
-                      </div>
-                    </div>
-                  )}
-                  {product.details.color && Array.isArray(product.details.color) && product.details.color.length > 0 && (
-                    <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Palette className="h-5 w-5 text-primary-600" />
-                        {product.details.color[0]?.hex && (
-                          <div 
-                            className="w-4 h-4 rounded-full border border-gray-300"
-                            style={{ backgroundColor: product.details.color[0].hex }}
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-primary-900">Color</p>
-                        <p className="text-sm text-primary-600">{product.details.color[0]?.name || 'Sin nombre'}</p>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+
+                {/* Columna de detalles técnicos */}
+                {product.details && (
+                  <div className="lg:w-1/2">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-primary-900">
+                      <MoreVertical className="h-5 w-5" />
+                      Detalles Técnicos
+                    </h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      {product.details.material && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <Gem className="h-5 w-5 text-primary-600" />
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Material</p>
+                            <p className="text-sm text-primary-600">{product.details.material}</p>
+                          </div>
+                        </div>
+                      )}
+                      {product.details.piedra && Array.isArray(product.details.piedra) && product.details.piedra.length > 0 && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <Gem className="h-5 w-5 text-primary-600" />
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Piedra</p>
+                            <p className="text-sm text-primary-600">{product.details.piedra.join(', ')}</p>
+                          </div>
+                        </div>
+                      )}
+                      {product.details.peso && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <Weight className="h-5 w-5 text-primary-600" />
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Peso</p>
+                            <p className="text-sm text-primary-600">{product.details.peso}</p>
+                          </div>
+                        </div>
+                      )}
+                      {product.details.pureza && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <Star className="h-5 w-5 text-primary-600" />
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Pureza</p>
+                            <p className="text-sm text-primary-600">{product.details.pureza}</p>
+                          </div>
+                        </div>
+                      )}
+                      {(product.details as any).largo && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <Gem className="h-5 w-5 text-primary-600" />
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Largo</p>
+                            <p className="text-sm text-primary-600">{(product.details as any).largo}</p>
+                          </div>
+                        </div>
+                      )}
+                      {(product.details as any).garantia && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <Star className="h-5 w-5 text-primary-600" />
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Garantía</p>
+                            <p className="text-sm text-primary-600">{(product.details as any).garantia}</p>
+                          </div>
+                        </div>
+                      )}
+                      {(product.details as any).certificado && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <Star className="h-5 w-5 text-primary-600" />
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Certificado</p>
+                            <p className="text-sm text-primary-600">{(product.details as any).certificado}</p>
+                          </div>
+                        </div>
+                      )}
+                      {product.details.color && Array.isArray(product.details.color) && product.details.color.length > 0 && (
+                        <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Palette className="h-5 w-5 text-primary-600" />
+                            {product.details.color[0]?.hex && (
+                              <div 
+                                className="w-4 h-4 rounded-full border border-gray-300"
+                                style={{ backgroundColor: product.details.color[0].hex }}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-primary-900">Color</p>
+                            <p className="text-sm text-primary-600">{product.details.color[0]?.name || 'Sin nombre'}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Espacio para otros componentes si se necesitan en el futuro */}
         </div>
 
-        {/* Columna lateral - Información comercial */}
-        <div className="space-y-6">
+        {/* Columna lateral - Información comercial y detalles técnicos */}
+        <div className="lg:col-span-2 space-y-6">
           {/* Información de precios */}
-          <Card>
+          <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
@@ -352,8 +354,10 @@ const ProductDetailsView: React.FC<ProductDetailsViewProps> = ({
             </CardContent>
           </Card>
 
+          {/* Espacio para otros detalles si se necesitan en el futuro */}
+
           {/* Estadísticas rápidas */}
-          <Card>
+          <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />

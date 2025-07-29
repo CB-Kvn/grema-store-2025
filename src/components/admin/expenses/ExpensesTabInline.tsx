@@ -78,7 +78,7 @@ const ExpensesTabInline = () => {
           <>
             {/* Header con estadísticas */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <Card>
+              <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Gastos</CardTitle>
                   <Receipt className="h-4 w-4 text-primary-600" />
@@ -91,7 +91,7 @@ const ExpensesTabInline = () => {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Monto Total</CardTitle>
                   <DollarSign className="h-4 w-4 text-primary-600" />
@@ -106,7 +106,7 @@ const ExpensesTabInline = () => {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Categoría Principal</CardTitle>
                   <BarChart3 className="h-4 w-4 text-purple-600" />
@@ -119,7 +119,7 @@ const ExpensesTabInline = () => {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Periodo</CardTitle>
                   <Calendar className="h-4 w-4 text-blue-600" />
@@ -170,7 +170,8 @@ const ExpensesTabInline = () => {
                 
                 <Button
                   onClick={handleCreateExpense}
-                  className="bg-primary-600 hover:bg-primary-700 flex items-center gap-2"
+                  variant="gradient"
+                  className="flex items-center gap-2"
                 >
                   <Plus className="h-4 w-4" />
                   Nuevo Gasto

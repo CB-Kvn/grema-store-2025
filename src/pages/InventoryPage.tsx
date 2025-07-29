@@ -188,9 +188,11 @@ const InventoryPage = () => {
         initial={false}
         animate={{
           x: isSidebarCollapsed ? '-100%' : 0,
+          width: isSidebarCollapsed ? 0 : 320,
+          opacity: isSidebarCollapsed ? 0 : 1
         }}
         transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-        className="fixed lg:relative z-50 h-full w-80 bg-white shadow-2xl lg:shadow-xl border-r border-primary-200 flex flex-col lg:translate-x-0"
+        className="fixed lg:relative z-50 h-full bg-white shadow-2xl lg:shadow-xl border-r border-primary-200 flex flex-col lg:translate-x-0 overflow-hidden"
       >
         {/* Header del Sidebar */}
         <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-6 flex items-center justify-between">
@@ -267,7 +269,14 @@ const InventoryPage = () => {
       </motion.aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <motion.div 
+        className="flex-1 flex flex-col min-w-0"
+        animate={{
+          width: '100%',
+          flexGrow: 1
+        }}
+        transition={{ type: "spring", bounce: 0, duration: 0.4 }}>
+      
         {/* Top Bar */}
         <header className="bg-white shadow-sm border-b border-primary-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -303,7 +312,7 @@ const InventoryPage = () => {
             {renderTabContent()}
           </motion.div>
         </main>
-      </div>
+      </motion.div>
     </div>
   );
 };

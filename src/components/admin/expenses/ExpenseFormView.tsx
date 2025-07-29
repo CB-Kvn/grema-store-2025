@@ -222,7 +222,7 @@ const ExpenseFormView: React.FC<ExpenseFormViewProps> = ({
         </div>
         <Button
           onClick={handleSubmit}
-          className="bg-primary-600 hover:bg-primary-700"
+          variant="gradient"
           disabled={isUploading}
         >
           {isUploading ? (
@@ -242,7 +242,7 @@ const ExpenseFormView: React.FC<ExpenseFormViewProps> = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Información principal */}
-          <Card>
+          <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Receipt className="h-5 w-5" />
@@ -369,7 +369,7 @@ const ExpenseFormView: React.FC<ExpenseFormViewProps> = ({
           </Card>
 
           {/* Información de pago */}
-          <Card>
+          <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
@@ -471,7 +471,7 @@ const ExpenseFormView: React.FC<ExpenseFormViewProps> = ({
         </div>
 
         {/* Notas adicionales */}
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />

@@ -107,7 +107,7 @@ const OrdersTabInline = () => {
             <div className="space-y-6">
               {/* Header con estadísticas */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card>
+                <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Total Órdenes</CardTitle>
                     <Package className="h-4 w-4 text-muted-foreground" />
@@ -120,7 +120,7 @@ const OrdersTabInline = () => {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -133,7 +133,7 @@ const OrdersTabInline = () => {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Completadas</CardTitle>
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -146,7 +146,7 @@ const OrdersTabInline = () => {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -192,7 +192,7 @@ const OrdersTabInline = () => {
                     </SelectContent>
                   </Select>
 
-                  <Button onClick={handleCreateOrder}>
+                  <Button onClick={handleCreateOrder} variant="gradient">
                     <Plus className="h-4 w-4 mr-2" />
                     Nueva Orden
                   </Button>

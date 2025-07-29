@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import InventoryAssignment from './InventoryAssignment';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +49,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
     onInventoryAssign,
 }) => {
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isInventoryDialogOpen, setIsInventoryDialogOpen] = useState(false);
+    const [selectedItemForInventory, setSelectedItemForInventory] = useState<Item | null>(null);
 
     const handleInputChange = (field: string, value: any) => {
         onFormChange(field, value);
@@ -130,7 +134,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                     </div>
                 </div>
 
-                <Button onClick={handleSubmit} className="bg-primary-600 hover:bg-primary-700">
+                <Button onClick={handleSubmit} variant="gradient">
                     <Save className="h-4 w-4 mr-2" />
                     {order ? 'Actualizar' : 'Crear'} Orden
                 </Button>
@@ -138,7 +142,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
             <form className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
-                    <Card>
+                    <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <User className="h-5 w-5" />
@@ -202,7 +206,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <DollarSign className="h-5 w-5" />
@@ -276,7 +280,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                             </CardContent>
                         </CardHeader>
                     </Card>
-                    <Card>
+                    <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Package className="h-5 w-5" />
@@ -377,7 +381,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="lg:col-span-2">
+                    <Card className="lg:col-span-2 border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
@@ -468,9 +472,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
                                                             variant="outline"
                                                             size="sm"
                                                             onClick={() => {
-                                                                if (onInventoryAssign) {
-                                                                    onInventoryAssign(item.id, []);
-                                                                }
+                                                                setSelectedItemForInventory(item);
+                                                                setIsInventoryDialogOpen(true);
                                                             }}
                                                             className="flex items-center gap-2"
                                                         >
@@ -493,7 +496,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
                             )}
                         </CardContent>
                     </Card>
-                    <Card className="lg:col-span-2">
+                    <Card className="lg:col-span-2 border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
                         <CardHeader>
                             <CardTitle>Notas Adicionales</CardTitle>
                         </CardHeader>
@@ -513,17 +516,31 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
                 </div>
             </form>
-            {/* {isInventoryDialogOpen && selectedItemForInventory && (
-                <Dialog open={isInventoryDialogOpen} onOpenChange={handleInventoryDialogClose}>
+            {isInventoryDialogOpen && selectedItemForInventory && (
+                <Dialog open={isInventoryDialogOpen} onOpenChange={(open) => {
+                    if (!open) {
+                        setIsInventoryDialogOpen(false);
+                        setSelectedItemForInventory(null);
+                    }
+                }}>
                     <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                         <InventoryAssignment
                             item={selectedItemForInventory}
-                            onAssignmentChange={handleInventoryAssignmentChange}
-                            onClose={handleInventoryDialogClose}
+                            onAssignmentChange={(itemId, assignments) => {
+                                if (onInventoryAssign) {
+                                    onInventoryAssign(itemId, assignments);
+                                }
+                                setIsInventoryDialogOpen(false);
+                                setSelectedItemForInventory(null);
+                            }}
+                            onClose={() => {
+                                setIsInventoryDialogOpen(false);
+                                setSelectedItemForInventory(null);
+                            }}
                         />
                     </DialogContent>
                 </Dialog>
-            )} */}
+            )}
         </motion.div>
     );
 };

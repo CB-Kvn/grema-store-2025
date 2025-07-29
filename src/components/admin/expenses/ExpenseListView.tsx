@@ -64,7 +64,7 @@ const ExpenseListView: React.FC<ExpenseListViewProps> = ({
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {filteredExpenses.map((expense: any) => (
         <motion.div
           key={expense.id}
@@ -72,7 +72,7 @@ const ExpenseListView: React.FC<ExpenseListViewProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+          <Card className="h-full hover:shadow-lg transition-all duration-200 border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">

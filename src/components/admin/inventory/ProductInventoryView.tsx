@@ -166,7 +166,7 @@ const ProductInventoryView: React.FC<ProductInventoryViewProps> = ({
 
       {/* Resumen general */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary-100 rounded-lg">
@@ -180,7 +180,7 @@ const ProductInventoryView: React.FC<ProductInventoryViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -194,7 +194,7 @@ const ProductInventoryView: React.FC<ProductInventoryViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -210,7 +210,7 @@ const ProductInventoryView: React.FC<ProductInventoryViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
@@ -231,7 +231,7 @@ const ProductInventoryView: React.FC<ProductInventoryViewProps> = ({
 
       {/* Formulario de inventario */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
@@ -365,7 +365,7 @@ const ProductInventoryView: React.FC<ProductInventoryViewProps> = ({
           </Button>
           <Button
             type="submit"
-            className="bg-primary-600 hover:bg-primary-700"
+            variant="gradient"
           >
             <Save className="h-4 w-4 mr-2" />
             Guardar Inventario

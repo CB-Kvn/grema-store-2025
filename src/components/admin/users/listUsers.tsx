@@ -721,7 +721,8 @@ export function UsersTable({ users, onUserTypeChange, onDiscountCodesChange }: {
                 <Button 
                   onClick={saveSelectedDiscounts}
                   disabled={loadingCodes[currentUserId]}
-                  className="flex-1 sm:flex-none bg-primary-600 hover:bg-primary-700 font-medium"
+                  variant="gradient"
+                  className="flex-1 sm:flex-none font-medium"
                 >
                   {loadingCodes[currentUserId] ? (
                     <>

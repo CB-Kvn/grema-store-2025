@@ -77,7 +77,7 @@ const ExpenseDetailsView: React.FC<ExpenseDetailsViewProps> = ({
           <Badge className={`${getCategoryColor(expense.category)} border text-sm px-3 py-1`}>
             {expense.category}
           </Badge>
-          <Button onClick={onEdit} className="bg-primary-600 hover:bg-primary-700">
+          <Button onClick={onEdit} variant="gradient">
             <Edit className="h-4 w-4 mr-2" />
             Editar
           </Button>
@@ -86,7 +86,7 @@ const ExpenseDetailsView: React.FC<ExpenseDetailsViewProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Información principal */}
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Receipt className="h-5 w-5" />
@@ -127,7 +127,7 @@ const ExpenseDetailsView: React.FC<ExpenseDetailsViewProps> = ({
         </Card>
 
         {/* Información de pago y recibo */}
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="h-5 w-5" />
@@ -192,7 +192,7 @@ const ExpenseDetailsView: React.FC<ExpenseDetailsViewProps> = ({
 
       {/* Detalles adicionales */}
       {(expense as any).notes && (
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -208,7 +208,7 @@ const ExpenseDetailsView: React.FC<ExpenseDetailsViewProps> = ({
       )}
 
       {/* Resumen del periodo */}
-      <Card>
+      <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
         <CardHeader>
           <CardTitle>Contexto del Periodo</CardTitle>
         </CardHeader>

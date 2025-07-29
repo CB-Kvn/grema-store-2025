@@ -35,7 +35,7 @@ const DiscountsTabInline = () => {
     <div className="space-y-6">
       {/* Header con estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Descuentos</CardTitle>
             <Percent className="h-4 w-4 text-primary-600" />
@@ -48,7 +48,7 @@ const DiscountsTabInline = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Descuentos Activos</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
@@ -61,7 +61,7 @@ const DiscountsTabInline = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Expirados</CardTitle>
             <Package className="h-4 w-4 text-red-600" />
@@ -74,7 +74,7 @@ const DiscountsTabInline = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-primary-100 hover:border-primary-200 bg-gradient-to-r from-white to-primary-25 hover:from-primary-25 hover:to-primary-50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Valor Promedio</CardTitle>
             <DollarSign className="h-4 w-4 text-blue-600" />
@@ -122,7 +122,8 @@ const DiscountsTabInline = () => {
           
           <Button
             onClick={handleCreateDiscount}
-            className="bg-primary-600 hover:bg-primary-700 flex items-center gap-2"
+            variant="gradient"
+            className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Nuevo Descuento
