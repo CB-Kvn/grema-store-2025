@@ -1,39 +1,29 @@
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import Initial, { products } from "./pages/initial";
+import ProductDetail from "./components/product/productDetail";
+import CartDrawer from "./components/shopping/cart";
+import CheckoutPage from "./components/shopping/checkout";
+import { ShopPage } from "./components/store/storePage";
 import { useAppDispatch } from "./hooks/useAppDispatch";
 import { useAppSelector } from "./hooks/useAppSelector";
+import { ValuesPage } from "./pages/values";
 import { Menu_Bar } from "./components/navigation/nav-store";
 import { Networking } from "./components/socials/networking";
 import { Footer } from "./components/login/initial-page/footer";
 import { addToCartShop, removeFromCartShop, updateQuantityShop } from "./store/slices/cartSlice";
+import OrderDocumentsPage from "./pages/OrderDocumentsPage";
+import OrderTrackingPage from "./pages/OrderTrackingPage";
+import InventoryPage from "./pages/InventoryPage";
 import Loader from '@/components/ui/Loader';
 import { AlertProvider } from "./context/AlertContext";
+import AboutUs from "./pages/about-us";
+import { motion } from "framer-motion";
 import { LoadingScreen } from "./components/common/LoadingScreen";
 import "./components/common/LoadingScreen.css";
-
-// Lazy loading de páginas principales
-const Initial = lazy(() => import("./pages/initial"));
-const ProductDetail = lazy(() => import("./components/product/productDetail"));
-const CartDrawer = lazy(() => import("./components/shopping/cart"));
-const CheckoutPage = lazy(() => import("./components/shopping/checkout"));
-const ShopPage = lazy(() => import("./components/store/storePage").then(module => ({ default: module.ShopPage })));
-const ValuesPage = lazy(() => import("./pages/values").then(module => ({ default: module.ValuesPage })));
-const AboutUs = lazy(() => import("./pages/about-us"));
-
-// Lazy loading de páginas administrativas (solo cargar cuando sea necesario)
-const OrderDocumentsPage = lazy(() => import("./pages/OrderDocumentsPage"));
-const OrderTrackingPage = lazy(() => import("./pages/OrderTrackingPage"));
-const InventoryPage = lazy(() => import("./pages/InventoryPage"));
-
-// Componente de carga para rutas
-const RouteLoader = () => (
-  <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-2"></div>
-      <p className="text-primary-600 text-sm">Cargando página...</p>
-    </div>
-  </div>
-);
 
 // Componente de fondo confeti animado (líneas más gruesas)
 function ConfettiBackground() {
@@ -131,37 +121,33 @@ function App() {
       
       <Router>
         <AlertProvider>
-          <Suspense fallback={<div>Cargando carrito...</div>}>
-            <CartDrawer
-              isOpen={isCartOpen}
-              onClose={() => setIsCartOpen(false)}
-              items={cartItems}
-              onRemove={removeFromCart}
-              onUpdateQuantity={updateQuantity}
-            />
-          </Suspense>
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            items={cartItems}
+            onRemove={removeFromCart}
+            onUpdateQuantity={updateQuantity}
+          />
           <Menu_Bar isOpen={() => setIsCartOpen(true)}></Menu_Bar>
 
-          <Suspense fallback={<RouteLoader />}>
-            <Routes>
-              <Route path="/" element={<Initial addToCart={addToCart} />} />
-              {/* <Route path="/login" element={<LoginPage />} /> */}
-              <Route
-                path="/producto/:id"
-                element={<ProductDetail addToCart={addToCart} updateQuantity={updateQuantity} />}
-              />
-              <Route
-                path="/checkout"
-                element={<CheckoutPage cartItems={cartItems} />}
-              />
-              <Route path="/tienda" element={<ShopPage addToCart={addToCart} />} />
-              <Route path="/sobre-nosotros" element={<AboutUs />} />
-              <Route path="/nuestros-valores" element={<ValuesPage />} />
-              <Route path="/admin/inventory" element={<InventoryPage />} />
-              <Route path="/orders/:orderIdFromUrl/documents" element={<OrderDocumentsPage />} />
-              <Route path="/tracking" element={<OrderTrackingPage />}></Route>
-            </Routes>
-          </Suspense>
+          <Routes>
+            <Route path="/" element={<Initial addToCart={addToCart} />} />
+            {/* <Route path="/login" element={<LoginPage />} /> */}
+            <Route
+              path="/producto/:id"
+              element={<ProductDetail addToCart={addToCart} updateQuantity={updateQuantity} />}
+            />
+            <Route
+              path="/checkout"
+              element={<CheckoutPage cartItems={cartItems} />}
+            />
+            <Route path="/tienda" element={<ShopPage addToCart={addToCart} />} />
+            <Route path="/sobre-nosotros" element={<AboutUs />} />
+            <Route path="/nuestros-valores" element={<ValuesPage />} />
+            <Route path="/admin/inventory" element={<InventoryPage />} />
+            <Route path="/orders/:orderIdFromUrl/documents" element={<OrderDocumentsPage />} />
+            <Route path="/tracking" element={<OrderTrackingPage />}></Route>
+          </Routes>
           <Networking></Networking>
           <Footer></Footer>
           <Loader />
