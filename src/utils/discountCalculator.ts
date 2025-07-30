@@ -504,7 +504,7 @@ const applyDiscountToItem = async (
     
     case 'BUY_X_GET_Y':
       // Para BUY_X_GET_Y, usar la función calculateBuyXGetYDiscount para calcular directamente
-      debugger
+
       const minQtyToPay = discount.minQuantity || 1;
       const bonusQtyToGet = discount.maxQuantity  || (minQtyToPay + 1); // Cantidad total que llevas
       const discountResult = calculateBuyXGetYDiscount(

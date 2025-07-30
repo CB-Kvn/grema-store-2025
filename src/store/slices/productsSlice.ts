@@ -169,7 +169,7 @@ const productsSlice = createSlice({
 
     updateImagesToItemInventory(state, action: PayloadAction<string[] & { id?: number}>) {
       const id = (action.payload as any).id;
-      debugger
+    
       if (state.itemInventory) {
         if (!state.itemInventory.Images) state.itemInventory.Images = [];
         if (!state.itemInventory.Images[0]) {
@@ -273,7 +273,7 @@ const productsSlice = createSlice({
       const targetItem = product.WarehouseItem.find(
         (item) => item.warehouseId === targetWarehouseId
       );
-      debugger
+ 
 
       // Restar del origen
       if (sourceItem && sourceItem.quantity >= quantity) {

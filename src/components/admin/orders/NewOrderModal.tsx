@@ -208,7 +208,7 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
       if (formData.documents && formData.documents.length > 0) {
         orderToCreate.documents = formData.documents;
       }
-      debugger
+      
       // Crear la orden primero
       await dispatch(createOrder(orderToCreate));
       
@@ -217,7 +217,7 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ onClose }) => {
         try {
           // Primero subir el archivo usando la ruta /uploadReceipt
           const uploadResponse = await purchaseOrderService.uploadFileReceipt(paymentProof);
-          debugger
+
           // Luego crear el documento con la URL devuelta
 
           

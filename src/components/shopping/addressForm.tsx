@@ -25,13 +25,13 @@ const AddressForm: React.FC<AddressFormProps> = ({
   onBack,
 }) => {
   console.log(values)
-  debugger
+
   const [selectedProvincia, setSelectedProvincia] = useState<ProvinciaId | ''>('');
   const [availableCantones, setAvailableCantones] = useState<typeof cantones[ProvinciaId]>(cantones["1"]);
   const [availableDistritos, setAvailableDistritos] = useState<{ nombre: string }[]>([]);
 
   useEffect(() => {
-    debugger
+
     const canton = availableCantones.find(c => c.nombre === values.canton);
     setAvailableDistritos(canton?.distritos || []);
   }, [values.canton, availableCantones]);

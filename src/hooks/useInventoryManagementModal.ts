@@ -247,7 +247,7 @@ export function useInventoryManagementModal({
    * Actualizar la cantidad de un producto en una bodega específica.
    */
   const handleUpdateQuantity = async (warehouseId: string, itemId: number, quantity: number, total:number) => {
-    debugger
+
     console.log('handleUpdateQuantity', { warehouseId, itemId, quantity, total });
     if (total < 0) {
       showAlert('Ingresa una cantidad válida.', 'error');

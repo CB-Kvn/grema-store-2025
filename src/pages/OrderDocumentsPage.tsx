@@ -165,7 +165,7 @@ const OrderDocumentsPage = () => {
           mimeType: uploadResponse.fileType,
           size: uploadResponse.size
         };
-        debugger
+    
         await purchaseOrderService.addDocument(selectedOrder?.id || '', documentData);
       }
 

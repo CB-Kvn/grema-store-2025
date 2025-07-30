@@ -100,7 +100,7 @@ export function useProductImageState() {
 
       const response = await productService.updateImage(itemInventory.Images[0].id, updatedImagesInventoryFilepaths, true, itemInventory.filepaths[0].productId) as any[];
 
-      debugger
+ 
 
       dispatch(updateImagesToProduct({ productId: itemInventory.id, images: updatedImages }));
 

@@ -223,7 +223,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose }) => {
         mimeType: uploadResponse.fileType,
         size: uploadResponse.size
       };
-      debugger;
+
       await purchaseOrderService.updateDocument(formData.id, updateData);
 
       // Actualizar el documento en el estado local con la nueva URL
