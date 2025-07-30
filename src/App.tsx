@@ -127,11 +127,11 @@ function App() {
     }
   ]);
 
-  const addToCart = (product: (typeof products)[0] & { quantity: number; isGift?: boolean; giftMessage?: string }) => {
+  const addToCart = (product: (typeof products) & { quantity?: number; isGift?: boolean; giftMessage?: string }) => {
     console.log("EN CARRO", { product, quantity: product.quantity, isGift: product.isGift, giftMessage: product.giftMessage });
     dispatch(addToCartShop({ 
-      product: product, 
-      quantity: product.quantity,
+      product: product[0], 
+      quantity: product.quantity || 1,
       isGift: product.isGift || false,
       giftMessage: product.giftMessage || ''
     }));

@@ -26,8 +26,8 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: () => void | null;
-  onClick?: () => void | null;
+  onAddToCart: () => void;
+  onClick?: () => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick }) => {
@@ -108,7 +108,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
             className="p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-primary-50 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
-              onAddToCart();
+              if (onAddToCart) {
+                onAddToCart();
+              }
             }}
             aria-label={`Añadir ${product.name} al carrito`}
           >
@@ -180,7 +182,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
                       maximumFractionDigits: 2,
                       minimumFractionDigits: 2,
                     }).format(
-                      product.WareHouseItem[0].price /
+                      product.WarehouseItem[0].price /
                         (1 - product.WarehouseItem[0].discount / 100)
                     )}
                   </span>
@@ -196,7 +198,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
           className="w-full bg-primary-600 text-white py-2 sm:py-3 rounded-b-lg text-sm sm:text-base font-medium hover:bg-primary-700 transition-colors mt-auto"
           onClick={(e) => {
             e.stopPropagation();
-            onAddToCart();
+            if (onAddToCart) {
+              onAddToCart();
+            }
           }}
         >
           Agregar al Carrito
