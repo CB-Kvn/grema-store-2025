@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IKImage, IKContext } from 'imagekitio-react';
 import { Truck, Gift, Shield, ArrowLeft, Copy, Phone, Wallet, AlertCircle } from 'lucide-react';
@@ -12,8 +12,22 @@ import { CartItem as DiscountCartItem } from '@/utils/discountCalculator';
 import { useDiscountCalculator } from '@/hooks/useDiscountCalculator';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
-import { clearCart } from '@/store/slices/cartSlice';
+import { clearCart, updateGiftStatusShop } from '@/store/slices/cartSlice';
 import { cn } from '@/lib/utils';
+import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+
+// Función debounce simple
+const debounce = (func: Function, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
 
 // Tipo para representar la estructura real de los datos del carrito
 interface RealCartItem {
@@ -60,6 +74,27 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector(state => state.user.currentUser);
+  
+  // Estado local para los mensajes de regalo para evitar actualizaciones constantes del store
+  const [localGiftMessages, setLocalGiftMessages] = useState<{[key: number]: string}>({});
+  
+  // Debounce para actualizar el mensaje de regalo en el store
+  const debouncedUpdateGiftMessage = useCallback(
+    debounce((productId: number, message: string) => {
+      dispatch(updateGiftStatusShop({
+        id: productId,
+        isGift: true,
+        giftMessage: message
+      }));
+    }, 500),
+    [dispatch]
+  );
+  
+  // Función para manejar cambios en el mensaje de regalo
+  const handleGiftMessageChange = useCallback((productId: number, message: string) => {
+    setLocalGiftMessages(prev => ({ ...prev, [productId]: message }));
+    debouncedUpdateGiftMessage(productId, message);
+  }, [debouncedUpdateGiftMessage]);
   const [step, setStep] = useState<'shipping' | 'billing' | 'payment' | 'confirmation'>('shipping');
   const [shippingInfo, setShippingInfo] = useState<AddressInfo>({
     buyerId: '',
@@ -98,8 +133,9 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   const [orderData, setOrderData] = useState<any>(null);
 
 
-  const discountCartItems: DiscountCartItem[] = useMemo(() =>
-    cartItems.map(item => ({
+  // Memoizar los items del carrito solo basándose en ID y cantidad para evitar recálculos innecesarios
+  const discountCartItems: DiscountCartItem[] = useMemo(() => {
+    return cartItems.map(item => ({
       product: {
         id: item.product.id,
         name: item.product.name,
@@ -108,7 +144,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
         // Agregar propiedades adicionales del producto si están disponibles
       },
       quantity: item.quantity
-    })), [cartItems]);
+    }));
+  }, [cartItems.map(item => `${item.product.id}-${item.quantity}`).join(',')]);
 
 
   const {
@@ -252,19 +289,20 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
   }, [step])
 
   return (
-    <div className="min-h-screen bg-primary-50">
+    <div className="min-h-screen">
 
-      <header className="bg-white shadow-sm">
+      <div className="bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-primary-600 hover:text-primary-700"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            <span>Volver</span>
-          </button>
+          <Breadcrumbs 
+            items={[
+              { name: 'Inicio', url: '/' },
+              { name: 'Tienda', url: '/tienda' },
+              { name: 'Checkout', url: '/checkout', isActive: true }
+            ]} 
+            className="mb-4" 
+          />
         </div>
-      </header>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -587,16 +625,16 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                   {itemsWithDiscounts.map((item, index) => {
                     // Usar los datos originales del cartItem para las imágenes
                     const originalCartItem = cartItems[index];
-                    const imageUrl = originalCartItem?.product.Images?.[0]?.url?.[0] || 'https://via.placeholder.com/150';
+                    const imageUrl = originalCartItem?.product.filepaths?.[0]?.url || 'https://via.placeholder.com/150';
                     const originalPrice = (item.product.price || 0) * item.quantity;
                     const finalPrice = item.appliedDiscount?.finalPrice || originalPrice;
                     const discount = item.appliedDiscount?.discountApplied || 0;
 
                     return (
                       <div key={`${item.product.id}-${index}`} className="flex items-start space-x-4">
-                        <IKContext urlEndpoint="https://ik.imagekit.io/grema">
+                        <IKContext urlEndpoint="https://ik.imagekit.io/wtelcc7rn">
                           <IKImage
-                            path={imageUrl}
+                            path={JSON.parse(imageUrl)[0]}
                             alt={item.product.name || 'Producto'}
                             className="w-16 h-16 object-cover rounded-md"
                             transformation={[{
@@ -612,6 +650,43 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
                             {item.product.name || 'Producto sin nombre'}
                           </h3>
                           <p className="text-sm text-primary-500">Cantidad: {item.quantity}</p>
+
+                          {/* Campos de regalo */}
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                id={`gift-${item.product.id}`}
+                                checked={originalCartItem?.isGift || false}
+                                onChange={(e) => {
+                                  dispatch(updateGiftStatusShop({
+                                    id: item.product.id,
+                                    isGift: e.target.checked,
+                                    giftMessage: originalCartItem?.giftMessage || ''
+                                  }));
+                                }}
+                                className="h-3 w-3 text-primary-600 focus:ring-primary-500 border-primary-300 rounded"
+                              />
+                              <label htmlFor={`gift-${item.product.id}`} className="ml-2 text-xs text-primary-700">
+                                Es un regalo
+                              </label>
+                            </div>
+                            
+                            {originalCartItem?.isGift && (
+                              <div className="mt-1">
+                                <input
+                                  type="text"
+                                  placeholder="Mensaje de regalo (opcional)"
+                                  value={localGiftMessages[item.product.id] ?? originalCartItem?.giftMessage ?? ''}
+                                  onChange={(e) => {
+                                    handleGiftMessageChange(item.product.id, e.target.value);
+                                  }}
+                                  className="w-full text-xs p-1 border border-primary-200 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                  maxLength={100}
+                                />
+                              </div>
+                            )}
+                          </div>
 
                           {/* Mostrar información de descuento aplicado */}
                           {item.appliedDiscount ? (

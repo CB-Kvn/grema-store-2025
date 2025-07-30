@@ -17,7 +17,7 @@ export const Networking = () => {
   if (isAdminRoute) return null;
 
   return (
-    <div className="fixed right-6 bottom-6 z-50 flex flex-col items-center space-y-4">
+    <div className="fixed right-6 md:bottom-10 bottom-24  z-50 flex flex-col items-center space-y-4">
       {/* Botón principal */}
       <button
         onClick={toggleMenu}

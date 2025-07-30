@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { Flame, Sparkles, Grid3X3, Circle, Heart, Gem, Watch, Package } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -16,7 +16,6 @@ import { useAppSelector } from "@/hooks/useAppSelector";
 import { useProductService } from "@/hooks/useProductService";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { ChevronRight, ShoppingBag, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Lazy loading de componentes pesados
@@ -184,7 +183,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
       {/* <FloatingSocialButton /> */}
 
       {/* Botón flotante a la derecha centrado, solo visible en pantallas md+ - Memoizado */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {!slide && (
           <motion.button
             key="go-to-shop-btn"
@@ -200,7 +199,7 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
             <ChevronRight className="ml-2 w-6 h-6" />
           </motion.button>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       {/* Navigation */}
 
