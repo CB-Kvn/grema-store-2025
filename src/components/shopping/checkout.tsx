@@ -220,7 +220,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
         status: 'PENDING'
       };
     });
-    debugger
+  
 
     const daBill = needInvoice ? (billingInfo.address + ", " + provincias[Number(billingInfo.provincia) - 1].nombre + " " + billingInfo.canton + ", " + billingInfo.zipCode) 
                               : (shippingInfo.address + ", " + provincias[Number(shippingInfo.provincia) - 1].nombre + " " + shippingInfo.canton + ", " + shippingInfo.zipCode)
@@ -253,7 +253,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems }) => {
         `Descuento aplicado: ${calculationResult.selectedDiscount.type} - ${calculationResult.selectedDiscount.value}${calculationResult.selectedDiscount.type === 'PERCENTAGE' ? '%' : ''}` :
         null
     };
-    debugger
+
     purchaseOrderService.create(orderDataResponse)
     purchaseOrderService.sendEmail(
       shippingInfo.email,
