@@ -64,6 +64,7 @@ export function DiscountsTable({ discounts, onEdit, onDelete }: {
                 <TableHead className="text-primary-700 font-medium">Fecha Inicio</TableHead>
                 <TableHead className="text-primary-700 font-medium">Fecha Fin</TableHead>
                 <TableHead className="text-primary-700 font-medium">Estado</TableHead>
+                <TableHead className="text-primary-700 font-medium">Aplicación</TableHead>
                 <TableHead className="text-primary-700 font-medium">Cant. Mín</TableHead>
                 <TableHead className="text-primary-700 font-medium">Cant. Máx</TableHead>
                 <TableHead className="text-primary-700 font-medium">Productos</TableHead>
@@ -129,6 +130,17 @@ export function DiscountsTable({ discounts, onEdit, onDelete }: {
                             : "bg-gray-100 text-gray-800 border-gray-200"
                         }>
                           {d.isActive ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </TableCell>
+
+                      {/* Aplicación */}
+                      <TableCell>
+                        <Badge variant="secondary" className={
+                          d.isGlobal 
+                            ? "bg-blue-100 text-blue-800 border-blue-200" 
+                            : "bg-amber-100 text-amber-800 border-amber-200"
+                        }>
+                          {d.isGlobal ? "Global" : "Por cliente"}
                         </Badge>
                       </TableCell>
 

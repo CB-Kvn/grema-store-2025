@@ -10,6 +10,7 @@ export interface Discount {
   startDate: string;
   endDate?: string;
   isActive: boolean;
+  isGlobal: boolean; // Indica si el descuento es global o por cliente
   minQuantity?: number;
   maxQuantity?: number;
   items?: number[]; // IDs de productos relacionados

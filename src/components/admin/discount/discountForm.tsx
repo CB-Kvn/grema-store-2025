@@ -225,6 +225,7 @@ export function DiscountForm({
     startDate: "",
     endDate: "",
     isActive: true,
+    isGlobal: true,
     minQuantity: "",
     maxQuantity: "",
     selectedProducts: [] as Product[],
@@ -244,6 +245,7 @@ export function DiscountForm({
         startDate: editingDiscount.startDate.split('T')[0], // Extraer solo la fecha
         endDate: editingDiscount.endDate ? editingDiscount.endDate.split('T')[0] : "",
         isActive: editingDiscount.isActive,
+        isGlobal: editingDiscount.isGlobal !== undefined ? editingDiscount.isGlobal : true,
         minQuantity: editingDiscount.minQuantity?.toString() || "",
         maxQuantity: editingDiscount.maxQuantity?.toString() || "",
         selectedProducts: selectedProducts,
@@ -260,6 +262,7 @@ export function DiscountForm({
         startDate: "",
         endDate: "",
         isActive: true,
+        isGlobal: true,
         minQuantity: "",
         maxQuantity: "",
         selectedProducts: [],
@@ -309,6 +312,7 @@ export function DiscountForm({
       startDate: form.startDate,
       endDate: form.endDate || undefined,
       isActive: form.type === "PERCENTAGE" ? true : form.isActive, // Always active for percentage discounts
+      isGlobal: form.isGlobal, // Añadimos el campo isGlobal
     });
     
     setForm({
@@ -317,6 +321,7 @@ export function DiscountForm({
       startDate: "",
       endDate: "",
       isActive: true,
+      isGlobal: true,
       minQuantity: "",
       maxQuantity: "",
       selectedProducts: [],
@@ -457,6 +462,26 @@ export function DiscountForm({
                 />
                 <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
+            </div>
+
+            {/* Tipo de Descuento (Global o por Cliente) - Disponible para todos los tipos de descuento */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-primary-700">Tipo de Aplicación</Label>
+              <div className="flex items-center space-x-2 h-9">
+                <Checkbox
+                  id="isGlobal"
+                  checked={form.isGlobal}
+                  onCheckedChange={(checked) => handleChange("isGlobal", checked)}
+                />
+                <Label htmlFor="isGlobal" className="text-sm text-primary-700">
+                  Descuento global
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {form.isGlobal 
+                  ? "Se aplicará a todos los clientes" 
+                  : "Se aplicará solo a clientes específicos"}
+              </p>
             </div>
 
             {/* Fields only for non-percentage discounts */}
