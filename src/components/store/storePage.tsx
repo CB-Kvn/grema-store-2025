@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useGlobalDiscounts } from "@/hooks/useGlobalDiscounts";
 import { Product, Category } from "@/types";
 import { selectAllProducts, setProducts, setLoading, setError, selectLoading, Product as ProductSlice } from "@/store/slices/productsSlice";
 import { productService } from "@/services/productService";
@@ -128,6 +129,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     colors: [], // Ahora es grupo de color
   });
 
+  // Hook para descuentos globales
+  const { fetchGlobalDiscounts } = useGlobalDiscounts();
+
   // Cargar productos si el estado está vacío
   useEffect(() => {
     const loadProducts = async () => {
@@ -136,6 +140,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
           dispatch(setLoading(true));
           const productsData = await productService.getAll();
           dispatch(setProducts(productsData as ProductSlice[]));
+          
+          // Fetch global discounts when products are loaded
+          fetchGlobalDiscounts();
         } catch (error) {
           console.error('Error al cargar productos:', error);
           dispatch(setError('Error al cargar los productos'));
@@ -146,7 +153,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
     };
 
     loadProducts();
-  }, [dispatch, productos.length]);
+  }, [dispatch, productos.length, fetchGlobalDiscounts]);
 
   // Breadcrumbs para la tienda
   const breadcrumbItems = [

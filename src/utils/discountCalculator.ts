@@ -644,6 +644,143 @@ function calculateBuyXGetYDiscount(
 }
 
 /**
+ * Calcula descuentos globales para items del carrito
+ * Aplica la jerarquía: PERCENTAGE > FIXED > BUY_X_GET_Y
+ */
+export async function calculateItemDiscountsWithGlobal(
+  cartItems: CartItem[],
+  globalDiscounts: any[]
+): Promise<CartItemWithDiscount[]> {
+  console.log('DEBUG - calculateItemDiscountsWithGlobal - Starting calculation');
+  console.log('DEBUG - Cart items:', cartItems);
+  console.log('DEBUG - Global discounts:', globalDiscounts);
+
+  if (!cartItems || cartItems.length === 0) {
+    console.log('DEBUG - No cart items provided');
+    return [];
+  }
+
+  if (!globalDiscounts || globalDiscounts.length === 0) {
+    console.log('DEBUG - No global discounts provided');
+    return cartItems.map(item => ({ ...item, appliedDiscount: undefined }));
+  }
+
+  const itemsWithDiscounts: CartItemWithDiscount[] = [];
+
+  // Procesar cada item del carrito
+  for (const item of cartItems) {
+    console.log(`DEBUG - Processing item: ${item.product.name} (ID: ${item.product.id})`);
+    
+    // Filtrar descuentos aplicables a este producto
+    const applicableDiscounts = globalDiscounts.filter(discount => {
+      // Si el descuento no tiene items específicos, se aplica a todos los productos
+      if (!discount.items || discount.items.length === 0) {
+        return true;
+      }
+      // Si tiene items específicos, verificar si este producto está incluido
+      return discount.items.includes(item.product.id);
+    });
+
+    console.log(`DEBUG - Applicable discounts for item ${item.product.id}:`, applicableDiscounts);
+
+    if (applicableDiscounts.length === 0) {
+      console.log(`DEBUG - No applicable discounts for item ${item.product.id}`);
+      itemsWithDiscounts.push({ ...item, appliedDiscount: undefined });
+      continue;
+    }
+
+    // Aplicar jerarquía de descuentos: PERCENTAGE > FIXED > BUY_X_GET_Y
+    let bestDiscount = null;
+    let bestDiscountResult = null;
+
+    // Aplicar jerarquía de descuentos: PERCENTAGE > FIXED > BUY_X_GET_Y
+     const originalPrice = (item.product.price || 0) * item.quantity;
+
+     // 1. Buscar descuentos PERCENTAGE
+     const percentageDiscounts = applicableDiscounts.filter(d => d.type === 'PERCENTAGE');
+     for (const discount of percentageDiscounts) {
+       const discountApplied = (originalPrice * discount.value) / 100;
+       const result = {
+         discountApplied,
+         originalPrice,
+         finalPrice: Math.max(0, originalPrice - discountApplied)
+       };
+       if (!bestDiscountResult || result.discountApplied > bestDiscountResult.discountApplied) {
+         bestDiscount = discount;
+         bestDiscountResult = result;
+       }
+     }
+
+     // 2. Si no hay PERCENTAGE, buscar FIXED
+     if (!bestDiscount) {
+       const fixedDiscounts = applicableDiscounts.filter(d => d.type === 'FIXED');
+       for (const discount of fixedDiscounts) {
+         const discountApplied = Math.min(discount.value, originalPrice);
+         const result = {
+           discountApplied,
+           originalPrice,
+           finalPrice: Math.max(0, originalPrice - discountApplied)
+         };
+         if (!bestDiscountResult || result.discountApplied > bestDiscountResult.discountApplied) {
+           bestDiscount = discount;
+           bestDiscountResult = result;
+         }
+       }
+     }
+
+     // 3. Si no hay PERCENTAGE ni FIXED, buscar BUY_X_GET_Y
+     if (!bestDiscount) {
+       const buyXGetYDiscounts = applicableDiscounts.filter(d => d.type === 'BUY_X_GET_Y');
+       for (const discount of buyXGetYDiscounts) {
+         const minQtyToPay = discount.minQuantity || 1;
+         const bonusQtyToGet = discount.maxQuantity || (minQtyToPay + 1);
+         const discountResult = calculateBuyXGetYDiscount(
+           minQtyToPay,
+           bonusQtyToGet,
+           item.product.price || 0,
+           item.quantity
+         );
+         const result = {
+           discountApplied: discountResult.savings,
+           originalPrice: discountResult.totalWithoutDiscount,
+           finalPrice: discountResult.totalWithDiscount,
+           message: discountResult.message
+         };
+         if (!bestDiscountResult || result.discountApplied > bestDiscountResult.discountApplied) {
+           bestDiscount = discount;
+           bestDiscountResult = result;
+         }
+       }
+     }
+
+    // Aplicar el mejor descuento encontrado
+    if (bestDiscount && bestDiscountResult) {
+      console.log(`DEBUG - Applied discount to item ${item.product.id}:`, bestDiscountResult);
+      itemsWithDiscounts.push({
+        ...item,
+        appliedDiscount: {
+          discountId: bestDiscount.id,
+          type: bestDiscount.type,
+          value: bestDiscount.value,
+          discountApplied: bestDiscountResult.discountApplied,
+          finalPrice: bestDiscountResult.finalPrice,
+          originalPrice: bestDiscountResult.originalPrice,
+          message: bestDiscountResult.message || ''
+        }
+      });
+    } else {
+      console.log(`DEBUG - No discount applied to item ${item.product.id}`);
+      itemsWithDiscounts.push({ ...item, appliedDiscount: undefined });
+    }
+  }
+
+  console.log('DEBUG - calculateItemDiscountsWithGlobal - Final result:', itemsWithDiscounts);
+  return itemsWithDiscounts;
+}
+
+
+
+/**
  * Formatea el resultado del cálculo de descuentos para mostrar al usuario
  * @param result - Resultado del cálculo
  * @returns Objeto con información formateada

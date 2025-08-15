@@ -88,8 +88,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <Card className="max-w-md w-full border border-primary-200 shadow-lg relative bg-white/95 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:shadow-xl">
-      <CardHeader className="pb-2 relative bg-gradient-to-r from-primary-50 to-white">
+    <Card className="max-w-md w-full  relative">
+      <CardHeader className="pb-2 relative ">
         {/* <Button
           variant="ghost"
           size="icon"
@@ -100,7 +100,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         </Button> */}
         
         <div className="flex justify-center mb-2">
-          <div className="w-48 h-24">
+          <div className="w-54 h-24">
             <IKContext urlEndpoint="https://ik.imagekit.io/xj7y5uqcr">
               <IKImage
                 path="/tr:w-250,q-80/Logos/Logo_en_negro.png"
@@ -115,13 +115,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       </CardHeader>
 
       <CardContent className="px-6 pb-6 pt-0">
-        <Tabs defaultValue={isLogin ? "login" : "register"} className="w-full" onValueChange={(value) => setIsLogin(value === "login")}>
-          <TabsList className="grid w-full grid-cols-2 mb-6 bg-primary-100/50 p-1 rounded-lg">
-            <TabsTrigger value="login" className="flex items-center gap-1.5 data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm transition-all duration-200">
+        <Tabs defaultValue={isLogin ? "login" : "register"} className="w-full " onValueChange={(value) => setIsLogin(value === "login")}>
+          <TabsList className="grid w-full grid-cols-2 mb-6  p-1 rounded-lg">
+            <TabsTrigger value="login" className="flex items-center gap-1.5 text-primary-600 data-[state=active]:bg-primary-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all duration-200">
               <LogIn className="h-4 w-4" />
               Iniciar Sesión
             </TabsTrigger>
-            <TabsTrigger value="register" className="flex items-center gap-1.5 data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm transition-all duration-200">
+            <TabsTrigger value="register" className="flex items-center gap-1.5 text-primary-600 data-[state=active]:bg-primary-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all duration-200">
               <UserPlus className="h-4 w-4" />
               Registrarse
             </TabsTrigger>
@@ -264,7 +264,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             <div className="w-full border-t border-primary-200"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-3 bg-white text-primary-600 font-medium">O continúa con</span>
+            <span className="px-3 bg-white text-primary-700 font-medium">O continúa con</span>
           </div>
         </div>
 

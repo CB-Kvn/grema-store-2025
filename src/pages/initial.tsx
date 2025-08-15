@@ -17,6 +17,7 @@ import { useProductService } from "@/hooks/useProductService";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGlobalDiscounts } from "@/hooks/useGlobalDiscounts";
 
 // Lazy loading de componentes pesados
 const ProductCard = lazy(() => import("@/components/product/ProductCard"));
@@ -84,7 +85,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
     navigate(`/producto/${productId}`);
   }, [navigate]);
 
-  const { loading, error, data, getAllProducts } = useProductService();
+  const { loading, getAllProducts } = useProductService();
+  const { fetchGlobalDiscounts } = useGlobalDiscounts();
 
   const [activeTab, setActiveTab] = useState<TabType>("bestSellers");
   const [visibleLatestProducts, setVisibleLatestProducts] = useState(4); // Mostrar 4 inicialmente
@@ -154,7 +156,8 @@ export const Initial: React.FC<ProductInitial> = ({ addToCart }) => {
 
   useEffect(() => {
     getAllProducts();
-  }, []);
+    fetchGlobalDiscounts();
+  }, [fetchGlobalDiscounts]);
 
   // Handler para animar y navegar a la tienda
   const [slide, setSlide] = useState(false);

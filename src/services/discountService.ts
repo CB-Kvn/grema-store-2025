@@ -64,4 +64,10 @@ export const discountService = {
       data: { productIds }
     });
   },
+
+  // Obtener descuentos globales
+  getGlobalDiscounts: async (): Promise<any> => {
+    const response = await api.get('/discounts/global');
+    return response.data;
+  },
 };

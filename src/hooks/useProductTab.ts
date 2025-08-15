@@ -6,6 +6,7 @@ import { productService } from "@/services/productService";
 import { warehouseService } from "@/services/warehouseService";
 import { addWarehouseItems } from "@/store/slices/warehousesSlice";
 import { useProductService } from "@/hooks/useProductService";
+import { useGlobalDiscounts } from "@/hooks/useGlobalDiscounts";
 import type { Product, WarehouseItem } from "@/types";
 
 export function useProductTab() {
@@ -32,6 +33,7 @@ export function useProductTab() {
     return savedPage ? parseInt(savedPage, 10) : 1;
   });
   const { deleteProduct } = useProductService();
+  const { fetchGlobalDiscounts } = useGlobalDiscounts();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
 
   useEffect(() => {
@@ -124,9 +126,12 @@ export function useProductTab() {
     const fetchProducts = async () => {
       const response = await productService.getAll() as Product[];
       dispatch(setProducts(response));
+      
+      // Fetch global discounts when products are loaded
+      fetchGlobalDiscounts();
     };
     fetchProducts();
-  }, []);
+  }, [fetchGlobalDiscounts]);
 
   return {
     searchQuery,

@@ -9,6 +9,7 @@ import favoritesReducer from '@/store/slices/favoriteslice';
 import purchasesReducer from '@/store/slices/purchaseOrdersSlice';
 import warehousesReducer from '@/store/slices/warehousesSlice';
 import expensesReducer  from '@/store/slices/expensesSlice';
+import globalDiscountsReducer from '@/store/slices/globalDiscountsSlice';
 import loaderReducer from './slices/loaderSlice';
 import userReducer from './slices/userSlice';
 
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
   expenses: expensesReducer,
   purchases: purchasesReducer,  
   warehouses: warehousesReducer,
+  globalDiscounts: globalDiscountsReducer,
   loader: loaderReducer,
   user: persistReducer(userPersistConfig, userReducer), // Solo persistir user
 });

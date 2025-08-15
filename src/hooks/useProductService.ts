@@ -4,6 +4,7 @@ import { warehouseService } from '@/services/warehouseService'; // <-- Importa e
 import { Product, Discount } from '@/types';
 import { useAppDispatch } from './useAppDispatch';
 import { setBestSellingProducts, setLatestProducts, setProducts } from '@/store/slices/productsSlice';
+import useGlobalDiscounts from './useGlobalDiscounts';
 
 export const useProductService = () => {
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,7 @@ export const useProductService = () => {
     const response = await handleRequest(() => productService.getAll());
     const latestProducts = await handleRequest(() => productService.getLatestProducts());
     const bestSellers = await handleRequest(() => productService.getBestSellingProducts());
+
     dispatch(setProducts(response));
     dispatch(setLatestProducts(latestProducts));
     dispatch(setBestSellingProducts(bestSellers));

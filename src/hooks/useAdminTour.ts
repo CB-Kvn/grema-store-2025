@@ -219,9 +219,43 @@ export const useAdminTour = (onTabChange?: (tab: string) => void) => {
       {
         element: '[data-tour="discounts-table"]',
         popover: {
-          title: 'Lista de Descuentos �',
+          title: 'Lista de Descuentos 📋',
           description: 'Administra todos tus códigos de descuento activos e inactivos.',
           position: 'top'
+        }
+      }
+    ],
+    banners: [
+      {
+        element: '[data-tour="banners-header"]',
+        popover: {
+          title: 'Gestión de Banners 🖼️',
+          description: 'Crea y administra banners promocionales que se muestran en tu tienda.',
+          position: 'bottom'
+        }
+      },
+      {
+        element: '[data-tour="banner-form"]',
+        popover: {
+          title: 'Formulario de Banner ➕',
+          description: 'Crea nuevos banners con imágenes, fechas de vigencia y estados personalizados.',
+          position: 'bottom'
+        }
+      },
+      {
+        element: '[data-tour="banners-table"]',
+        popover: {
+          title: 'Lista de Banners 📋',
+          description: 'Administra todos tus banners: activa, desactiva, edita o elimina según necesites.',
+          position: 'top'
+        }
+      },
+      {
+        element: '[data-tour="banner-status"]',
+        popover: {
+          title: 'Control de Estado 🔄',
+          description: 'Cambia rápidamente el estado de tus banners entre activo, inactivo y programado.',
+          position: 'left'
         }
       }
     ]

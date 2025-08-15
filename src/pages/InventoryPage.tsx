@@ -13,6 +13,7 @@ import InventoryDashboard from '@/components/admin/dashboard/InventoryDashboard'
 import { authService } from '@/services/authService';
 import { UsersTable } from '@/components/admin/users/listUsers';
 import { DiscountTab } from '@/components/admin/discount/discountTab';
+import { BannerTab } from '@/components/admin/banners/BannerTab';
 import { AdminTourButton } from '@/components/admin/common/AdminTourButton';
 import { useAutoTourInit } from '@/hooks/useAutoTourInit';
 import '@/styles/tour.css';
@@ -51,7 +52,8 @@ const InventoryPage = () => {
     { value: 'gastos', label: 'Control de gastos' },
     { value: 'bodegas', label: 'Bodegas' },
     { value: 'ordenes', label: 'Órdenes' },
-    { value: 'descuentos', label: 'Descuentos' }
+    { value: 'descuentos', label: 'Descuentos' },
+    { value: 'banners', label: 'Banners' }
   ];
   
 
@@ -143,6 +145,7 @@ const InventoryPage = () => {
                         <DiscountTab/>
                       
                     )}
+                    {tab.value === 'banners' && <BannerTab />}
                   </TabsContent>
                 ))}
               </Tabs>
@@ -177,6 +180,7 @@ const InventoryPage = () => {
                     <DiscountTab/>
                   
                 )}
+                {activeTab === 'banners' && <BannerTab />}
               </div>
             </div>
           </CardContent>

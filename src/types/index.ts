@@ -116,3 +116,12 @@ export interface AuthUser {
   name: string;
   avatar: string;
 }
+
+export interface Banner {
+  id: number;
+  name: string;
+  dateInit: string;
+  dateEnd: string;
+  imageUrl: string;
+  status: 'ACTIVE' | 'INACTIVE';
+}

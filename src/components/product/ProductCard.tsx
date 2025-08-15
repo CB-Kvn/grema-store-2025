@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { IKImage, IKContext } from 'imagekitio-react';
-import { Heart, ShoppingCart, Share2, Facebook, Twitter, Instagram, Link } from 'lucide-react';
+import { Heart, ShoppingCart, Share2, Facebook, Twitter, Instagram, Link, Tag, Percent, DollarSign } from 'lucide-react';
+import { useDiscountCalculator } from '@/hooks/useDiscountCalculator';
+import { CartItem } from '@/utils/discountCalculator';
 
 
 interface Product {
@@ -10,16 +12,22 @@ interface Product {
   image: string;
   description: string;
   category: string;
-  WareHouseItem?:[
+  sku?: string;
+  details?: any;
+  createdAt?: string;
+  updatedAt?: string;
+  available?: boolean;
+  filepaths?: any[];
+  WarehouseItem?: [
     {
-      id:string,
-      price:number,
-      discount:number,
+      id: string,
+      price: number,
+      discount: number,
     }
   ],
-  Images?:[
+  Images?: [
     {
-      url:string[],
+      url: string[],
     }
   ]
 }
@@ -33,7 +41,62 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick }) => {
   const [isHovering, setIsHovering] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const discountedPrice = product.price * 0.85; // 15% de descuento
+
+  // Crear item del carrito para cálculo de descuentos
+  const cartItemForDiscount: CartItem[] = useMemo(() => {
+    return [{
+      product: {
+        id: product.id,
+        name: product.name,
+        price: product.WarehouseItem?.[0]?.price || product.price || 0,
+        Images: product.Images?.[0]?.url?.[0] || '',
+        description: product.description,
+        category: product.category,
+        sku: product.sku || '',
+        details: product.details || {},
+        createdAt: product.createdAt || '',
+        updatedAt: product.updatedAt || '',
+        available: product.available ?? true,
+        WarehouseItem: product.WarehouseItem || [],
+        filepaths: product.filepaths || []
+      },
+      quantity: 1
+    }];
+  }, [product]);
+
+  // Hook para calcular descuentos
+  const {
+    calculationResult,
+    itemsWithDiscounts,
+    hasDiscounts,
+    isLoading: discountLoading,
+    error: discountError
+  } = useDiscountCalculator(cartItemForDiscount);
+
+  // Información de descuentos
+  const discountInfo = useMemo(() => {
+    if (!hasDiscounts || !itemsWithDiscounts.length) {
+      return null;
+    }
+
+    const itemWithDiscount = itemsWithDiscounts[0];
+    if (!itemWithDiscount.appliedDiscount) {
+      return null;
+    }
+
+    const discount = itemWithDiscount.appliedDiscount;
+    
+    return {
+      type: discount.type,
+      value: discount.value,
+      discountApplied: discount.discountApplied,
+      originalPrice: discount.originalPrice,
+      finalPrice: discount.finalPrice,
+      message: discount.message,
+      savings: discount.discountApplied,
+      savingsPercentage: discount.originalPrice > 0 ? (discount.discountApplied / discount.originalPrice) * 100 : 0
+    };
+  }, [hasDiscounts, itemsWithDiscounts]);
 
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
@@ -69,6 +132,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         }}
         onClick={onClick}
       >
+        {/* Badge de descuento */}
+        {discountInfo && (
+          <div className="absolute top-2 left-2 z-20">
+            <div className="bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold flex items-center space-x-1 shadow-lg">
+              {discountInfo.type === 'PERCENTAGE' && <Percent className="h-3 w-3" />}
+              {discountInfo.type === 'FIXED' && <DollarSign className="h-3 w-3" />}
+              {discountInfo.type === 'BUY_X_GET_Y' && <Tag className="h-3 w-3" />}
+              <span>
+                {discountInfo.type === 'PERCENTAGE' && `${discountInfo.value}% OFF`}
+                {discountInfo.type === 'FIXED' && `₡${discountInfo.value} OFF`}
+                {discountInfo.type === 'BUY_X_GET_Y' && 'OFERTA'}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Imagen optimizada con IKImage */}
         <div className="flex-grow relative transition-all duration-300 transform group-hover:scale-105">
           <IKImage
@@ -163,33 +242,71 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
           <h3 className="text-base sm:text-lg font-medium text-primary-900 mb-2 line-clamp-3">
             {product.name}
           </h3>
-          <div className="flex items-baseline">
-            {product.WarehouseItem && product.WarehouseItem.length > 0 && product.WarehouseItem[0].price ? (
+          <div className="flex flex-col space-y-1">
+            {/* Mostrar precios con descuentos globales si aplican */}
+            {discountInfo ? (
               <>
-                <span className="text-lg sm:text-xl font-bold text-primary-900">
-                  {new Intl.NumberFormat("es-CR", {
-                    style: "currency",
-                    currency: "CRC",
-                    maximumFractionDigits: 2,
-                    minimumFractionDigits: 2,
-                  }).format(product.WarehouseItem[0].price)}
-                </span>
-                {product.WarehouseItem[0].discount > 0 && (
-                  <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-lg sm:text-xl font-bold text-green-600">
                     {new Intl.NumberFormat("es-CR", {
                       style: "currency",
                       currency: "CRC",
                       maximumFractionDigits: 2,
                       minimumFractionDigits: 2,
-                    }).format(
-                      product.WarehouseItem[0].price /
-                        (1 - product.WarehouseItem[0].discount / 100)
-                    )}
+                    }).format(discountInfo.finalPrice)}
                   </span>
+                  <span className="text-sm line-through text-gray-500">
+                    {new Intl.NumberFormat("es-CR", {
+                      style: "currency",
+                      currency: "CRC",
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    }).format(discountInfo.originalPrice)}
+                  </span>
+                </div>
+                <div className="text-xs text-green-600 font-medium">
+                  Ahorras: {new Intl.NumberFormat("es-CR", {
+                    style: "currency",
+                    currency: "CRC",
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                  }).format(discountInfo.savings)} ({discountInfo.savingsPercentage.toFixed(0)}%)
+                </div>
+                {discountInfo.message && (
+                  <div className="text-xs text-blue-600 italic">
+                    {discountInfo.message}
+                  </div>
                 )}
               </>
             ) : (
-              <span className="text-xs sm:text-sm text-primary-400">Precio no disponible</span>
+              /* Mostrar precios normales o con descuentos de WarehouseItem */
+              product.WarehouseItem && product.WarehouseItem.length > 0 && product.WarehouseItem[0].price ? (
+                <>
+                  <span className="text-lg sm:text-xl font-bold text-primary-900">
+                    {new Intl.NumberFormat("es-CR", {
+                      style: "currency",
+                      currency: "CRC",
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                    }).format(product.WarehouseItem[0].price)}
+                  </span>
+                  {product.WarehouseItem[0].discount > 0 && (
+                    <span className="ml-2 text-xs sm:text-sm line-through text-primary-400">
+                      {new Intl.NumberFormat("es-CR", {
+                        style: "currency",
+                        currency: "CRC",
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 2,
+                      }).format(
+                        product.WarehouseItem[0].price /
+                          (1 - product.WarehouseItem[0].discount / 100)
+                      )}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs sm:text-sm text-primary-400">Precio no disponible</span>
+              )
             )}
           </div>
         </div>

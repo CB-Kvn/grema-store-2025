@@ -13,6 +13,7 @@ import { Menu_Bar } from "./components/navigation/nav-store";
 import { Networking } from "./components/socials/networking";
 import { Footer } from "./components/login/initial-page/footer";
 import { addToCartShop, removeFromCartShop, updateQuantityShop } from "./store/slices/cartSlice";
+import { fetchGlobalDiscounts } from "./store/slices/globalDiscountsSlice";
 import OrderDocumentsPage from "./pages/OrderDocumentsPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import InventoryPage from "./pages/InventoryPage";
@@ -21,6 +22,7 @@ import { AlertProvider } from "./context/AlertContext";
 import AboutUs from "./pages/about-us";
 import { motion } from "framer-motion";
 import { LoadingScreen } from "./components/common/LoadingScreen";
+import Banner from "./components/common/Banner";
 import "./components/common/LoadingScreen.css";
 
 // Componente de fondo confeti animado (líneas más gruesas)
@@ -84,12 +86,15 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const cartItems = useAppSelector((state) => state.cart.items);
 
-  // Load critical CSS immediately
+  // Load critical CSS immediately and fetch global discounts
   useEffect(() => {
     loadCriticalCSS();
     
     // Load non-critical CSS after initial render
     loadNonCriticalCSS();
+    
+    // Fetch global discounts on app initialization
+    dispatch(fetchGlobalDiscounts());
     
     // Load library-specific CSS when needed
     const loadLibrariesCSS = () => {
@@ -170,6 +175,7 @@ function App() {
             onUpdateQuantity={updateQuantity}
           />
           <Menu_Bar isOpen={() => setIsCartOpen(true)}></Menu_Bar>
+          <Banner />
 
           <Routes>
             <Route path="/" element={<Initial addToCart={addToCart} />} />
